@@ -7,6 +7,7 @@ import (
 	"github.com/BigListRyRy/harbourlivingapi/util"
 	_ "github.com/lib/pq"
 	"log"
+	"os"
 )
 
 func main() {
@@ -68,7 +69,13 @@ func main() {
 	if err != nil {
 		log.Fatal("unable to create a new server ", err)
 	}
-	err = server.Start(config.Port)
+
+	port := os.Getenv("PORT")
+
+	if port == "" {
+		port = config.Port
+	}
+	err = server.Start(port)
 	if err != nil {
 		log.Fatal("unable to start server", err)
 	}
