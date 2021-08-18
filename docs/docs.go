@@ -19,9 +19,9 @@ var doc = `{
         "title": "{{.Title}}",
         "termsOfService": "http://swagger.io/terms/",
         "contact": {
-            "name": "API Support",
+            "name": "Ayo Adesokan",
             "url": "http://www.swagger.io/support",
-            "email": "support@swagger.io"
+            "email": "adesokanayo@gmail.com"
         },
         "license": {
             "name": "Apache 2.0",
@@ -32,6 +32,29 @@ var doc = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/login/": {
+            "post": {
+                "description": "Authenticate a user returns a token",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Login"
+                ],
+                "summary": "Authenticate a user with username and password and generate token",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/api.loginUserResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/users/": {
             "post": {
                 "description": "Create a user and returns a token",
@@ -49,7 +72,7 @@ var doc = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/db.User"
+                            "$ref": "#/definitions/api.userResponse"
                         }
                     }
                 }
@@ -57,41 +80,31 @@ var doc = `{
         }
     },
     "definitions": {
-        "db.User": {
+        "api.loginUserResponse": {
+            "type": "object",
+            "properties": {
+                "access_token": {
+                    "type": "string"
+                },
+                "user": {
+                    "$ref": "#/definitions/api.userResponse"
+                }
+            }
+        },
+        "api.userResponse": {
             "type": "object",
             "properties": {
                 "created_at": {
                     "type": "string"
                 },
-                "date_of_birth": {
-                    "type": "string"
-                },
                 "email": {
-                    "type": "string"
-                },
-                "first_name": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "integer"
-                },
-                "last_name": {
-                    "type": "string"
-                },
-                "password": {
                     "type": "string"
                 },
                 "password_changed_at": {
                     "type": "string"
                 },
-                "title": {
-                    "type": "string"
-                },
                 "username": {
                     "type": "string"
-                },
-                "usertype": {
-                    "type": "integer"
                 }
             }
         }
@@ -104,15 +117,6 @@ var doc = `{
         },
         "BasicAuth": {
             "type": "basic"
-        },
-        "OAuth2AccessCode": {
-            "type": "oauth2",
-            "flow": "accessCode",
-            "authorizationUrl": "https://example.com/oauth/authorize",
-            "tokenUrl": "https://example.com/oauth/token",
-            "scopes": {
-                "admin": " Grants read and write access to administrative information"
-            }
         },
         "OAuth2Application": {
             "type": "oauth2",
@@ -160,8 +164,8 @@ var SwaggerInfo = swaggerInfo{
 	Host:        "localhost:8080",
 	BasePath:    "/api/v1",
 	Schemes:     []string{},
-	Title:       "Swagger Example API",
-	Description: "This is a sample server celler server.",
+	Title:       "HarbourLiving API",
+	Description: "This is a harbour living API .",
 }
 
 type s struct{}

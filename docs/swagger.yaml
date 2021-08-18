@@ -1,44 +1,52 @@
 basePath: /api/v1
 definitions:
-  db.User:
+  api.loginUserResponse:
+    properties:
+      access_token:
+        type: string
+      user:
+        $ref: '#/definitions/api.userResponse'
+    type: object
+  api.userResponse:
     properties:
       created_at:
         type: string
-      date_of_birth:
-        type: string
       email:
-        type: string
-      first_name:
-        type: string
-      id:
-        type: integer
-      last_name:
-        type: string
-      password:
         type: string
       password_changed_at:
         type: string
-      title:
-        type: string
       username:
         type: string
-      usertype:
-        type: integer
     type: object
 host: localhost:8080
 info:
   contact:
-    email: support@swagger.io
-    name: API Support
+    email: adesokanayo@gmail.com
+    name: Ayo Adesokan
     url: http://www.swagger.io/support
-  description: This is a sample server celler server.
+  description: This is a harbour living API .
   license:
     name: Apache 2.0
     url: http://www.apache.org/licenses/LICENSE-2.0.html
   termsOfService: http://swagger.io/terms/
-  title: Swagger Example API
+  title: HarbourLiving API
   version: "1.0"
 paths:
+  /login/:
+    post:
+      consumes:
+      - application/json
+      description: Authenticate a user returns a token
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.loginUserResponse'
+      summary: Authenticate a user with username and password and generate token
+      tags:
+      - Login
   /users/:
     post:
       consumes:
@@ -50,7 +58,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/db.User'
+            $ref: '#/definitions/api.userResponse'
       summary: Create a user
       tags:
       - User
@@ -61,13 +69,6 @@ securityDefinitions:
     type: apiKey
   BasicAuth:
     type: basic
-  OAuth2AccessCode:
-    authorizationUrl: https://example.com/oauth/authorize
-    flow: accessCode
-    scopes:
-      admin: ' Grants read and write access to administrative information'
-    tokenUrl: https://example.com/oauth/token
-    type: oauth2
   OAuth2Application:
     flow: application
     scopes:

@@ -80,7 +80,7 @@ func newLoginResponse(user db.User, token string) loginUserResponse {
 // @Tags User
 // @Accept  json
 // @Produce  json
-// @Success 200 {object} db.User
+// @Success 200 {object} userResponse
 // @Router /users/ [post]
 func (s *Server) CreateUser(ctx *gin.Context) {
 	var req CreateUserRequest
@@ -104,7 +104,7 @@ func (s *Server) CreateUser(ctx *gin.Context) {
 	createUserReq := db.CreateUserParams{
 		Title:       req.Title,
 		FirstName:   req.FirstName,
-		Username: req.Username,
+		Username:    req.Username,
 		LastName:    req.LastName,
 		Email:       req.Email,
 		Password:    hashedPassword,
@@ -114,7 +114,7 @@ func (s *Server) CreateUser(ctx *gin.Context) {
 
 	user, err := s.store.CreateUser(ctx, createUserReq)
 	if err != nil {
-		if strings.Contains(err.Error(),"duplicate"){
+		if strings.Contains(err.Error(), "duplicate") {
 			ctx.JSON(http.StatusInternalServerError, errorResponse(errors.New("Username already exist")))
 			return
 		}
@@ -132,6 +132,14 @@ func (s *Server) ListUsers(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, users)
 }
 
+// Login godoc
+// @Summary Authenticate a user with username and password and generate token
+// @Description Authenticate a user returns a token
+// @Tags Login
+// @Accept  json
+// @Produce  json
+// @Success 200 {object} loginUserResponse
+// @Router /login/ [post]
 func (s *Server) Login(ctx *gin.Context) {
 	var req loginUserRequest
 	err := ctx.ShouldBindJSON(&req)
@@ -149,18 +157,18 @@ func (s *Server) Login(ctx *gin.Context) {
 		return
 	}
 
-	err = util.CheckPassword(req.Password,user.Password)
+	err = util.CheckPassword(req.Password, user.Password)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, errorResponse(errors.New("invalid username & password combination")))
 		return
 	}
 
-		token, err := s.tokenMaker.CreateToken(user.Username, time.Minute)
-		if err != nil {
-			ctx.JSON(http.StatusInternalServerError, errorResponse(err))
-			return
-		}
-		ctx.JSON(http.StatusOK, newLoginResponse(user, token))
+	token, err := s.tokenMaker.CreateToken(user.Username, time.Minute)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		return
+	}
+	ctx.JSON(http.StatusOK, newLoginResponse(user, token))
 }
 
 func (s *Server) GetUser(ctx *gin.Context) {

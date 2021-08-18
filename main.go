@@ -12,14 +12,14 @@ import (
 
 func main() {
 
-	// @title Swagger Example API
+	// @title HarbourLiving API
 	// @version 1.0
-	// @description This is a sample server celler server.
+	// @description This is a harbour living API .
 	// @termsOfService http://swagger.io/terms/
 
-	// @contact.name API Support
+	// @contact.name Ayo Adesokan
 	// @contact.url http://www.swagger.io/support
-	// @contact.email support@swagger.io
+	// @contact.email adesokanayo@gmail.com
 
 	// @license.name Apache 2.0
 	// @license.url http://www.apache.org/licenses/LICENSE-2.0.html
@@ -49,11 +49,6 @@ func main() {
 	// @scope.write Grants write access
 	// @scope.admin Grants read and write access to administrative information
 
-	// @securitydefinitions.oauth2.accessCode OAuth2AccessCode
-	// @tokenUrl https://example.com/oauth/token
-	// @authorizationUrl https://example.com/oauth/authorize
-	// @scope.admin Grants read and write access to administrative information
-
 	config, err := util.LoadConfig(".")
 	if err != nil {
 		log.Fatal("cannot local config", err)
@@ -75,7 +70,7 @@ func main() {
 	if port == "" {
 		port = config.Port
 	}
-	err = server.Start(":" +port)
+	err = server.Start(":" + port)
 	if err != nil {
 		log.Fatal("unable to start server", err)
 	}
