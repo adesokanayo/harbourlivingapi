@@ -75,7 +75,7 @@ func main() {
 	if port == "" {
 		port = config.Port
 	}
-	err = server.Start(port)
+	err = server.Start(":" +port)
 	if err != nil {
 		log.Fatal("unable to start server", err)
 	}
