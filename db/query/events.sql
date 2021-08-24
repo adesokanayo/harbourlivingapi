@@ -2,13 +2,15 @@
 SELECT * FROM events
 WHERE id = $1 LIMIT 1;
 
--- name: GetAllEvents :many
-SELECT * FROM events
+-- name: GetEventsByFilter :many
+SELECT * FROM events, venue v
 WHERE category = $1
 and subcategory =$2
-ORDER BY id
-LIMIT $3
-OFFSET $4;
+and v.city = $3
+and v.province = $4
+ORDER BY startdate desc
+LIMIT $5
+OFFSET $6;
 
 -- name: DeleteEvents :exec
 DELETE FROM events

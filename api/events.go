@@ -3,6 +3,7 @@ package api
 import (
 	"database/sql"
 	db "github.com/BigListRyRy/harbourlivingapi/db/sqlc"
+	"github.com/BigListRyRy/harbourlivingapi/util"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
@@ -45,12 +46,12 @@ func (s *Server) CreateEvent(ctx *gin.Context) {
 		return
 	}
 
-	startDate, err := ProcessDateTime(req.StartDate)
+	startDate, err := util.ProcessDateTime(req.StartDate)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
 		return
 	}
-	endDate, err := ProcessDateTime(req.StartDate)
+	endDate, err := util.ProcessDateTime(req.EndDate)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
 		return
@@ -84,13 +85,13 @@ func (s *Server) ListEvents(ctx *gin.Context) {
 		return
 	}
 
-	arg := db.GetAllEventsParams{
+	arg := db.GetEventsByFilterParams{
 		Category:    req.Category,
 		Subcategory: req.SubCategory,
 		Limit:       req.PageSize,
 		Offset:      (req.PageID - 1) * req.PageSize,
 	}
-	events, err := s.store.GetAllEvents(ctx, arg)
+	events, err := s.store.GetEventsByFilter(ctx, arg)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return

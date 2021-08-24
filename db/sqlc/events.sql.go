@@ -103,69 +103,6 @@ func (q *Queries) DeleteEvents(ctx context.Context, id int32) error {
 	return err
 }
 
-const getAllEvents = `-- name: GetAllEvents :many
-SELECT id, title, description, banner_image, start_date, end_date, venue, type, user_id, category, subcategory, status, image1, image2, image3, video1, video2, created_at FROM events
-WHERE category = $1
-and subcategory =$2
-ORDER BY id
-LIMIT $3
-OFFSET $4
-`
-
-type GetAllEventsParams struct {
-	Category    int32 `json:"category"`
-	Subcategory int32 `json:"subcategory"`
-	Limit       int32 `json:"limit"`
-	Offset      int32 `json:"offset"`
-}
-
-func (q *Queries) GetAllEvents(ctx context.Context, arg GetAllEventsParams) ([]Event, error) {
-	rows, err := q.db.QueryContext(ctx, getAllEvents,
-		arg.Category,
-		arg.Subcategory,
-		arg.Limit,
-		arg.Offset,
-	)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	items := []Event{}
-	for rows.Next() {
-		var i Event
-		if err := rows.Scan(
-			&i.ID,
-			&i.Title,
-			&i.Description,
-			&i.BannerImage,
-			&i.StartDate,
-			&i.EndDate,
-			&i.Venue,
-			&i.Type,
-			&i.UserID,
-			&i.Category,
-			&i.Subcategory,
-			&i.Status,
-			&i.Image1,
-			&i.Image2,
-			&i.Image3,
-			&i.Video1,
-			&i.Video2,
-			&i.CreatedAt,
-		); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Close(); err != nil {
-		return nil, err
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
-}
-
 const getEvent = `-- name: GetEvent :one
 SELECT id, title, description, banner_image, start_date, end_date, venue, type, user_id, category, subcategory, status, image1, image2, image3, video1, video2, created_at FROM events
 WHERE id = $1 LIMIT 1
@@ -195,4 +132,106 @@ func (q *Queries) GetEvent(ctx context.Context, id int32) (Event, error) {
 		&i.CreatedAt,
 	)
 	return i, err
+}
+
+const getEventsByFilter = `-- name: GetEventsByFilter :many
+SELECT events.id, title, description, banner_image, start_date, end_date, venue, type, user_id, category, subcategory, status, image1, image2, image3, video1, video2, created_at, v.id, name, address, city, province, country_code FROM events, venue v
+WHERE category = $1
+and subcategory =$2
+and v.city = $3
+and v.province = $4
+ORDER BY startdate desc
+LIMIT $5
+OFFSET $6
+`
+
+type GetEventsByFilterParams struct {
+	Category    int32  `json:"category"`
+	Subcategory int32  `json:"subcategory"`
+	City        string `json:"city"`
+	Province    string `json:"province"`
+	Limit       int32  `json:"limit"`
+	Offset      int32  `json:"offset"`
+}
+
+type GetEventsByFilterRow struct {
+	ID          int32          `json:"id"`
+	Title       string         `json:"title"`
+	Description string         `json:"description"`
+	BannerImage string         `json:"banner_image"`
+	StartDate   time.Time      `json:"start_date"`
+	EndDate     time.Time      `json:"end_date"`
+	Venue       int32          `json:"venue"`
+	Type        int32          `json:"type"`
+	UserID      int32          `json:"user_id"`
+	Category    int32          `json:"category"`
+	Subcategory int32          `json:"subcategory"`
+	Status      sql.NullString `json:"status"`
+	Image1      sql.NullString `json:"image1"`
+	Image2      sql.NullString `json:"image2"`
+	Image3      sql.NullString `json:"image3"`
+	Video1      sql.NullString `json:"video1"`
+	Video2      sql.NullString `json:"video2"`
+	CreatedAt   sql.NullTime   `json:"created_at"`
+	ID_2        int32          `json:"id_2"`
+	Name        string         `json:"name"`
+	Address     string         `json:"address"`
+	City        string         `json:"city"`
+	Province    string         `json:"province"`
+	CountryCode string         `json:"country_code"`
+}
+
+func (q *Queries) GetEventsByFilter(ctx context.Context, arg GetEventsByFilterParams) ([]GetEventsByFilterRow, error) {
+	rows, err := q.db.QueryContext(ctx, getEventsByFilter,
+		arg.Category,
+		arg.Subcategory,
+		arg.City,
+		arg.Province,
+		arg.Limit,
+		arg.Offset,
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []GetEventsByFilterRow{}
+	for rows.Next() {
+		var i GetEventsByFilterRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.Title,
+			&i.Description,
+			&i.BannerImage,
+			&i.StartDate,
+			&i.EndDate,
+			&i.Venue,
+			&i.Type,
+			&i.UserID,
+			&i.Category,
+			&i.Subcategory,
+			&i.Status,
+			&i.Image1,
+			&i.Image2,
+			&i.Image3,
+			&i.Video1,
+			&i.Video2,
+			&i.CreatedAt,
+			&i.ID_2,
+			&i.Name,
+			&i.Address,
+			&i.City,
+			&i.Province,
+			&i.CountryCode,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
