@@ -2,8 +2,11 @@ package api
 
 import (
 	"fmt"
+	"github.com/99designs/gqlgen/graphql/handler"
+	"github.com/99designs/gqlgen/graphql/playground"
 	db "github.com/BigListRyRy/harbourlivingapi/db/sqlc"
 	_ "github.com/BigListRyRy/harbourlivingapi/docs"
+	gqlgen "github.com/BigListRyRy/harbourlivingapi/gqlgen"
 	"github.com/BigListRyRy/harbourlivingapi/token"
 	"github.com/BigListRyRy/harbourlivingapi/util"
 	"github.com/gin-gonic/gin"
@@ -43,8 +46,12 @@ func NewServer(store *db.Store, config util.Config) (*Server, error) {
 	router.POST("/api/v1/venues", server.CreateVenue)
 	router.GET("/api/v1/venues", server.ListVenues)
 	router.GET("/api/v1/venues/:id", server.GetVenue)
-	server.router = router
+	//server.router = router
 	router.GET("/swagger/*any", ginSwagger.DisablingWrapHandler(swaggerFiles.Handler, "NAME_OF_ENV_VARIABLE"))
+
+	router.POST("/query", graphqlHandler())
+	router.GET("/", playgroundHandler())
+
 	return server, nil
 }
 
@@ -55,4 +62,27 @@ func errorResponse(err error) gin.H {
 //============ Start ================//
 func (s *Server) Start(address string) error {
 	return s.router.Run(address)
+}
+
+func graphqlHandler() gin.HandlerFunc {
+	// NewExecutableSchema and Config are in the generated.go file
+	// Resolver is in the resolver.go file
+	h := handler.NewDefaultServer(gqlgen.NewExecutableSchema(gqlgen.Config{Resolvers: &gqlgen.Resolver{}}))
+
+	return func(c *gin.Context) {
+		h.ServeHTTP(c.Writer, c.Request)
+	}
+}
+
+// Defining the Playground handler
+func playgroundHandler() gin.HandlerFunc {
+	h := playground.Handler("GraphQL", "/query")
+
+	return func(c *gin.Context) {
+		h.ServeHTTP(c.Writer, c.Request)
+	}
+}
+
+func GetDatabase() {
+
 }

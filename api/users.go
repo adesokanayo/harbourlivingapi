@@ -11,10 +11,7 @@ import (
 	"time"
 )
 
-const (
-	LayoutISODOB  = "2006-01-02"
-	LayoutISOTime = "2006-01-02T15:04:05-0700"
-)
+
 
 type CreateUserRequest struct {
 	Title       string `json:"title" `
@@ -95,7 +92,7 @@ func (s *Server) CreateUser(ctx *gin.Context) {
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return
 	}
-	dateOrTime, err := ProcessDateTime(req.DateOfBirth)
+	dateOrTime, err := util.ProcessDateTime(req.DateOfBirth)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return
@@ -190,27 +187,4 @@ func (s *Server) GetUser(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, user)
 }
 
-//ProcessDateTime process time input as string
-func ProcessDateTime(input string) (*time.Time, error) {
-	switch input {
-	case LayoutISODOB:
-		time, err := time.Parse(LayoutISODOB, input)
-		if err != nil {
-			return nil, err
-		}
-		return &time, nil
 
-	case LayoutISOTime:
-		time, err := time.Parse(LayoutISOTime, input)
-		if err != nil {
-			return nil, err
-		}
-		return &time, nil
-	default:
-		time, err := time.Parse(LayoutISOTime, input)
-		if err != nil {
-			return nil, err
-		}
-		return &time, nil
-	}
-}

@@ -1,0 +1,135 @@
+type User {
+        id: ID!
+        title: String!
+        first_name: String!
+        last_name: String!
+        email: String!
+        username: String!
+        password: String!
+        usertype: Int!
+        }
+
+type Usertype {
+        id: ID!
+        desc: String
+        status: Int
+        }
+type EventType {
+        id: ID!
+        desc: String
+        status: Int
+        }
+type Category {
+        id: ID!
+        desc: String
+        status: Int
+        }
+type Subcategory {
+        id: ID!
+        desc: String
+        status: Int
+        }
+type Event {
+        id: ID!
+        title: String!
+        description: String!
+        banner_image: String!
+        startDate:   String!
+        endDate:     String!
+        venue: Int!
+        type: Int!
+        user_id: ID!
+        category: Int!
+        subcategory: Int!
+        status: String
+        image1: String
+        image2: String
+        image3: String
+        video1: String
+        video2: String
+        }
+type Venue {
+        id: ID!
+        name: String!
+        address: String!
+        city: String!
+        province: String!
+        country_code: String!
+        }
+
+input Login {
+        username: String!
+        password: String!
+}
+
+type LoginResponse{
+      token: String
+      user : User
+      success: Boolean!
+      message: String
+}
+input NewVenue {
+        name: String!
+        address: String!
+        city: String!
+        province: String!
+        country_code: String!
+}
+
+input GetEvent{
+        category: Int!
+        subcategory: Int!,
+        city :String,
+        province: String
+        pageSize: Int!
+        offset: Int!
+}
+input NewEvent {
+        title: String!
+        description: String!
+        banner_image: String!
+        startDate:   String!
+        endDate:     String!
+        venue: Int!
+        type: Int!
+        user_id: ID!
+        category: Int!
+        subcategory: Int!
+        status: String
+        image1: String
+        image2: String
+        image3: String
+        video1: String
+        video2: String
+}
+input RefreshTokenInput{
+        token: String!
+}
+
+input NewUser {
+        title: String!
+        first_name: String!
+        last_name: String!
+        email: String!
+        username: String!
+        password: String!
+        usertype: Int!
+}
+
+type Mutation {
+        createVenue(input: NewVenue!): Venue!
+        createUser(input: NewUser!): User!
+        createEvent(input: NewEvent!):Event!
+        login(input: Login!): LoginResponse!
+        # we'll talk about this in authentication section
+        refreshToken(input: RefreshTokenInput!): String!
+}
+
+type Query{
+        getUser(input: ID!): User
+        getEvent(input: ID!): Event
+        getVenue(input: ID!): Venue
+        getUsers : [User!]
+        getEventByProperties(input: GetEvent!): [Event!]
+
+}

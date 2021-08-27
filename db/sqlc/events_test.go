@@ -66,13 +66,13 @@ func TestGetAllEvents(t *testing.T) {
 		createRandomEvent(t)
 	}
 
-	arg := GetAllEventsParams{
+	arg := GetEventsByFilterParams{
 		Limit:       1,
 		Offset:      1,
 		Category:    1,
 		Subcategory: 1,
 	}
-	events, err := testQueries.GetAllEvents(context.Background(), arg)
+	events, err := testQueries.GetEventsByFilter(context.Background(), arg)
 	require.NoError(t, err)
 	for _, event := range events {
 		require.NotEmpty(t, event)

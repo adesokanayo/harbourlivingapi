@@ -14,6 +14,11 @@ type Config struct {
 	AccessTokenDuration time.Duration `mapstructure:"ACCESS_TOKEN_DURATION"`
 }
 
+const (
+	LayoutISODOB  = "2006-01-02"
+	Layout3 = "2015-09-15T14:00:12-00:00"
+)
+
 func LoadConfig(path string) (config *Config, err error) {
 	viper.AddConfigPath(path)
 	viper.SetConfigName("app")
@@ -26,4 +31,35 @@ func LoadConfig(path string) (config *Config, err error) {
 	}
 	err = viper.Unmarshal(&config)
 	return
+}
+
+//ProcessDateTime process time input as string
+func ProcessDateTime(input string) (*time.Time, error) {
+	switch input {
+	case LayoutISODOB:
+		time, err := time.Parse(LayoutISODOB, input)
+		if err != nil {
+			return nil, err
+		}
+		return &time, nil
+	case Layout3:
+		time, err := time.Parse(time.RFC3339, input)
+		if err != nil {
+			return nil, err
+		}
+		return &time, nil
+	/*case LayoutISOTime:
+		time, err := time.Parse(LayoutISOTime, input)
+		if err != nil {
+			return nil, err
+		}
+		return &time, nil
+	 */
+	default:
+		time, err := time.Parse(LayoutISODOB, input)
+		if err != nil {
+			return nil, err
+		}
+		return &time, nil
+	}
 }

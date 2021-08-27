@@ -1,17 +1,17 @@
 postgres:
-	docker run -p 5432:5432 --name docker-postgres -e POSTGRES_USER=root -e POSTGRES_PASSWORD=secret -d postgres
+	docker run -p 5432:5432 --name docker-postgres -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=secret -d postgres
 
 createdb:
-	docker exec -it docker-postgres createdb --username=root --owner=root harbour
+	docker exec -it docker-postgres createdb --username=postgres --owner=postgres harbour
 
 dropdb:
 	docker exec -it docker-postgres dropdb harbour
 
 migrateup:
-	migrate -path ./db/migration -database "postgres://root:secret@localhost:5432/harbour?sslmode=disable" -verbose up
+	migrate -path ./db/migration -database "postgres://postgres:secret@localhost:5432/harbour?sslmode=disable" -verbose up
 
 migratedown:
-	migrate -path ./db/migration -database "postgres://root:secret@localhost:5432/harbour?sslmode=disable" -verbose down
+	migrate -path ./db/migration -database "postgres://postgres:secret@localhost:5432/harbour?sslmode=disable" -verbose down
 
 test:
 	go test -v -cover ./...

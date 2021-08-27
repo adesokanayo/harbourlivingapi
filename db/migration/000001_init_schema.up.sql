@@ -113,7 +113,11 @@ INSERT  INTO category ( "desc", "status")
 VALUES
     ('Education',1),
     ('Food ',1),
-    ('Sport',1);
+    ('Sport',1),
+    ('Music',1),
+    ('Arts',1),
+    ('Business',1);
+
 
 INSERT  INTO subcategory ( "desc", "status")
 VALUES
