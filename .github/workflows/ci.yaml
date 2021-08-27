@@ -16,7 +16,7 @@ jobs:
       postgres:
         image: postgres:12
         env:
-          POSTGRES_USER: root
+          POSTGRES_USER: postgres
           POSTGRES_PASSWORD: secret
           POSTGRES_DB: harbour
         ports:

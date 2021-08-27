@@ -154,7 +154,7 @@ func (r *mutationResolver) Login(ctx context.Context, input Login) (*LoginRespon
 		return nil, errors.New("invalid username & password combination")
 	}
 
-	token, err := tokenMaker.CreateToken(user.Username, time.Minute)
+	token, err := tokenMaker.CreateToken(user.Username, time.Hour)
 	if err != nil {
 		return nil, errors.New("unable to create token")
 	}
@@ -164,6 +164,10 @@ func (r *mutationResolver) Login(ctx context.Context, input Login) (*LoginRespon
 		   ID:        user.ID,
 		   Email:     user.Email,
 		   Usertype:  int(user.Usertype),
+		   Username: user.Username,
+		   LastName: user.LastName,
+		   Title:  user.Title,
+		   FirstName:  user.FirstName,
 	   },
 	   Success : true,
    }, nil

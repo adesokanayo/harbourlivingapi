@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/harbourlivingapi.iml" filepath="$PROJECT_DIR$/.idea/harbourlivingapi.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/HarbourLivingAPI.iml" filepath="$PROJECT_DIR$/.idea/HarbourLivingAPI.iml" />
     </modules>
   </component>
 </project>
