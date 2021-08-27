@@ -3,12 +3,13 @@ SELECT * FROM events
 WHERE id = $1 LIMIT 1;
 
 -- name: GetEventsByFilter :many
-SELECT * FROM events, venue v
+SELECT * FROM events e inner join venue v
+on  e.venue = v.id
 WHERE category = $1
 and subcategory =$2
 and v.city = $3
 and v.province = $4
-ORDER BY startdate desc
+ORDER BY e.id desc
 LIMIT $5
 OFFSET $6;
 

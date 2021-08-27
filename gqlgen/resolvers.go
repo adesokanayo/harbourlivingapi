@@ -6,12 +6,16 @@ import (
 	"context"
 	"database/sql"
 	db "github.com/BigListRyRy/harbourlivingapi/db/sqlc"
+	token "github.com/BigListRyRy/harbourlivingapi/token"
 	"github.com/BigListRyRy/harbourlivingapi/util"
 	_ "github.com/lib/pq"
+	"github.com/pkg/errors"
 	"log"
+	"time"
 )
 
 var store *db.Store
+var tokenMaker token.Maker
 
 func init() {
 	config, err := util.LoadConfig(".")
@@ -25,6 +29,10 @@ func init() {
 	}
 
 	store = db.NewStore(conn)
+	tokenMaker, err = token.NewJWTMaker(config.TokenSymmetricKey)
+	if err != nil {
+		log.Fatalln("cannot create a token maker ", err)
+	}
 
 }
 
@@ -131,8 +139,34 @@ func (r *mutationResolver) CreateEvent(ctx context.Context, input NewEvent) (*Ev
 	}, nil
 }
 
-func (r *mutationResolver) Login(ctx context.Context, input Login) (string, error) {
-	panic("not implemented")
+func (r *mutationResolver) Login(ctx context.Context, input Login) (*LoginResponse, error) {
+
+	user, err := store.GetUsername(ctx, input.Username)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, errors.New("invalid user")
+		}
+		return nil, err
+	}
+
+	err = util.CheckPassword(input.Password, user.Password)
+	if err != nil {
+		return nil, errors.New("invalid username & password combination")
+	}
+
+	token, err := tokenMaker.CreateToken(user.Username, time.Minute)
+	if err != nil {
+		return nil, errors.New("unable to create token")
+	}
+   return  &LoginResponse{
+	   Token: &token,
+	   User:  &User{
+		   ID:        user.ID,
+		   Email:     user.Email,
+		   Usertype:  int(user.Usertype),
+	   },
+	   Success : true,
+   }, nil
 }
 
 func (r *mutationResolver) RefreshToken(ctx context.Context, input RefreshTokenInput) (string, error) {
@@ -143,7 +177,11 @@ func (r *queryResolver) GetUser(ctx context.Context, input int32) (*User, error)
 
 	user, err := store.GetUser(ctx, input)
 	if err != nil {
-		return nil, err
+		if err == sql.ErrNoRows {
+			return nil, errors.New("no record found")
+		}
+
+		return nil, errors.New("an error occured")
 	}
 
 	return &User{
@@ -169,17 +207,18 @@ func (r *queryResolver) GetEvent(ctx context.Context, input int32) (*Event, erro
 }
 
 
-func (r *queryResolver) GetEventByProperties(ctx context.Context, category *int,subcategory *int, city *string, province *string) ([]Event, error) {
+func (r *queryResolver) GetEventByProperties(ctx context.Context,  input GetEvent) ([]Event, error) {
 
 	var result []Event
 
 	arg:= db.GetEventsByFilterParams{
-		Category:    1,
-		Subcategory: 1,
-		City:       "Calgary",
-		Province:    "AB",
-		Limit:      10,
-		Offset:      1,
+		Category:    int32(input.Category),
+		Subcategory: int32(input.Subcategory),
+		City:       *input.City,
+		Province:    *input.Province,
+		Limit:      int32(input.PageSize),
+		Offset:      int32(input.Offset),
+
 	}
 	events , err := store.GetEventsByFilter(ctx, arg)
 	if err != nil {

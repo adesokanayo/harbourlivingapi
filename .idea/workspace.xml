@@ -4,21 +4,19 @@
     <option name="autoReloadType" value="ALL" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="f4a554c3-51d0-4fb8-b053-ce8a17152d37" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/.gitignore" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/HarbourLivingAPI.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/HarbourLivingAPI.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/api/events.go" beforeDir="false" afterPath="$PROJECT_DIR$/api/events.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/api/server.go" beforeDir="false" afterPath="$PROJECT_DIR$/api/server.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/api/users.go" beforeDir="false" afterPath="$PROJECT_DIR$/api/users.go" afterDir="false" />
+    <list default="true" id="2224c95a-bf4c-4405-865f-f2c5fdc42389" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/util/error.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Makefile" beforeDir="false" afterPath="$PROJECT_DIR$/Makefile" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app.env" beforeDir="false" afterPath="$PROJECT_DIR$/app.env" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/db/migration/000001_init_schema.up.sql" beforeDir="false" afterPath="$PROJECT_DIR$/db/migration/000001_init_schema.up.sql" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/db/query/events.sql" beforeDir="false" afterPath="$PROJECT_DIR$/db/query/events.sql" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/db/sqlc/events.sql.go" beforeDir="false" afterPath="$PROJECT_DIR$/db/sqlc/events.sql.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/go.mod" beforeDir="false" afterPath="$PROJECT_DIR$/go.mod" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/go.sum" beforeDir="false" afterPath="$PROJECT_DIR$/go.sum" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/util/config.go" beforeDir="false" afterPath="$PROJECT_DIR$/util/config.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/gqlgen/exec.go" beforeDir="false" afterPath="$PROJECT_DIR$/gqlgen/exec.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/gqlgen/model.go" beforeDir="false" afterPath="$PROJECT_DIR$/gqlgen/model.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/gqlgen/resolvers.go" beforeDir="false" afterPath="$PROJECT_DIR$/gqlgen/resolvers.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/graph/schema.graphql" beforeDir="false" afterPath="$PROJECT_DIR$/graph/schema.graphql" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -32,7 +30,7 @@
   <component name="GoLibraries">
     <option name="indexEntireGoPath" value="false" />
   </component>
-  <component name="ProjectId" id="1x5lEJtuFYpcjlaPTAxvIU1Tw2s" />
+  <component name="ProjectId" id="1xBB71h4vS8ValOoRQVuQpn1Qgj" />
   <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
   <component name="ProjectViewState">
     <option name="foldersAlwaysOnTop" value="false" />
@@ -53,17 +51,6 @@
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
-  </component>
-  <component name="Vcs.Log.Tabs.Properties">
-    <option name="TAB_STATES">
-      <map>
-        <entry key="MAIN">
-          <value>
-            <State />
-          </value>
-        </entry>
-      </map>
-    </option>
   </component>
   <component name="VgoProject">
     <integration-enabled>true</integration-enabled>

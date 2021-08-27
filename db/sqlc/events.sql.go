@@ -135,12 +135,13 @@ func (q *Queries) GetEvent(ctx context.Context, id int32) (Event, error) {
 }
 
 const getEventsByFilter = `-- name: GetEventsByFilter :many
-SELECT events.id, title, description, banner_image, start_date, end_date, venue, type, user_id, category, subcategory, status, image1, image2, image3, video1, video2, created_at, v.id, name, address, city, province, country_code FROM events, venue v
+SELECT e.id, title, description, banner_image, start_date, end_date, venue, type, user_id, category, subcategory, status, image1, image2, image3, video1, video2, created_at, v.id, name, address, city, province, country_code FROM events e inner join venue v
+on  e.venue = v.id
 WHERE category = $1
 and subcategory =$2
 and v.city = $3
 and v.province = $4
-ORDER BY startdate desc
+ORDER BY e.id desc
 LIMIT $5
 OFFSET $6
 `

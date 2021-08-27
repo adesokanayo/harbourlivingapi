@@ -73,6 +73,13 @@ type ComplexityRoot struct {
 		Status func(childComplexity int) int
 	}
 
+	LoginResponse struct {
+		Message func(childComplexity int) int
+		Success func(childComplexity int) int
+		Token   func(childComplexity int) int
+		User    func(childComplexity int) int
+	}
+
 	Mutation struct {
 		CreateEvent  func(childComplexity int, input NewEvent) int
 		CreateUser   func(childComplexity int, input NewUser) int
@@ -83,7 +90,7 @@ type ComplexityRoot struct {
 
 	Query struct {
 		GetEvent             func(childComplexity int, input int32) int
-		GetEventByProperties func(childComplexity int, category *int, subcategory *int, city *string, province *string) int
+		GetEventByProperties func(childComplexity int, input GetEvent) int
 		GetUser              func(childComplexity int, input int32) int
 		GetUsers             func(childComplexity int) int
 		GetVenue             func(childComplexity int, input int32) int
@@ -126,7 +133,7 @@ type MutationResolver interface {
 	CreateVenue(ctx context.Context, input NewVenue) (*Venue, error)
 	CreateUser(ctx context.Context, input NewUser) (*User, error)
 	CreateEvent(ctx context.Context, input NewEvent) (*Event, error)
-	Login(ctx context.Context, input Login) (string, error)
+	Login(ctx context.Context, input Login) (*LoginResponse, error)
 	RefreshToken(ctx context.Context, input RefreshTokenInput) (string, error)
 }
 type QueryResolver interface {
@@ -134,7 +141,7 @@ type QueryResolver interface {
 	GetEvent(ctx context.Context, input int32) (*Event, error)
 	GetVenue(ctx context.Context, input int32) (*Venue, error)
 	GetUsers(ctx context.Context) ([]User, error)
-	GetEventByProperties(ctx context.Context, category *int, subcategory *int, city *string, province *string) ([]Event, error)
+	GetEventByProperties(ctx context.Context, input GetEvent) ([]Event, error)
 }
 
 type executableSchema struct {
@@ -313,6 +320,34 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.EventType.Status(childComplexity), true
 
+	case "LoginResponse.message":
+		if e.complexity.LoginResponse.Message == nil {
+			break
+		}
+
+		return e.complexity.LoginResponse.Message(childComplexity), true
+
+	case "LoginResponse.success":
+		if e.complexity.LoginResponse.Success == nil {
+			break
+		}
+
+		return e.complexity.LoginResponse.Success(childComplexity), true
+
+	case "LoginResponse.token":
+		if e.complexity.LoginResponse.Token == nil {
+			break
+		}
+
+		return e.complexity.LoginResponse.Token(childComplexity), true
+
+	case "LoginResponse.user":
+		if e.complexity.LoginResponse.User == nil {
+			break
+		}
+
+		return e.complexity.LoginResponse.User(childComplexity), true
+
 	case "Mutation.createEvent":
 		if e.complexity.Mutation.CreateEvent == nil {
 			break
@@ -395,7 +430,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.GetEventByProperties(childComplexity, args["category"].(*int), args["subcategory"].(*int), args["city"].(*string), args["province"].(*string)), true
+		return e.complexity.Query.GetEventByProperties(childComplexity, args["input"].(GetEvent)), true
 
 	case "Query.getUser":
 		if e.complexity.Query.GetUser == nil {
@@ -696,6 +731,12 @@ input Login {
         password: String!
 }
 
+type LoginResponse{
+      token: String
+      user : User
+      success: Boolean!
+      message: String
+}
 input NewVenue {
         name: String!
         address: String!
@@ -704,6 +745,14 @@ input NewVenue {
         country_code: String!
 }
 
+input GetEvent{
+        category: Int!
+        subcategory: Int!,
+        city :String,
+        province: String
+        pageSize: Int!
+        offset: Int!
+}
 input NewEvent {
         title: String!
         description: String!
@@ -740,7 +789,7 @@ type Mutation {
         createVenue(input: NewVenue!): Venue!
         createUser(input: NewUser!): User!
         createEvent(input: NewEvent!):Event!
-        login(input: Login!): String!
+        login(input: Login!): LoginResponse!
         # we'll talk about this in authentication section
         refreshToken(input: RefreshTokenInput!): String!
 }
@@ -750,7 +799,7 @@ type Query{
         getEvent(input: ID!): Event
         getVenue(input: ID!): Venue
         getUsers : [User!]
-        getEventByProperties(category: Int, subcategory: Int, city :String, province: String): [Event!]
+        getEventByProperties(input: GetEvent!): [Event!]
 
 }`, BuiltIn: false},
 }
@@ -853,42 +902,15 @@ func (ec *executionContext) field_Query___type_args(ctx context.Context, rawArgs
 func (ec *executionContext) field_Query_getEventByProperties_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 *int
-	if tmp, ok := rawArgs["category"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("category"))
-		arg0, err = ec.unmarshalOInt2ᚖint(ctx, tmp)
+	var arg0 GetEvent
+	if tmp, ok := rawArgs["input"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+		arg0, err = ec.unmarshalNGetEvent2githubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgqlgenᚐGetEvent(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["category"] = arg0
-	var arg1 *int
-	if tmp, ok := rawArgs["subcategory"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("subcategory"))
-		arg1, err = ec.unmarshalOInt2ᚖint(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["subcategory"] = arg1
-	var arg2 *string
-	if tmp, ok := rawArgs["city"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("city"))
-		arg2, err = ec.unmarshalOString2ᚖstring(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["city"] = arg2
-	var arg3 *string
-	if tmp, ok := rawArgs["province"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("province"))
-		arg3, err = ec.unmarshalOString2ᚖstring(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["province"] = arg3
+	args["input"] = arg0
 	return args, nil
 }
 
@@ -1750,6 +1772,137 @@ func (ec *executionContext) _EventType_status(ctx context.Context, field graphql
 	return ec.marshalOInt2ᚖint(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _LoginResponse_token(ctx context.Context, field graphql.CollectedField, obj *LoginResponse) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "LoginResponse",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Token, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _LoginResponse_user(ctx context.Context, field graphql.CollectedField, obj *LoginResponse) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "LoginResponse",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.User, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*User)
+	fc.Result = res
+	return ec.marshalOUser2ᚖgithubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgqlgenᚐUser(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _LoginResponse_success(ctx context.Context, field graphql.CollectedField, obj *LoginResponse) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "LoginResponse",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Success, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(bool)
+	fc.Result = res
+	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _LoginResponse_message(ctx context.Context, field graphql.CollectedField, obj *LoginResponse) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "LoginResponse",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Message, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _Mutation_createVenue(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -1913,9 +2066,9 @@ func (ec *executionContext) _Mutation_login(ctx context.Context, field graphql.C
 		}
 		return graphql.Null
 	}
-	res := resTmp.(string)
+	res := resTmp.(*LoginResponse)
 	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
+	return ec.marshalNLoginResponse2ᚖgithubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgqlgenᚐLoginResponse(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Mutation_refreshToken(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -2134,7 +2287,7 @@ func (ec *executionContext) _Query_getEventByProperties(ctx context.Context, fie
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().GetEventByProperties(rctx, args["category"].(*int), args["subcategory"].(*int), args["city"].(*string), args["province"].(*string))
+		return ec.resolvers.Query().GetEventByProperties(rctx, args["input"].(GetEvent))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -3994,6 +4147,66 @@ func (ec *executionContext) ___Type_ofType(ctx context.Context, field graphql.Co
 
 // region    **************************** input.gotpl *****************************
 
+func (ec *executionContext) unmarshalInputGetEvent(ctx context.Context, obj interface{}) (GetEvent, error) {
+	var it GetEvent
+	var asMap = obj.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "category":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("category"))
+			it.Category, err = ec.unmarshalNInt2int(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "subcategory":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("subcategory"))
+			it.Subcategory, err = ec.unmarshalNInt2int(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "city":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("city"))
+			it.City, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "province":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("province"))
+			it.Province, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "pageSize":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("pageSize"))
+			it.PageSize, err = ec.unmarshalNInt2int(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "offset":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("offset"))
+			it.Offset, err = ec.unmarshalNInt2int(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputLogin(ctx context.Context, obj interface{}) (Login, error) {
 	var it Login
 	var asMap = obj.(map[string]interface{})
@@ -4450,6 +4663,39 @@ func (ec *executionContext) _EventType(ctx context.Context, sel ast.SelectionSet
 			out.Values[i] = ec._EventType_desc(ctx, field, obj)
 		case "status":
 			out.Values[i] = ec._EventType_status(ctx, field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var loginResponseImplementors = []string{"LoginResponse"}
+
+func (ec *executionContext) _LoginResponse(ctx context.Context, sel ast.SelectionSet, obj *LoginResponse) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, loginResponseImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("LoginResponse")
+		case "token":
+			out.Values[i] = ec._LoginResponse_token(ctx, field, obj)
+		case "user":
+			out.Values[i] = ec._LoginResponse_user(ctx, field, obj)
+		case "success":
+			out.Values[i] = ec._LoginResponse_success(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "message":
+			out.Values[i] = ec._LoginResponse_message(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -5047,6 +5293,11 @@ func (ec *executionContext) marshalNEvent2ᚖgithubᚗcomᚋBigListRyRyᚋharbou
 	return ec._Event(ctx, sel, v)
 }
 
+func (ec *executionContext) unmarshalNGetEvent2githubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgqlgenᚐGetEvent(ctx context.Context, v interface{}) (GetEvent, error) {
+	res, err := ec.unmarshalInputGetEvent(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
 func (ec *executionContext) unmarshalNID2int32(ctx context.Context, v interface{}) (int32, error) {
 	res, err := graphql.UnmarshalInt32(v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -5080,6 +5331,20 @@ func (ec *executionContext) marshalNInt2int(ctx context.Context, sel ast.Selecti
 func (ec *executionContext) unmarshalNLogin2githubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgqlgenᚐLogin(ctx context.Context, v interface{}) (Login, error) {
 	res, err := ec.unmarshalInputLogin(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNLoginResponse2githubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgqlgenᚐLoginResponse(ctx context.Context, sel ast.SelectionSet, v LoginResponse) graphql.Marshaler {
+	return ec._LoginResponse(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNLoginResponse2ᚖgithubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgqlgenᚐLoginResponse(ctx context.Context, sel ast.SelectionSet, v *LoginResponse) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._LoginResponse(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalNNewEvent2githubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgqlgenᚐNewEvent(ctx context.Context, v interface{}) (NewEvent, error) {

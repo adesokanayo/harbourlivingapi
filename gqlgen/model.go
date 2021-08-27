@@ -34,9 +34,25 @@ type EventType struct {
 	Status *int    `json:"status"`
 }
 
+type GetEvent struct {
+	Category    int     `json:"category"`
+	Subcategory int     `json:"subcategory"`
+	City        *string `json:"city"`
+	Province    *string `json:"province"`
+	PageSize    int     `json:"pageSize"`
+	Offset      int     `json:"offset"`
+}
+
 type Login struct {
 	Username string `json:"username"`
 	Password string `json:"password"`
+}
+
+type LoginResponse struct {
+	Token   *string `json:"token"`
+	User    *User   `json:"user"`
+	Success bool    `json:"success"`
+	Message *string `json:"message"`
 }
 
 type NewEvent struct {

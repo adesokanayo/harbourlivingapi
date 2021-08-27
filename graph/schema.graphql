@@ -62,6 +62,12 @@ input Login {
         password: String!
 }
 
+type LoginResponse{
+      token: String
+      user : User
+      success: Boolean!
+      message: String
+}
 input NewVenue {
         name: String!
         address: String!
@@ -70,6 +76,14 @@ input NewVenue {
         country_code: String!
 }
 
+input GetEvent{
+        category: Int!
+        subcategory: Int!,
+        city :String,
+        province: String
+        pageSize: Int!
+        offset: Int!
+}
 input NewEvent {
         title: String!
         description: String!
@@ -106,7 +120,7 @@ type Mutation {
         createVenue(input: NewVenue!): Venue!
         createUser(input: NewUser!): User!
         createEvent(input: NewEvent!):Event!
-        login(input: Login!): String!
+        login(input: Login!): LoginResponse!
         # we'll talk about this in authentication section
         refreshToken(input: RefreshTokenInput!): String!
 }
@@ -116,6 +130,6 @@ type Query{
         getEvent(input: ID!): Event
         getVenue(input: ID!): Venue
         getUsers : [User!]
-        getEventByProperties(category: Int, subcategory: Int, city :String, province: String): [Event!]
+        getEventByProperties(input: GetEvent!): [Event!]
 
 }
