@@ -62,14 +62,21 @@ func (maker *JWTMaker) VerifyToken(token string) (*Payload, error) {
 }
 
 //ParseToken parses a jwt token and returns the username it it's claims
-func ParseToken(tokenStr string,  secretKey string) (string, error) {
+func (maker *JWTMaker) ParseToken(tokenStr string) (string, error) {
+
 	token, err := jwt.Parse(tokenStr, func(token *jwt.Token) (interface{}, error) {
-		return secretKey, nil
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("Unexpected signing method: %v", token.Header["alg"])
+		}
+		return []byte(maker.secretKey), nil
 	})
+  if err != nil {
+	  return "error", err
+  }
 	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
 		username := claims["username"].(string)
 		return username, nil
-	} else {
-		return "", err
+	} else{
+		return "", nil
 	}
 }

@@ -11,16 +11,18 @@ const createVenue = `-- name: CreateVenue :one
 INSERT INTO venue (
     name,
     address,
+    postal_code,
     city,
     province,
     country_code
 ) VALUES
-    ($1, $2, $3, $4, $5) RETURNING id, name, address, city, province, country_code
+    ($1, $2, $3, $4, $5, $6) RETURNING id, name, address, postal_code, city, province, country_code
 `
 
 type CreateVenueParams struct {
 	Name        string `json:"name"`
 	Address     string `json:"address"`
+	PostalCode  string `json:"postal_code"`
 	City        string `json:"city"`
 	Province    string `json:"province"`
 	CountryCode string `json:"country_code"`
@@ -30,6 +32,7 @@ func (q *Queries) CreateVenue(ctx context.Context, arg CreateVenueParams) (Venue
 	row := q.db.QueryRowContext(ctx, createVenue,
 		arg.Name,
 		arg.Address,
+		arg.PostalCode,
 		arg.City,
 		arg.Province,
 		arg.CountryCode,
@@ -39,6 +42,7 @@ func (q *Queries) CreateVenue(ctx context.Context, arg CreateVenueParams) (Venue
 		&i.ID,
 		&i.Name,
 		&i.Address,
+		&i.PostalCode,
 		&i.City,
 		&i.Province,
 		&i.CountryCode,
@@ -57,7 +61,7 @@ func (q *Queries) DeleteVenue(ctx context.Context, id int32) error {
 }
 
 const getAllVenues = `-- name: GetAllVenues :many
-SELECT id, name, address, city, province, country_code FROM venue
+SELECT id, name, address, postal_code, city, province, country_code FROM venue
 ORDER  by id
 `
 
@@ -74,6 +78,7 @@ func (q *Queries) GetAllVenues(ctx context.Context) ([]Venue, error) {
 			&i.ID,
 			&i.Name,
 			&i.Address,
+			&i.PostalCode,
 			&i.City,
 			&i.Province,
 			&i.CountryCode,
@@ -92,7 +97,7 @@ func (q *Queries) GetAllVenues(ctx context.Context) ([]Venue, error) {
 }
 
 const getVenue = `-- name: GetVenue :one
-SELECT id, name, address, city, province, country_code FROM venue
+SELECT id, name, address, postal_code, city, province, country_code FROM venue
 WHERE id = $1 LIMIT 1
 `
 
@@ -103,6 +108,7 @@ func (q *Queries) GetVenue(ctx context.Context, id int32) (Venue, error) {
 		&i.ID,
 		&i.Name,
 		&i.Address,
+		&i.PostalCode,
 		&i.City,
 		&i.Province,
 		&i.CountryCode,

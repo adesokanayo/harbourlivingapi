@@ -56,9 +56,11 @@ type ComplexityRoot struct {
 		Image1      func(childComplexity int) int
 		Image2      func(childComplexity int) int
 		Image3      func(childComplexity int) int
+		Sponsors    func(childComplexity int) int
 		StartDate   func(childComplexity int) int
 		Status      func(childComplexity int) int
 		Subcategory func(childComplexity int) int
+		Ticket      func(childComplexity int) int
 		Title       func(childComplexity int) int
 		Type        func(childComplexity int) int
 		UserID      func(childComplexity int) int
@@ -96,10 +98,20 @@ type ComplexityRoot struct {
 		GetVenue             func(childComplexity int, input int32) int
 	}
 
+	Sponsor struct {
+		ID     func(childComplexity int) int
+		UserID func(childComplexity int) int
+	}
+
 	Subcategory struct {
 		Desc   func(childComplexity int) int
 		ID     func(childComplexity int) int
 		Status func(childComplexity int) int
+	}
+
+	Ticket struct {
+		ID    func(childComplexity int) int
+		Price func(childComplexity int) int
 	}
 
 	User struct {
@@ -125,6 +137,7 @@ type ComplexityRoot struct {
 		CountryCode func(childComplexity int) int
 		ID          func(childComplexity int) int
 		Name        func(childComplexity int) int
+		PostalCode  func(childComplexity int) int
 		Province    func(childComplexity int) int
 	}
 }
@@ -134,7 +147,7 @@ type MutationResolver interface {
 	CreateUser(ctx context.Context, input NewUser) (*User, error)
 	CreateEvent(ctx context.Context, input NewEvent) (*Event, error)
 	Login(ctx context.Context, input Login) (*LoginResponse, error)
-	RefreshToken(ctx context.Context, input RefreshTokenInput) (string, error)
+	RefreshToken(ctx context.Context, input RefreshTokenInput) (*string, error)
 }
 type QueryResolver interface {
 	GetUser(ctx context.Context, input int32) (*User, error)
@@ -236,6 +249,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Event.Image3(childComplexity), true
 
+	case "Event.sponsors":
+		if e.complexity.Event.Sponsors == nil {
+			break
+		}
+
+		return e.complexity.Event.Sponsors(childComplexity), true
+
 	case "Event.startDate":
 		if e.complexity.Event.StartDate == nil {
 			break
@@ -256,6 +276,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Event.Subcategory(childComplexity), true
+
+	case "Event.ticket":
+		if e.complexity.Event.Ticket == nil {
+			break
+		}
+
+		return e.complexity.Event.Ticket(childComplexity), true
 
 	case "Event.title":
 		if e.complexity.Event.Title == nil {
@@ -463,6 +490,20 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.GetVenue(childComplexity, args["input"].(int32)), true
 
+	case "Sponsor.id":
+		if e.complexity.Sponsor.ID == nil {
+			break
+		}
+
+		return e.complexity.Sponsor.ID(childComplexity), true
+
+	case "Sponsor.user_Id":
+		if e.complexity.Sponsor.UserID == nil {
+			break
+		}
+
+		return e.complexity.Sponsor.UserID(childComplexity), true
+
 	case "Subcategory.desc":
 		if e.complexity.Subcategory.Desc == nil {
 			break
@@ -483,6 +524,20 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Subcategory.Status(childComplexity), true
+
+	case "Ticket.id":
+		if e.complexity.Ticket.ID == nil {
+			break
+		}
+
+		return e.complexity.Ticket.ID(childComplexity), true
+
+	case "Ticket.price":
+		if e.complexity.Ticket.Price == nil {
+			break
+		}
+
+		return e.complexity.Ticket.Price(childComplexity), true
 
 	case "User.email":
 		if e.complexity.User.Email == nil {
@@ -595,6 +650,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Venue.Name(childComplexity), true
+
+	case "Venue.postal_code":
+		if e.complexity.Venue.PostalCode == nil {
+			break
+		}
+
+		return e.complexity.Venue.PostalCode(childComplexity), true
 
 	case "Venue.province":
 		if e.complexity.Venue.Province == nil {
@@ -710,6 +772,8 @@ type Event {
         user_id: ID!
         category: Int!
         subcategory: Int!
+        sponsors : [Sponsor]
+        ticket : Ticket
         status: String
         image1: String
         image2: String
@@ -721,6 +785,7 @@ type Venue {
         id: ID!
         name: String!
         address: String!
+        postal_code:String!
         city: String!
         province: String!
         country_code: String!
@@ -740,6 +805,7 @@ type LoginResponse{
 input NewVenue {
         name: String!
         address: String!
+        postal_code:String!
         city: String!
         province: String!
         country_code: String!
@@ -785,13 +851,21 @@ input NewUser {
         usertype: Int!
 }
 
+
+type Sponsor {
+        id: ID!
+        user_Id: Int!
+}
+type Ticket {
+        id: ID!
+        price: Int!
+}
 type Mutation {
         createVenue(input: NewVenue!): Venue!
         createUser(input: NewUser!): User!
         createEvent(input: NewEvent!):Event!
-        login(input: Login!): LoginResponse!
-        # we'll talk about this in authentication section
-        refreshToken(input: RefreshTokenInput!): String!
+        login(input: Login!): LoginResponse
+        refreshToken(input: RefreshTokenInput!): String
 }
 
 type Query{
@@ -1481,6 +1555,70 @@ func (ec *executionContext) _Event_subcategory(ctx context.Context, field graphq
 	return ec.marshalNInt2int(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _Event_sponsors(ctx context.Context, field graphql.CollectedField, obj *Event) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Event",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Sponsors, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]*Sponsor)
+	fc.Result = res
+	return ec.marshalOSponsor2ᚕᚖgithubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgqlgenᚐSponsor(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Event_ticket(ctx context.Context, field graphql.CollectedField, obj *Event) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Event",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Ticket, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*Ticket)
+	fc.Result = res
+	return ec.marshalOTicket2ᚖgithubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgqlgenᚐTicket(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _Event_status(ctx context.Context, field graphql.CollectedField, obj *Event) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -2061,14 +2199,11 @@ func (ec *executionContext) _Mutation_login(ctx context.Context, field graphql.C
 		return graphql.Null
 	}
 	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
 		return graphql.Null
 	}
 	res := resTmp.(*LoginResponse)
 	fc.Result = res
-	return ec.marshalNLoginResponse2ᚖgithubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgqlgenᚐLoginResponse(ctx, field.Selections, res)
+	return ec.marshalOLoginResponse2ᚖgithubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgqlgenᚐLoginResponse(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Mutation_refreshToken(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -2103,14 +2238,11 @@ func (ec *executionContext) _Mutation_refreshToken(ctx context.Context, field gr
 		return graphql.Null
 	}
 	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
 		return graphql.Null
 	}
-	res := resTmp.(string)
+	res := resTmp.(*string)
 	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query_getUser(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -2372,6 +2504,76 @@ func (ec *executionContext) _Query___schema(ctx context.Context, field graphql.C
 	return ec.marshalO__Schema2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐSchema(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _Sponsor_id(ctx context.Context, field graphql.CollectedField, obj *Sponsor) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Sponsor",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int32)
+	fc.Result = res
+	return ec.marshalNID2int32(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Sponsor_user_Id(ctx context.Context, field graphql.CollectedField, obj *Sponsor) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Sponsor",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.UserID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _Subcategory_id(ctx context.Context, field graphql.CollectedField, obj *Subcategory) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -2469,6 +2671,76 @@ func (ec *executionContext) _Subcategory_status(ctx context.Context, field graph
 	res := resTmp.(*int)
 	fc.Result = res
 	return ec.marshalOInt2ᚖint(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Ticket_id(ctx context.Context, field graphql.CollectedField, obj *Ticket) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Ticket",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int32)
+	fc.Result = res
+	return ec.marshalNID2int32(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Ticket_price(ctx context.Context, field graphql.CollectedField, obj *Ticket) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Ticket",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Price, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _User_id(ctx context.Context, field graphql.CollectedField, obj *User) (ret graphql.Marshaler) {
@@ -2939,6 +3211,41 @@ func (ec *executionContext) _Venue_address(ctx context.Context, field graphql.Co
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Address, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Venue_postal_code(ctx context.Context, field graphql.CollectedField, obj *Venue) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Venue",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.PostalCode, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -4465,6 +4772,14 @@ func (ec *executionContext) unmarshalInputNewVenue(ctx context.Context, obj inte
 			if err != nil {
 				return it, err
 			}
+		case "postal_code":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("postal_code"))
+			it.PostalCode, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "city":
 			var err error
 
@@ -4620,6 +4935,10 @@ func (ec *executionContext) _Event(ctx context.Context, sel ast.SelectionSet, ob
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
+		case "sponsors":
+			out.Values[i] = ec._Event_sponsors(ctx, field, obj)
+		case "ticket":
+			out.Values[i] = ec._Event_ticket(ctx, field, obj)
 		case "status":
 			out.Values[i] = ec._Event_status(ctx, field, obj)
 		case "image1":
@@ -4739,14 +5058,8 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			}
 		case "login":
 			out.Values[i] = ec._Mutation_login(ctx, field)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
 		case "refreshToken":
 			out.Values[i] = ec._Mutation_refreshToken(ctx, field)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -4843,6 +5156,38 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 	return out
 }
 
+var sponsorImplementors = []string{"Sponsor"}
+
+func (ec *executionContext) _Sponsor(ctx context.Context, sel ast.SelectionSet, obj *Sponsor) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, sponsorImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("Sponsor")
+		case "id":
+			out.Values[i] = ec._Sponsor_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "user_Id":
+			out.Values[i] = ec._Sponsor_user_Id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
 var subcategoryImplementors = []string{"Subcategory"}
 
 func (ec *executionContext) _Subcategory(ctx context.Context, sel ast.SelectionSet, obj *Subcategory) graphql.Marshaler {
@@ -4863,6 +5208,38 @@ func (ec *executionContext) _Subcategory(ctx context.Context, sel ast.SelectionS
 			out.Values[i] = ec._Subcategory_desc(ctx, field, obj)
 		case "status":
 			out.Values[i] = ec._Subcategory_status(ctx, field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var ticketImplementors = []string{"Ticket"}
+
+func (ec *executionContext) _Ticket(ctx context.Context, sel ast.SelectionSet, obj *Ticket) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, ticketImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("Ticket")
+		case "id":
+			out.Values[i] = ec._Ticket_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "price":
+			out.Values[i] = ec._Ticket_price(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -4990,6 +5367,11 @@ func (ec *executionContext) _Venue(ctx context.Context, sel ast.SelectionSet, ob
 			}
 		case "address":
 			out.Values[i] = ec._Venue_address(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "postal_code":
+			out.Values[i] = ec._Venue_postal_code(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
@@ -5331,20 +5713,6 @@ func (ec *executionContext) marshalNInt2int(ctx context.Context, sel ast.Selecti
 func (ec *executionContext) unmarshalNLogin2githubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgqlgenᚐLogin(ctx context.Context, v interface{}) (Login, error) {
 	res, err := ec.unmarshalInputLogin(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
-}
-
-func (ec *executionContext) marshalNLoginResponse2githubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgqlgenᚐLoginResponse(ctx context.Context, sel ast.SelectionSet, v LoginResponse) graphql.Marshaler {
-	return ec._LoginResponse(ctx, sel, &v)
-}
-
-func (ec *executionContext) marshalNLoginResponse2ᚖgithubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgqlgenᚐLoginResponse(ctx context.Context, sel ast.SelectionSet, v *LoginResponse) graphql.Marshaler {
-	if v == nil {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	return ec._LoginResponse(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalNNewEvent2githubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgqlgenᚐNewEvent(ctx context.Context, v interface{}) (NewEvent, error) {
@@ -5725,6 +6093,60 @@ func (ec *executionContext) marshalOInt2ᚖint(ctx context.Context, sel ast.Sele
 	return graphql.MarshalInt(*v)
 }
 
+func (ec *executionContext) marshalOLoginResponse2ᚖgithubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgqlgenᚐLoginResponse(ctx context.Context, sel ast.SelectionSet, v *LoginResponse) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._LoginResponse(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalOSponsor2ᚕᚖgithubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgqlgenᚐSponsor(ctx context.Context, sel ast.SelectionSet, v []*Sponsor) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalOSponsor2ᚖgithubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgqlgenᚐSponsor(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+	return ret
+}
+
+func (ec *executionContext) marshalOSponsor2ᚖgithubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgqlgenᚐSponsor(ctx context.Context, sel ast.SelectionSet, v *Sponsor) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._Sponsor(ctx, sel, v)
+}
+
 func (ec *executionContext) unmarshalOString2string(ctx context.Context, v interface{}) (string, error) {
 	res, err := graphql.UnmarshalString(v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -5747,6 +6169,13 @@ func (ec *executionContext) marshalOString2ᚖstring(ctx context.Context, sel as
 		return graphql.Null
 	}
 	return graphql.MarshalString(*v)
+}
+
+func (ec *executionContext) marshalOTicket2ᚖgithubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgqlgenᚐTicket(ctx context.Context, sel ast.SelectionSet, v *Ticket) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._Ticket(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalOUser2ᚕgithubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgqlgenᚐUserᚄ(ctx context.Context, sel ast.SelectionSet, v []User) graphql.Marshaler {

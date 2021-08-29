@@ -25,6 +25,8 @@ type Event struct {
 	UserID      int32          `json:"user_id"`
 	Category    int32          `json:"category"`
 	Subcategory int32          `json:"subcategory"`
+	TicketID    sql.NullInt32  `json:"ticket_id"`
+	Recurring   sql.NullBool   `json:"recurring"`
 	Status      sql.NullString `json:"status"`
 	Image1      sql.NullString `json:"image1"`
 	Image2      sql.NullString `json:"image2"`
@@ -40,10 +42,38 @@ type EventType struct {
 	Status sql.NullInt32  `json:"status"`
 }
 
+type EventsSponsor struct {
+	ID        int32     `json:"id"`
+	EventID   int32     `json:"event_id"`
+	SponsorID int32     `json:"sponsor_id"`
+	CreatedAt time.Time `json:"created_at"`
+}
+
+type Sponsor struct {
+	ID        int32     `json:"id"`
+	UserID    int32     `json:"user_id"`
+	CreatedAt time.Time `json:"created_at"`
+}
+
 type Subcategory struct {
 	ID     int32          `json:"id"`
 	Desc   sql.NullString `json:"desc"`
 	Status sql.NullInt32  `json:"status"`
+}
+
+type Ticket struct {
+	ID       int32         `json:"id"`
+	Name     string        `json:"name"`
+	EventID  int32         `json:"event_id"`
+	Price    float64       `json:"price"`
+	Quantity int32         `json:"quantity"`
+	Status   sql.NullInt32 `json:"status"`
+}
+
+type TicketStatus struct {
+	ID     int32          `json:"id"`
+	Desc   sql.NullString `json:"desc"`
+	Status int32          `json:"status"`
 }
 
 type User struct {
@@ -60,6 +90,18 @@ type User struct {
 	CreatedAt         time.Time    `json:"created_at"`
 }
 
+type UserTicket struct {
+	ID            int32           `json:"id"`
+	UserID        int32           `json:"user_id"`
+	TicketID      int32           `json:"ticket_id"`
+	Quantity      sql.NullInt32   `json:"quantity"`
+	TotalCost     sql.NullFloat64 `json:"total_cost"`
+	Paid          sql.NullBool    `json:"paid"`
+	PaymentRef    sql.NullString  `json:"payment_ref"`
+	PaymentMethod sql.NullString  `json:"payment_method"`
+	CreatedAt     time.Time       `json:"created_at"`
+}
+
 type Usertype struct {
 	ID     int32          `json:"id"`
 	Desc   sql.NullString `json:"desc"`
@@ -70,6 +112,7 @@ type Venue struct {
 	ID          int32  `json:"id"`
 	Name        string `json:"name"`
 	Address     string `json:"address"`
+	PostalCode  string `json:"postal_code"`
 	City        string `json:"city"`
 	Province    string `json:"province"`
 	CountryCode string `json:"country_code"`

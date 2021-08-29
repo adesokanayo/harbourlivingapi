@@ -28,7 +28,7 @@ INSERT INTO events (
     video1,
     video2
 ) VALUES
-    ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15,$16) RETURNING id, title, description, banner_image, start_date, end_date, venue, type, user_id, category, subcategory, status, image1, image2, image3, video1, video2, created_at
+    ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15,$16) RETURNING id, title, description, banner_image, start_date, end_date, venue, type, user_id, category, subcategory, ticket_id, recurring, status, image1, image2, image3, video1, video2, created_at
 `
 
 type CreateEventParams struct {
@@ -82,6 +82,8 @@ func (q *Queries) CreateEvent(ctx context.Context, arg CreateEventParams) (Event
 		&i.UserID,
 		&i.Category,
 		&i.Subcategory,
+		&i.TicketID,
+		&i.Recurring,
 		&i.Status,
 		&i.Image1,
 		&i.Image2,
@@ -93,18 +95,18 @@ func (q *Queries) CreateEvent(ctx context.Context, arg CreateEventParams) (Event
 	return i, err
 }
 
-const deleteEvents = `-- name: DeleteEvents :exec
+const deleteEvent = `-- name: DeleteEvent :exec
 DELETE FROM events
 WHERE id = $1
 `
 
-func (q *Queries) DeleteEvents(ctx context.Context, id int32) error {
-	_, err := q.db.ExecContext(ctx, deleteEvents, id)
+func (q *Queries) DeleteEvent(ctx context.Context, id int32) error {
+	_, err := q.db.ExecContext(ctx, deleteEvent, id)
 	return err
 }
 
 const getEvent = `-- name: GetEvent :one
-SELECT id, title, description, banner_image, start_date, end_date, venue, type, user_id, category, subcategory, status, image1, image2, image3, video1, video2, created_at FROM events
+SELECT id, title, description, banner_image, start_date, end_date, venue, type, user_id, category, subcategory, ticket_id, recurring, status, image1, image2, image3, video1, video2, created_at FROM events
 WHERE id = $1 LIMIT 1
 `
 
@@ -123,6 +125,8 @@ func (q *Queries) GetEvent(ctx context.Context, id int32) (Event, error) {
 		&i.UserID,
 		&i.Category,
 		&i.Subcategory,
+		&i.TicketID,
+		&i.Recurring,
 		&i.Status,
 		&i.Image1,
 		&i.Image2,
@@ -135,8 +139,8 @@ func (q *Queries) GetEvent(ctx context.Context, id int32) (Event, error) {
 }
 
 const getEventsByFilter = `-- name: GetEventsByFilter :many
-SELECT e.id, title, description, banner_image, start_date, end_date, venue, type, user_id, category, subcategory, status, image1, image2, image3, video1, video2, created_at, v.id, name, address, city, province, country_code FROM events e inner join venue v
-on  e.venue = v.id
+SELECT e.id, title, description, banner_image, start_date, end_date, venue, type, user_id, category, subcategory, ticket_id, recurring, status, image1, image2, image3, video1, video2, created_at, v.id, name, address, postal_code, city, province, country_code FROM events e
+inner join venue v on  e.venue = v.id
 WHERE category = $1
 and subcategory =$2
 and v.city = $3
@@ -167,6 +171,8 @@ type GetEventsByFilterRow struct {
 	UserID      int32          `json:"user_id"`
 	Category    int32          `json:"category"`
 	Subcategory int32          `json:"subcategory"`
+	TicketID    sql.NullInt32  `json:"ticket_id"`
+	Recurring   sql.NullBool   `json:"recurring"`
 	Status      sql.NullString `json:"status"`
 	Image1      sql.NullString `json:"image1"`
 	Image2      sql.NullString `json:"image2"`
@@ -177,6 +183,7 @@ type GetEventsByFilterRow struct {
 	ID_2        int32          `json:"id_2"`
 	Name        string         `json:"name"`
 	Address     string         `json:"address"`
+	PostalCode  string         `json:"postal_code"`
 	City        string         `json:"city"`
 	Province    string         `json:"province"`
 	CountryCode string         `json:"country_code"`
@@ -210,6 +217,8 @@ func (q *Queries) GetEventsByFilter(ctx context.Context, arg GetEventsByFilterPa
 			&i.UserID,
 			&i.Category,
 			&i.Subcategory,
+			&i.TicketID,
+			&i.Recurring,
 			&i.Status,
 			&i.Image1,
 			&i.Image2,
@@ -220,6 +229,7 @@ func (q *Queries) GetEventsByFilter(ctx context.Context, arg GetEventsByFilterPa
 			&i.ID_2,
 			&i.Name,
 			&i.Address,
+			&i.PostalCode,
 			&i.City,
 			&i.Province,
 			&i.CountryCode,

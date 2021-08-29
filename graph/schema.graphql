@@ -41,6 +41,8 @@ type Event {
         user_id: ID!
         category: Int!
         subcategory: Int!
+        sponsors : [Sponsor]
+        ticket : Ticket
         status: String
         image1: String
         image2: String
@@ -52,6 +54,7 @@ type Venue {
         id: ID!
         name: String!
         address: String!
+        postal_code:String!
         city: String!
         province: String!
         country_code: String!
@@ -71,6 +74,7 @@ type LoginResponse{
 input NewVenue {
         name: String!
         address: String!
+        postal_code:String!
         city: String!
         province: String!
         country_code: String!
@@ -116,13 +120,21 @@ input NewUser {
         usertype: Int!
 }
 
+
+type Sponsor {
+        id: ID!
+        user_Id: Int!
+}
+type Ticket {
+        id: ID!
+        price: Int!
+}
 type Mutation {
         createVenue(input: NewVenue!): Venue!
         createUser(input: NewUser!): User!
         createEvent(input: NewEvent!):Event!
-        login(input: Login!): LoginResponse!
-        # we'll talk about this in authentication section
-        refreshToken(input: RefreshTokenInput!): String!
+        login(input: Login!): LoginResponse
+        refreshToken(input: RefreshTokenInput!): String
 }
 
 type Query{

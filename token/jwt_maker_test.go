@@ -63,3 +63,19 @@ func TestInvalidJWTTokenAlgNone(t *testing.T) {
 	require.EqualError(t, err, ErrInvalidToken.Error())
 	require.Nil(t, payload)
 }
+
+func TestParseToken(t *testing.T){
+	secret:= util.RandomString(32)
+	maker, err := NewJWTMaker(secret)
+	require.NoError(t, err)
+    user := util.RandomOwner()
+
+	token, err := maker.CreateToken(user, time.Minute)
+	require.NoError(t, err)
+	require.NotEmpty(t, token)
+
+	username, err := maker.ParseToken(token)
+	require.NoError(t, err)
+	require.NotNil(t, username)
+	require.Equal(t, user, username)
+}

@@ -5,13 +5,27 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="2224c95a-bf4c-4405-865f-f2c5fdc42389" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.github/workflows/ci.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/.github/workflows/ci.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Dockerfile" beforeDir="false" afterPath="$PROJECT_DIR$/Dockerfile" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Makefile" beforeDir="false" afterPath="$PROJECT_DIR$/Makefile" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/db/migration/000001_init_schema.down.sql" beforeDir="false" afterPath="$PROJECT_DIR$/db/migration/000001_init_schema.down.sql" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/db/migration/000001_init_schema.up.sql" beforeDir="false" afterPath="$PROJECT_DIR$/db/migration/000001_init_schema.up.sql" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/db/query/events.sql" beforeDir="false" afterPath="$PROJECT_DIR$/db/query/temp/events.sql" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/db/query/users.sql" beforeDir="false" afterPath="$PROJECT_DIR$/db/query/users.sql" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/db/query/venue.sql" beforeDir="false" afterPath="$PROJECT_DIR$/db/query/temp/venue.sql" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/db/sqlc/events.sql.go" beforeDir="false" afterPath="$PROJECT_DIR$/db/sqlc/events.sql.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/db/sqlc/models.go" beforeDir="false" afterPath="$PROJECT_DIR$/db/sqlc/models.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/db/sqlc/pg.go" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/db/sqlc/store.go" beforeDir="false" afterPath="$PROJECT_DIR$/db/sqlc/store.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/db/sqlc/venue.sql.go" beforeDir="false" afterPath="$PROJECT_DIR$/db/sqlc/venue.sql.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/docker-compose.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/docker-compose.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/gqlgen/exec.go" beforeDir="false" afterPath="$PROJECT_DIR$/gqlgen/exec.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/gqlgen/model.go" beforeDir="false" afterPath="$PROJECT_DIR$/gqlgen/model.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/gqlgen/resolvers.go" beforeDir="false" afterPath="$PROJECT_DIR$/gqlgen/resolvers.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/graph/schema.graphql" beforeDir="false" afterPath="$PROJECT_DIR$/graph/schema.graphql" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/token/jwt_maker.go" beforeDir="false" afterPath="$PROJECT_DIR$/token/jwt_maker.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/token/jwt_maker_test.go" beforeDir="false" afterPath="$PROJECT_DIR$/token/jwt_maker_test.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/token/maker.go" beforeDir="false" afterPath="$PROJECT_DIR$/token/maker.go" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -43,13 +57,37 @@
     <property name="last_opened_file_path" value="$USER_HOME$" />
     <property name="settings.editor.selected.configurable" value="go.sdk" />
   </component>
-  <component name="RunManager">
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/db/query" />
+      <recent name="$PROJECT_DIR$/db/query/temp" />
+      <recent name="$PROJECT_DIR$/db/query/test" />
+    </key>
+  </component>
+  <component name="RunManager" selected="Database Script.sponsor.sql">
+    <configuration name="sponsor.sql" type="DatabaseScript" editBeforeRun="true" temporary="true" nameIsGenerated="true">
+      <script-file value="$PROJECT_DIR$/db/query/sponsor.sql" />
+      <script-mode>FILE</script-mode>
+      <method v="2" />
+    </configuration>
     <configuration default="true" type="GoApplicationRunConfiguration" factoryName="Go Application">
       <module name="HarbourLivingAPI" />
       <working_directory value="$PROJECT_DIR$" />
       <kind value="FILE" />
       <directory value="$PROJECT_DIR$" />
       <filePath value="$PROJECT_DIR$" />
+      <method v="2" />
+    </configuration>
+    <configuration name="TestParseToken in github.com/BigListRyRy/harbourlivingapi/token" type="GoTestRunConfiguration" factoryName="Go Test" temporary="true" nameIsGenerated="true">
+      <module name="HarbourLivingAPI" />
+      <working_directory value="$PROJECT_DIR$/token" />
+      <root_directory value="$PROJECT_DIR$" />
+      <kind value="PACKAGE" />
+      <package value="github.com/BigListRyRy/harbourlivingapi/token" />
+      <directory value="$PROJECT_DIR$" />
+      <filePath value="$PROJECT_DIR$" />
+      <framework value="gotest" />
+      <pattern value="^\QTestParseToken\E$" />
       <method v="2" />
     </configuration>
     <configuration default="true" type="GoTestRunConfiguration" factoryName="Go Test">
@@ -61,10 +99,45 @@
       <framework value="gotest" />
       <method v="2" />
     </configuration>
+    <configuration name="jwt_maker_test.go" type="GoTestRunConfiguration" factoryName="Go Test" temporary="true" nameIsGenerated="true">
+      <module name="HarbourLivingAPI" />
+      <working_directory value="$PROJECT_DIR$/token" />
+      <root_directory value="$PROJECT_DIR$" />
+      <kind value="FILE" />
+      <directory value="$PROJECT_DIR$" />
+      <filePath value="$PROJECT_DIR$/token/jwt_maker_test.go" />
+      <framework value="gotest" />
+      <method v="2" />
+    </configuration>
+    <configuration name="Makefile" type="MAKEFILE_TARGET_RUN_CONFIGURATION" factoryName="Makefile" temporary="true">
+      <makefile filename="$PROJECT_DIR$/Makefile" target="" workingDirectory="" arguments="">
+        <envs />
+      </makefile>
+      <method v="2" />
+    </configuration>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Database Script.sponsor.sql" />
+        <item itemvalue="Makefile Target.Makefile" />
+        <item itemvalue="Go Test.TestParseToken in github.com/BigListRyRy/harbourlivingapi/token" />
+        <item itemvalue="Go Test.jwt_maker_test.go" />
+      </list>
+    </recent_temporary>
   </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
   </component>
   <component name="VgoProject">
     <integration-enabled>true</integration-enabled>
@@ -76,6 +149,11 @@
           <url>file://$PROJECT_DIR$/api/users.go</url>
           <line>139</line>
           <option name="timeStamp" value="1" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="DlvLineBreakpoint">
+          <url>file://$PROJECT_DIR$/gqlgen/exec.go</url>
+          <line>147</line>
+          <option name="timeStamp" value="3" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

@@ -41,10 +41,10 @@ type Resolver struct {
 }
 
 func (r *mutationResolver) CreateVenue(ctx context.Context, input NewVenue) (*Venue, error) {
-
 	createEventReq := db.CreateVenueParams{
 		Name:        input.Name,
 		Address:     input.Address,
+		PostalCode: input.PostalCode,
 		City:        input.City,
 		Province:    input.Province,
 		CountryCode: input.CountryCode,
@@ -56,6 +56,7 @@ func (r *mutationResolver) CreateVenue(ctx context.Context, input NewVenue) (*Ve
 	return &Venue{
 		ID:          venue.ID,
 		Name:        venue.Name,
+		PostalCode: venue.PostalCode,
 		Address:     venue.Address,
 		City:        venue.City,
 		Province:    venue.Province,
@@ -154,7 +155,7 @@ func (r *mutationResolver) Login(ctx context.Context, input Login) (*LoginRespon
 		return nil, errors.New("invalid username & password combination")
 	}
 
-	token, err := tokenMaker.CreateToken(user.Username, time.Hour)
+	token, err := tokenMaker.CreateToken(user.Username, time.Hour *24)
 	if err != nil {
 		return nil, errors.New("unable to create token")
 	}
@@ -173,8 +174,18 @@ func (r *mutationResolver) Login(ctx context.Context, input Login) (*LoginRespon
    }, nil
 }
 
-func (r *mutationResolver) RefreshToken(ctx context.Context, input RefreshTokenInput) (string, error) {
-	panic("not implemented")
+func (r *mutationResolver) RefreshToken(ctx context.Context, input RefreshTokenInput) (*string, error) {
+	username, err := tokenMaker.ParseToken(input.Token)
+	if err != nil {
+		return nil, errors.New("invalid token")
+	}
+
+	token, err := tokenMaker.CreateToken(username ,time.Hour *24)
+	if err != nil {
+		return nil, err
+	}
+	return &token, nil
+
 }
 
 func (r *queryResolver) GetUser(ctx context.Context, input int32) (*User, error) {
@@ -202,12 +213,54 @@ func (r *queryResolver) GetUser(ctx context.Context, input int32) (*User, error)
 
 func (r *queryResolver) GetVenue(ctx context.Context, input int32) (*Venue, error) {
 
-	panic("not implemented")
+	venue, err := store.GetVenue(ctx, input)
+	if err != nil {
+		return nil, err
+	}
+	return &Venue{
+		ID:          venue.ID,
+		Name:        venue.Name,
+		PostalCode: venue.PostalCode,
+		Address:    venue.Address,
+		City:        venue.City,
+		Province:    venue.Province,
+		CountryCode: venue.CountryCode,
+	}, nil
 }
 
 func (r *queryResolver) GetEvent(ctx context.Context, input int32) (*Event, error) {
 
-	panic("not implemented")
+	event, err := store.GetEvent(ctx, input)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, errors.New("no record found")
+		}
+
+		return nil, errors.New("an error occurred")
+	}
+
+	//fetch event Sponsors
+     store.
+
+	return &Event{
+		ID:          event.ID,
+		Title:       event.Title,
+		Description: event.Description,
+		BannerImage: event.BannerImage,
+		StartDate:   event.StartDate.String(),
+		EndDate:     event.EndDate.String(),
+		Venue:       int(event.Venue),
+		Type:        int(event.Type),
+		UserID:      event.UserID,
+		Category:    int(event.Category),
+		Subcategory: int(event.Subcategory),
+		Status:      nil,
+		Image1:      nil,
+		Image2:      nil,
+		Image3:      nil,
+		Video1:      nil,
+		Video2:      nil,
+	}, nil
 }
 
 

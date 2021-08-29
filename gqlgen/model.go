@@ -9,23 +9,25 @@ type Category struct {
 }
 
 type Event struct {
-	ID          int32   `json:"id"`
-	Title       string  `json:"title"`
-	Description string  `json:"description"`
-	BannerImage string  `json:"banner_image"`
-	StartDate   string  `json:"startDate"`
-	EndDate     string  `json:"endDate"`
-	Venue       int     `json:"venue"`
-	Type        int     `json:"type"`
-	UserID      int32   `json:"user_id"`
-	Category    int     `json:"category"`
-	Subcategory int     `json:"subcategory"`
-	Status      *string `json:"status"`
-	Image1      *string `json:"image1"`
-	Image2      *string `json:"image2"`
-	Image3      *string `json:"image3"`
-	Video1      *string `json:"video1"`
-	Video2      *string `json:"video2"`
+	ID          int32      `json:"id"`
+	Title       string     `json:"title"`
+	Description string     `json:"description"`
+	BannerImage string     `json:"banner_image"`
+	StartDate   string     `json:"startDate"`
+	EndDate     string     `json:"endDate"`
+	Venue       int        `json:"venue"`
+	Type        int        `json:"type"`
+	UserID      int32      `json:"user_id"`
+	Category    int        `json:"category"`
+	Subcategory int        `json:"subcategory"`
+	Sponsors    []*Sponsor `json:"sponsors"`
+	Ticket      *Ticket    `json:"ticket"`
+	Status      *string    `json:"status"`
+	Image1      *string    `json:"image1"`
+	Image2      *string    `json:"image2"`
+	Image3      *string    `json:"image3"`
+	Video1      *string    `json:"video1"`
+	Video2      *string    `json:"video2"`
 }
 
 type EventType struct {
@@ -87,6 +89,7 @@ type NewUser struct {
 type NewVenue struct {
 	Name        string `json:"name"`
 	Address     string `json:"address"`
+	PostalCode  string `json:"postal_code"`
 	City        string `json:"city"`
 	Province    string `json:"province"`
 	CountryCode string `json:"country_code"`
@@ -96,10 +99,20 @@ type RefreshTokenInput struct {
 	Token string `json:"token"`
 }
 
+type Sponsor struct {
+	ID     int32 `json:"id"`
+	UserID int   `json:"user_Id"`
+}
+
 type Subcategory struct {
 	ID     int32   `json:"id"`
 	Desc   *string `json:"desc"`
 	Status *int    `json:"status"`
+}
+
+type Ticket struct {
+	ID    int32 `json:"id"`
+	Price int   `json:"price"`
 }
 
 type User struct {
@@ -123,6 +136,7 @@ type Venue struct {
 	ID          int32  `json:"id"`
 	Name        string `json:"name"`
 	Address     string `json:"address"`
+	PostalCode  string `json:"postal_code"`
 	City        string `json:"city"`
 	Province    string `json:"province"`
 	CountryCode string `json:"country_code"`
