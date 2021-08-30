@@ -11,8 +11,6 @@ import (
 	"time"
 )
 
-
-
 type CreateUserRequest struct {
 	Title       string `json:"title" `
 	Username    string `json:"username" binding:"required,alphanum"`
@@ -186,5 +184,3 @@ func (s *Server) GetUser(ctx *gin.Context) {
 	}
 	ctx.JSON(http.StatusOK, user)
 }
-
-

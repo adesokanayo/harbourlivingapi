@@ -5,13 +5,14 @@ package gqlgen
 import (
 	"context"
 	"database/sql"
+	"log"
+	"time"
+
 	db "github.com/BigListRyRy/harbourlivingapi/db/sqlc"
 	token "github.com/BigListRyRy/harbourlivingapi/token"
 	"github.com/BigListRyRy/harbourlivingapi/util"
 	_ "github.com/lib/pq"
 	"github.com/pkg/errors"
-	"log"
-	"time"
 )
 
 var store *db.Store
@@ -44,7 +45,7 @@ func (r *mutationResolver) CreateVenue(ctx context.Context, input NewVenue) (*Ve
 	createEventReq := db.CreateVenueParams{
 		Name:        input.Name,
 		Address:     input.Address,
-		PostalCode: input.PostalCode,
+		PostalCode:  input.PostalCode,
 		City:        input.City,
 		Province:    input.Province,
 		CountryCode: input.CountryCode,
@@ -56,7 +57,7 @@ func (r *mutationResolver) CreateVenue(ctx context.Context, input NewVenue) (*Ve
 	return &Venue{
 		ID:          venue.ID,
 		Name:        venue.Name,
-		PostalCode: venue.PostalCode,
+		PostalCode:  venue.PostalCode,
 		Address:     venue.Address,
 		City:        venue.City,
 		Province:    venue.Province,
@@ -155,23 +156,23 @@ func (r *mutationResolver) Login(ctx context.Context, input Login) (*LoginRespon
 		return nil, errors.New("invalid username & password combination")
 	}
 
-	token, err := tokenMaker.CreateToken(user.Username, time.Hour *24)
+	token, err := tokenMaker.CreateToken(user.Username, time.Hour*24)
 	if err != nil {
 		return nil, errors.New("unable to create token")
 	}
-   return  &LoginResponse{
-	   Token: &token,
-	   User:  &User{
-		   ID:        user.ID,
-		   Email:     user.Email,
-		   Usertype:  int(user.Usertype),
-		   Username: user.Username,
-		   LastName: user.LastName,
-		   Title:  user.Title,
-		   FirstName:  user.FirstName,
-	   },
-	   Success : true,
-   }, nil
+	return &LoginResponse{
+		Token: &token,
+		User: &User{
+			ID:        user.ID,
+			Email:     user.Email,
+			Usertype:  int(user.Usertype),
+			Username:  user.Username,
+			LastName:  user.LastName,
+			Title:     user.Title,
+			FirstName: user.FirstName,
+		},
+		Success: true,
+	}, nil
 }
 
 func (r *mutationResolver) RefreshToken(ctx context.Context, input RefreshTokenInput) (*string, error) {
@@ -180,7 +181,7 @@ func (r *mutationResolver) RefreshToken(ctx context.Context, input RefreshTokenI
 		return nil, errors.New("invalid token")
 	}
 
-	token, err := tokenMaker.CreateToken(username ,time.Hour *24)
+	token, err := tokenMaker.CreateToken(username, time.Hour*24)
 	if err != nil {
 		return nil, err
 	}
@@ -220,8 +221,8 @@ func (r *queryResolver) GetVenue(ctx context.Context, input int32) (*Venue, erro
 	return &Venue{
 		ID:          venue.ID,
 		Name:        venue.Name,
-		PostalCode: venue.PostalCode,
-		Address:    venue.Address,
+		PostalCode:  venue.PostalCode,
+		Address:     venue.Address,
 		City:        venue.City,
 		Province:    venue.Province,
 		CountryCode: venue.CountryCode,
@@ -230,17 +231,25 @@ func (r *queryResolver) GetVenue(ctx context.Context, input int32) (*Venue, erro
 
 func (r *queryResolver) GetEvent(ctx context.Context, input int32) (*Event, error) {
 
+	var result []*Sponsor
 	event, err := store.GetEvent(ctx, input)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, errors.New("no record found")
 		}
-
-		return nil, errors.New("an error occurred")
+		return nil, err
 	}
+ //Fetch  Sponsors
 
-	//fetch event Sponsors
-     store.
+ eventSponsors, err := store.GetSponsorByEvent(ctx, input)
+ if err != nil {
+	 return nil, err
+ }
+
+ for _, s := range eventSponsors{
+ 	 result = append(result,&Sponsor{ID: s.SponsorID} )
+ }
+
 
 	return &Event{
 		ID:          event.ID,
@@ -254,6 +263,7 @@ func (r *queryResolver) GetEvent(ctx context.Context, input int32) (*Event, erro
 		UserID:      event.UserID,
 		Category:    int(event.Category),
 		Subcategory: int(event.Subcategory),
+		Sponsors: result,
 		Status:      nil,
 		Image1:      nil,
 		Image2:      nil,
@@ -263,42 +273,54 @@ func (r *queryResolver) GetEvent(ctx context.Context, input int32) (*Event, erro
 	}, nil
 }
 
-
-func (r *queryResolver) GetEventByProperties(ctx context.Context,  input GetEvent) ([]Event, error) {
+func (r *queryResolver) GetEventByProperties(ctx context.Context, input GetEvent) ([]Event, error) {
 
 	var result []Event
+	var eventSponsors []*Sponsor
 
-	arg:= db.GetEventsByFilterParams{
+	arg := db.GetEventsByFilterParams{
 		Category:    int32(input.Category),
 		Subcategory: int32(input.Subcategory),
-		City:       *input.City,
+		City:        *input.City,
 		Province:    *input.Province,
-		Limit:      int32(input.PageSize),
+		Limit:       int32(input.PageSize),
 		Offset:      int32(input.Offset),
-
 	}
-	events , err := store.GetEventsByFilter(ctx, arg)
+	events, err := store.GetEventsByFilter(ctx, arg)
 	if err != nil {
 		return nil, err
 	}
+	// Get all the Sponsors for these events
 
-	 for _, event := range events{
-		 result = append(result, Event{
-		 	ID: event.ID,
-		 	Title: event.Title,
-		 	Description: event.Description,
-		 	StartDate: event.StartDate.String(),
-		 	EndDate:  event.EndDate.String(),
-		 	Category: int(event.Category),
-		 	Subcategory: int(event.Subcategory),
-		 	Type: int(event.Type),
-		 	UserID: event.UserID,
-		 	Venue: int(event.Venue),
-		 	BannerImage: event.BannerImage,
-		 })
-	 }
+	for _, event := range events {
+		sponsors, err := store.GetSponsorByEvent(ctx, event.ID)
 
-	return  result,nil
+		if err != nil {
+			return nil, err
+		}
+
+		for _, v := range sponsors {
+			eventSponsors = append(eventSponsors, &Sponsor{
+				ID: v.ID})
+		}
+
+		result = append(result, Event{
+			ID:          event.ID,
+			Title:       event.Title,
+			Description: event.Description,
+			StartDate:   event.StartDate.String(),
+			EndDate:     event.EndDate.String(),
+			Category:    int(event.Category),
+			Subcategory: int(event.Subcategory),
+			Type:        int(event.Type),
+			UserID:      event.UserID,
+			Venue:       int(event.Venue),
+			BannerImage: event.BannerImage,
+			Sponsors:    eventSponsors,
+		})
+	}
+
+	return result, nil
 }
 func (r *queryResolver) GetUsers(ctx context.Context) ([]User, error) {
 	var AllUsers []User
@@ -320,6 +342,63 @@ func (r *queryResolver) GetUsers(ctx context.Context) ([]User, error) {
 		})
 	}
 	return AllUsers, nil
+}
+
+func (r *mutationResolver) CreateTicket(ctx context.Context, input NewTicket) (*Ticket, error) {
+	arg := db.CreateTicketParams{
+		EventID:  int32(input.EventID),
+		Quantity: int32(input.Quantity),
+		Price:    float64(input.Price),
+		Status:   int32(input.Status),
+		Name:     input.Name,
+	}
+
+	ticket, err := store.CreateTicket(ctx, arg)
+	if err != nil {
+		return nil, err
+	}
+
+	return &Ticket{
+		ID:       ticket.ID,
+		Name:     ticket.Name,
+		Price:    int(ticket.Price),
+		EventID:  int(ticket.EventID),
+		Quantity: int(ticket.Quantity),
+		Status:   int(ticket.Status),
+	}, nil
+}
+
+func (r *mutationResolver) CreateSponsorForEvent(ctx context.Context, input NewSponsor) (*Sponsor, error) {
+
+	var result *Sponsor
+
+	err := store.ExecTx(ctx, func(q *db.Queries) error {
+
+		// Create a Sponsor based on the provided user
+		sponsor, err := store.CreateSponsor(ctx, int32(input.UserID))
+		if err != nil {
+			return err
+		}
+
+		// Link the Sponsor to the Event
+		arg := db.LinkSponsorToEventParams{
+			SponsorID: sponsor.ID,
+			EventID:   int32(input.EventID),
+		}
+
+		linkedSponsor, err := store.LinkSponsorToEvent(ctx, arg)
+		if err != nil {
+			return err
+		}
+
+		result = &Sponsor{
+			ID:     linkedSponsor.SponsorID,
+			UserID: input.UserID,
+		}
+		return nil
+	})
+
+	return result, err
 }
 
 // Mutation returns MutationResolver implementation.

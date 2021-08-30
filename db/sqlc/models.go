@@ -62,12 +62,12 @@ type Subcategory struct {
 }
 
 type Ticket struct {
-	ID       int32         `json:"id"`
-	Name     string        `json:"name"`
-	EventID  int32         `json:"event_id"`
-	Price    float64       `json:"price"`
-	Quantity int32         `json:"quantity"`
-	Status   sql.NullInt32 `json:"status"`
+	ID       int32   `json:"id"`
+	Name     string  `json:"name"`
+	EventID  int32   `json:"event_id"`
+	Price    float64 `json:"price"`
+	Quantity int32   `json:"quantity"`
+	Status   int32   `json:"status"`
 }
 
 type TicketStatus struct {

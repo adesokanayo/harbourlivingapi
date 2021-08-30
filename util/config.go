@@ -15,8 +15,8 @@ type Config struct {
 }
 
 const (
-	LayoutISODOB  = "2006-01-02"
-	Layout3 = "2015-09-15T14:00:12-00:00"
+	LayoutISODOB = "2006-01-02"
+	Layout3      = "2015-09-15T14:00:12-00:00"
 )
 
 func LoadConfig(path string) (config *Config, err error) {
@@ -49,12 +49,12 @@ func ProcessDateTime(input string) (*time.Time, error) {
 		}
 		return &time, nil
 	/*case LayoutISOTime:
-		time, err := time.Parse(LayoutISOTime, input)
-		if err != nil {
-			return nil, err
-		}
-		return &time, nil
-	 */
+	time, err := time.Parse(LayoutISOTime, input)
+	if err != nil {
+		return nil, err
+	}
+	return &time, nil
+	*/
 	default:
 		time, err := time.Parse(LayoutISODOB, input)
 		if err != nil {

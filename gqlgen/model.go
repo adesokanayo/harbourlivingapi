@@ -76,6 +76,19 @@ type NewEvent struct {
 	Video2      *string `json:"video2"`
 }
 
+type NewSponsor struct {
+	UserID  int `json:"user_id"`
+	EventID int `json:"event_id"`
+}
+
+type NewTicket struct {
+	Name     string `json:"name"`
+	Price    int    `json:"price"`
+	EventID  int    `json:"event_id"`
+	Quantity int    `json:"quantity"`
+	Status   int    `json:"status"`
+}
+
 type NewUser struct {
 	Title     string `json:"title"`
 	FirstName string `json:"first_name"`
@@ -100,8 +113,9 @@ type RefreshTokenInput struct {
 }
 
 type Sponsor struct {
-	ID     int32 `json:"id"`
-	UserID int   `json:"user_Id"`
+	ID     int32    `json:"id"`
+	UserID int      `json:"user_id"`
+	Events []*Event `json:"events"`
 }
 
 type Subcategory struct {
@@ -111,8 +125,12 @@ type Subcategory struct {
 }
 
 type Ticket struct {
-	ID    int32 `json:"id"`
-	Price int   `json:"price"`
+	ID       int32  `json:"id"`
+	Name     string `json:"name"`
+	Price    int    `json:"price"`
+	EventID  int    `json:"event_id"`
+	Quantity int    `json:"quantity"`
+	Status   int    `json:"status"`
 }
 
 type User struct {

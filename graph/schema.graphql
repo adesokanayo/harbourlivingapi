@@ -120,14 +120,32 @@ input NewUser {
         usertype: Int!
 }
 
-
 type Sponsor {
         id: ID!
-        user_Id: Int!
+        user_id: Int!
+        events: [Event]!
 }
+
+input NewSponsor {
+  user_id : Int!
+  event_id: Int!
+}
+
 type Ticket {
         id: ID!
+        name: String!
         price: Int!
+        event_id: Int!
+        quantity: Int!
+        status: Int!
+}
+
+input NewTicket {
+        name: String!
+        price: Int!
+        event_id: Int!
+        quantity: Int!
+        status: Int!
 }
 type Mutation {
         createVenue(input: NewVenue!): Venue!
@@ -135,6 +153,8 @@ type Mutation {
         createEvent(input: NewEvent!):Event!
         login(input: Login!): LoginResponse
         refreshToken(input: RefreshTokenInput!): String
+        createTicket(input: NewTicket!): Ticket!
+        createSponsorForEvent(input: NewSponsor!): Sponsor! 
 }
 
 type Query{

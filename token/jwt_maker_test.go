@@ -64,11 +64,11 @@ func TestInvalidJWTTokenAlgNone(t *testing.T) {
 	require.Nil(t, payload)
 }
 
-func TestParseToken(t *testing.T){
-	secret:= util.RandomString(32)
+func TestParseToken(t *testing.T) {
+	secret := util.RandomString(32)
 	maker, err := NewJWTMaker(secret)
 	require.NoError(t, err)
-    user := util.RandomOwner()
+	user := util.RandomOwner()
 
 	token, err := maker.CreateToken(user, time.Minute)
 	require.NoError(t, err)

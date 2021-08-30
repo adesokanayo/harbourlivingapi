@@ -7,5 +7,5 @@ import (
 type Maker interface {
 	CreateToken(username string, duration time.Duration) (string, error)
 	VerifyToken(token string) (*Payload, error)
-	ParseToken(token string)( string, error)
+	ParseToken(token string) (string, error)
 }

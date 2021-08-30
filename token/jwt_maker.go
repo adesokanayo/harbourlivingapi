@@ -70,13 +70,13 @@ func (maker *JWTMaker) ParseToken(tokenStr string) (string, error) {
 		}
 		return []byte(maker.secretKey), nil
 	})
-  if err != nil {
-	  return "error", err
-  }
+	if err != nil {
+		return "error", err
+	}
 	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
 		username := claims["username"].(string)
 		return username, nil
-	} else{
+	} else {
 		return "", nil
 	}
 }

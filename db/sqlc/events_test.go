@@ -81,7 +81,7 @@ func TestGetAllEvents(t *testing.T) {
 
 func TestDeleteEvent(t *testing.T) {
 	event1 := createRandomEvent(t)
-	err := testQueries.DeleteEvents(context.Background(), event1.ID)
+	err := testQueries.DeleteEvent(context.Background(), event1.ID)
 	require.NoError(t, err)
 	event2, err := testQueries.GetEvent(context.Background(), event1.ID)
 	require.Error(t, err)

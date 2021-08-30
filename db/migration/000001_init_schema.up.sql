@@ -75,7 +75,7 @@ CREATE TABLE "ticket" (
                           "event_id" int NOT NULL,
                           "price" float NOT NULL DEFAULT (0.00),
                           "quantity" int NOT NULL DEFAULT (0),
-                          "status" int
+                          "status" int NOT NULL
 );
 
 CREATE TABLE "ticket_status" (
