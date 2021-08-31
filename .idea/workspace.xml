@@ -6,12 +6,7 @@
   <component name="ChangeListManager">
     <list default="true" id="2224c95a-bf4c-4405-865f-f2c5fdc42389" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/db/migration/000001_init_schema.up.sql" beforeDir="false" afterPath="$PROJECT_DIR$/db/migration/000001_init_schema.up.sql" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/db/sqlc/models.go" beforeDir="false" afterPath="$PROJECT_DIR$/db/sqlc/models.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/gqlgen/exec.go" beforeDir="false" afterPath="$PROJECT_DIR$/gqlgen/exec.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/gqlgen/model.go" beforeDir="false" afterPath="$PROJECT_DIR$/gqlgen/model.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/gqlgen/resolvers.go" beforeDir="false" afterPath="$PROJECT_DIR$/gqlgen/resolvers.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/graph/schema.graphql" beforeDir="false" afterPath="$PROJECT_DIR$/graph/schema.graphql" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -156,13 +151,8 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="DlvLineBreakpoint">
           <url>file://$PROJECT_DIR$/gqlgen/resolvers.go</url>
-          <line>101</line>
+          <line>100</line>
           <option name="timeStamp" value="4" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="DlvLineBreakpoint">
-          <url>file://$PROJECT_DIR$/gqlgen/resolvers.go</url>
-          <line>136</line>
-          <option name="timeStamp" value="5" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
