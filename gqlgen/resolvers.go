@@ -98,6 +98,7 @@ func (r *mutationResolver) CreateUser(ctx context.Context, input NewUser) (*User
 
 func (r *mutationResolver) CreateEvent(ctx context.Context, input NewEvent) (*Event, error) {
 
+	var result *Event
 	startdate, err := util.ProcessDateTime(input.StartDate)
 	if err != nil {
 		return nil, err
@@ -124,21 +125,52 @@ func (r *mutationResolver) CreateEvent(ctx context.Context, input NewEvent) (*Ev
 		Video1:      sql.NullString{},
 		Video2:      sql.NullString{},
 	}
-	event, err := store.CreateEvent(ctx, arg)
+
+	//Use Transaction
+	err = store.ExecTx(ctx, func(q *db.Queries) error {
+
+		//create event
+		event, err := store.CreateEvent(ctx, arg)
+		if err != nil {
+			return err
+		}
+
+		//create host
+		host, err := store.CreateHost(ctx, input.UserID)
+		if err != nil {
+			return err
+		}
+
+		//Link Host with Event
+
+		arg := db.LinkHostToEventParams{
+			HostID:  host.ID,
+			EventID: event.ID,
+		}
+
+		linkedEventHost, err := store.LinkHostToEvent(ctx, arg)
+		if err != nil {
+			return nil
+		}
+
+		result = &Event{
+			ID:          event.ID,
+			Title:       event.Title,
+			Description: event.Description,
+			StartDate:   event.StartDate.String(),
+			EndDate:     event.EndDate.String(),
+			BannerImage: event.BannerImage,
+			Subcategory: int(event.Subcategory),
+			Category:    int(event.Category),
+			HostID:      int(linkedEventHost.HostID),
+		}
+		return nil
+	})
+
 	if err != nil {
 		return nil, err
 	}
-
-	return &Event{
-		ID:          event.ID,
-		Title:       event.Title,
-		Description: event.Description,
-		StartDate:   event.StartDate.String(),
-		EndDate:     event.EndDate.String(),
-		BannerImage: event.BannerImage,
-		Subcategory: int(event.Subcategory),
-		Category:    int(event.Category),
-	}, nil
+	return result, nil
 }
 
 func (r *mutationResolver) Login(ctx context.Context, input Login) (*LoginResponse, error) {
@@ -239,17 +271,16 @@ func (r *queryResolver) GetEvent(ctx context.Context, input int32) (*Event, erro
 		}
 		return nil, err
 	}
- //Fetch  Sponsors
+	//Fetch  Sponsors
 
- eventSponsors, err := store.GetSponsorByEvent(ctx, input)
- if err != nil {
-	 return nil, err
- }
+	eventSponsors, err := store.GetSponsorByEvent(ctx, input)
+	if err != nil {
+		return nil, err
+	}
 
- for _, s := range eventSponsors{
- 	 result = append(result,&Sponsor{ID: s.SponsorID} )
- }
-
+	for _, s := range eventSponsors {
+		result = append(result, &Sponsor{ID: s.SponsorID})
+	}
 
 	return &Event{
 		ID:          event.ID,
@@ -263,7 +294,7 @@ func (r *queryResolver) GetEvent(ctx context.Context, input int32) (*Event, erro
 		UserID:      event.UserID,
 		Category:    int(event.Category),
 		Subcategory: int(event.Subcategory),
-		Sponsors: result,
+		Sponsors:    result,
 		Status:      nil,
 		Image1:      nil,
 		Image2:      nil,
@@ -397,8 +428,10 @@ func (r *mutationResolver) CreateSponsorForEvent(ctx context.Context, input NewS
 		}
 		return nil
 	})
-
-	return result, err
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
 }
 
 // Mutation returns MutationResolver implementation.

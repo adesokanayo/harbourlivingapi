@@ -6,23 +6,12 @@
   <component name="ChangeListManager">
     <list default="true" id="2224c95a-bf4c-4405-865f-f2c5fdc42389" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/api/users.go" beforeDir="false" afterPath="$PROJECT_DIR$/api/users.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/db/migration/000001_init_schema.up.sql" beforeDir="false" afterPath="$PROJECT_DIR$/db/migration/000001_init_schema.up.sql" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/db/query/temp/events.sql" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/db/query/temp/sponsor.sql" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/db/query/temp/users.sql" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/db/query/temp/venue.sql" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/db/sqlc/events_test.go" beforeDir="false" afterPath="$PROJECT_DIR$/db/sqlc/events_test.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/db/sqlc/models.go" beforeDir="false" afterPath="$PROJECT_DIR$/db/sqlc/models.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/gqlgen/exec.go" beforeDir="false" afterPath="$PROJECT_DIR$/gqlgen/exec.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/gqlgen/model.go" beforeDir="false" afterPath="$PROJECT_DIR$/gqlgen/model.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/gqlgen/resolvers.go" beforeDir="false" afterPath="$PROJECT_DIR$/gqlgen/resolvers.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/graph/schema.graphql" beforeDir="false" afterPath="$PROJECT_DIR$/graph/schema.graphql" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/token/jwt_maker.go" beforeDir="false" afterPath="$PROJECT_DIR$/token/jwt_maker.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/token/jwt_maker_test.go" beforeDir="false" afterPath="$PROJECT_DIR$/token/jwt_maker_test.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/token/maker.go" beforeDir="false" afterPath="$PROJECT_DIR$/token/maker.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/util/config.go" beforeDir="false" afterPath="$PROJECT_DIR$/util/config.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/util/error.go" beforeDir="false" afterPath="$PROJECT_DIR$/util/error.go" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -51,20 +40,39 @@
     <property name="go.formatter.settings.were.checked" value="true" />
     <property name="go.import.settings.migrated" value="true" />
     <property name="go.modules.go.list.on.any.changes.was.set" value="true" />
-    <property name="last_opened_file_path" value="$USER_HOME$" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/db/query" />
     <property name="settings.editor.selected.configurable" value="go.sdk" />
   </component>
   <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/db/query" />
+    </key>
     <key name="MoveFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$/db/query" />
       <recent name="$PROJECT_DIR$/db/query/temp" />
       <recent name="$PROJECT_DIR$/db/query/test" />
     </key>
   </component>
-  <component name="RunManager" selected="Database Script.sponsor.sql">
+  <component name="RunManager" selected="Go Build.go build main.go">
     <configuration name="sponsor.sql" type="DatabaseScript" editBeforeRun="true" temporary="true" nameIsGenerated="true">
       <script-file value="$PROJECT_DIR$/db/query/sponsor.sql" />
       <script-mode>FILE</script-mode>
+      <method v="2" />
+    </configuration>
+    <configuration default="true" type="GoApplicationRunConfiguration" factoryName="Go Application">
+      <module name="HarbourLivingAPI" />
+      <working_directory value="$PROJECT_DIR$" />
+      <kind value="FILE" />
+      <directory value="$PROJECT_DIR$" />
+      <filePath value="$PROJECT_DIR$" />
+      <method v="2" />
+    </configuration>
+    <configuration name="go build main.go" type="GoApplicationRunConfiguration" factoryName="Go Application" temporary="true" nameIsGenerated="true">
+      <module name="HarbourLivingAPI" />
+      <working_directory value="$PROJECT_DIR$" />
+      <kind value="FILE" />
+      <directory value="$PROJECT_DIR$" />
+      <filePath value="$PROJECT_DIR$/main.go" />
       <method v="2" />
     </configuration>
     <configuration name="TestParseToken in github.com/BigListRyRy/harbourlivingapi/token" type="GoTestRunConfiguration" factoryName="Go Test" temporary="true" nameIsGenerated="true">
@@ -77,6 +85,15 @@
       <filePath value="$PROJECT_DIR$" />
       <framework value="gotest" />
       <pattern value="^\QTestParseToken\E$" />
+      <method v="2" />
+    </configuration>
+    <configuration default="true" type="GoTestRunConfiguration" factoryName="Go Test">
+      <module name="HarbourLivingAPI" />
+      <working_directory value="$PROJECT_DIR$" />
+      <kind value="DIRECTORY" />
+      <directory value="$PROJECT_DIR$" />
+      <filePath value="$PROJECT_DIR$" />
+      <framework value="gotest" />
       <method v="2" />
     </configuration>
     <configuration name="jwt_maker_test.go" type="GoTestRunConfiguration" factoryName="Go Test" temporary="true" nameIsGenerated="true">
@@ -97,6 +114,7 @@
     </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="Go Build.go build main.go" />
         <item itemvalue="Database Script.sponsor.sql" />
         <item itemvalue="Makefile Target.Makefile" />
         <item itemvalue="Go Test.TestParseToken in github.com/BigListRyRy/harbourlivingapi/token" />
@@ -133,8 +151,18 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="DlvLineBreakpoint">
           <url>file://$PROJECT_DIR$/gqlgen/exec.go</url>
-          <line>147</line>
+          <line>154</line>
           <option name="timeStamp" value="3" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="DlvLineBreakpoint">
+          <url>file://$PROJECT_DIR$/gqlgen/resolvers.go</url>
+          <line>101</line>
+          <option name="timeStamp" value="4" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="DlvLineBreakpoint">
+          <url>file://$PROJECT_DIR$/gqlgen/resolvers.go</url>
+          <line>136</line>
+          <option name="timeStamp" value="5" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

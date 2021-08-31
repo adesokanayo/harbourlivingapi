@@ -109,6 +109,19 @@ CREATE TABLE "events_sponsor" (
                                   "created_at" timestamp NOT NULL DEFAULT (now())
 );
 
+CREATE TABLE "host" (
+                        "id" SERIAL PRIMARY KEY,
+                        "user_id" int NOT NULL,
+                        "created_at" timestamp NOT NULL DEFAULT (now())
+);
+
+CREATE TABLE "events_host" (
+                               "id" SERIAL PRIMARY KEY,
+                               "event_id" int NOT NULL,
+                               "host_id" int NOT NULL,
+                               "created_at" timestamp NOT NULL DEFAULT (now())
+);
+
 ALTER TABLE "users" ADD FOREIGN KEY ("usertype") REFERENCES "usertype" ("id");
 
 ALTER TABLE "events" ADD FOREIGN KEY ("venue") REFERENCES "venue" ("id");
@@ -135,6 +148,12 @@ ALTER TABLE "events_sponsor" ADD FOREIGN KEY ("event_id") REFERENCES "events" ("
 
 ALTER TABLE "events_sponsor" ADD FOREIGN KEY ("sponsor_id") REFERENCES "sponsor" ("id");
 
+ALTER TABLE "host" ADD FOREIGN KEY ("user_id") REFERENCES "users" ("id");
+
+ALTER TABLE "events_host" ADD FOREIGN KEY ("event_id") REFERENCES "events" ("id");
+
+ALTER TABLE "events_host" ADD FOREIGN KEY ("host_id") REFERENCES "host" ("id");
+
 CREATE INDEX ON "users" ("id");
 
 CREATE INDEX ON "users" ("email");
@@ -152,7 +171,6 @@ CREATE INDEX ON "events" ("start_date");
 CREATE INDEX ON "events" ("end_date");
 
 CREATE INDEX ON "events" ("type");
-
 
 
 

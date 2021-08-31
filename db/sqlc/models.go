@@ -42,10 +42,23 @@ type EventType struct {
 	Status sql.NullInt32  `json:"status"`
 }
 
+type EventsHost struct {
+	ID        int32     `json:"id"`
+	EventID   int32     `json:"event_id"`
+	HostID    int32     `json:"host_id"`
+	CreatedAt time.Time `json:"created_at"`
+}
+
 type EventsSponsor struct {
 	ID        int32     `json:"id"`
 	EventID   int32     `json:"event_id"`
 	SponsorID int32     `json:"sponsor_id"`
+	CreatedAt time.Time `json:"created_at"`
+}
+
+type Host struct {
+	ID        int32     `json:"id"`
+	UserID    int32     `json:"user_id"`
 	CreatedAt time.Time `json:"created_at"`
 }
 

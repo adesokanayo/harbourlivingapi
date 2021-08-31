@@ -21,6 +21,7 @@ type Event struct {
 	Category    int        `json:"category"`
 	Subcategory int        `json:"subcategory"`
 	Sponsors    []*Sponsor `json:"sponsors"`
+	HostID      int        `json:"hostID"`
 	Ticket      *Ticket    `json:"ticket"`
 	Status      *string    `json:"status"`
 	Image1      *string    `json:"image1"`
@@ -43,6 +44,12 @@ type GetEvent struct {
 	Province    *string `json:"province"`
 	PageSize    int     `json:"pageSize"`
 	Offset      int     `json:"offset"`
+}
+
+type Host struct {
+	ID     int32    `json:"id"`
+	UserID int      `json:"user_id"`
+	Events []*Event `json:"events"`
 }
 
 type Login struct {
@@ -74,6 +81,11 @@ type NewEvent struct {
 	Image3      *string `json:"image3"`
 	Video1      *string `json:"video1"`
 	Video2      *string `json:"video2"`
+}
+
+type NewHost struct {
+	UserID  int `json:"user_id"`
+	EventID int `json:"event_id"`
 }
 
 type NewSponsor struct {

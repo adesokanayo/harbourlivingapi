@@ -42,6 +42,7 @@ type Event {
         category: Int!
         subcategory: Int!
         sponsors : [Sponsor]
+        hostID: Int!
         ticket : Ticket
         status: String
         image1: String
@@ -130,6 +131,16 @@ input NewSponsor {
   user_id : Int!
   event_id: Int!
 }
+type Host {
+        id: ID!
+        user_id: Int!
+        events: [Event]!
+}
+
+input NewHost {
+        user_id : Int!
+        event_id: Int!
+}
 
 type Ticket {
         id: ID!
@@ -154,7 +165,7 @@ type Mutation {
         login(input: Login!): LoginResponse
         refreshToken(input: RefreshTokenInput!): String
         createTicket(input: NewTicket!): Ticket!
-        createSponsorForEvent(input: NewSponsor!): Sponsor! 
+        createSponsorForEvent(input: NewSponsor!): Sponsor!
 }
 
 type Query{
