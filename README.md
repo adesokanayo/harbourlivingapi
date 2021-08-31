@@ -6,9 +6,9 @@
 ### Setup
 
 - Install the Go version specified in go.mod
-- fill connection details in api/app.env
+- Add the details required in api/app.env
 
-### Start the Service Locally
+### Start the Service Locally with make command
 
 ```make postgres```
 
@@ -28,6 +28,9 @@
 - Clean Architecture 
 - Swagger 
 
+
+### Database Entity Diagram
+[ER Diagram](https://dbdiagram.io/d/612d650b825b5b0146eb97b0)
 
 ### Build and Push Docker Image
 
