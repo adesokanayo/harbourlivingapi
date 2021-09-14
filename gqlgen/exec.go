@@ -100,11 +100,11 @@ type ComplexityRoot struct {
 	}
 
 	Query struct {
-		GetEvent             func(childComplexity int, input int32) int
-		GetEventByProperties func(childComplexity int, input GetEvent) int
-		GetUser              func(childComplexity int, input int32) int
-		GetUsers             func(childComplexity int) int
-		GetVenue             func(childComplexity int, input int32) int
+		GetEvent  func(childComplexity int, input int32) int
+		GetEvents func(childComplexity int, input GetEvent) int
+		GetUser   func(childComplexity int, input int32) int
+		GetUsers  func(childComplexity int) int
+		GetVenue  func(childComplexity int, input int32) int
 	}
 
 	Sponsor struct {
@@ -153,6 +153,9 @@ type ComplexityRoot struct {
 		Name        func(childComplexity int) int
 		PostalCode  func(childComplexity int) int
 		Province    func(childComplexity int) int
+		Rating      func(childComplexity int) int
+		URL         func(childComplexity int) int
+		Virtual     func(childComplexity int) int
 	}
 }
 
@@ -170,7 +173,7 @@ type QueryResolver interface {
 	GetEvent(ctx context.Context, input int32) (*Event, error)
 	GetVenue(ctx context.Context, input int32) (*Venue, error)
 	GetUsers(ctx context.Context) ([]User, error)
-	GetEventByProperties(ctx context.Context, input GetEvent) ([]Event, error)
+	GetEvents(ctx context.Context, input GetEvent) ([]Event, error)
 }
 
 type executableSchema struct {
@@ -515,17 +518,17 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.GetEvent(childComplexity, args["input"].(int32)), true
 
-	case "Query.getEventByProperties":
-		if e.complexity.Query.GetEventByProperties == nil {
+	case "Query.getEvents":
+		if e.complexity.Query.GetEvents == nil {
 			break
 		}
 
-		args, err := ec.field_Query_getEventByProperties_args(context.TODO(), rawArgs)
+		args, err := ec.field_Query_getEvents_args(context.TODO(), rawArgs)
 		if err != nil {
 			return 0, false
 		}
 
-		return e.complexity.Query.GetEventByProperties(childComplexity, args["input"].(GetEvent)), true
+		return e.complexity.Query.GetEvents(childComplexity, args["input"].(GetEvent)), true
 
 	case "Query.getUser":
 		if e.complexity.Query.GetUser == nil {
@@ -768,6 +771,27 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Venue.Province(childComplexity), true
 
+	case "Venue.rating":
+		if e.complexity.Venue.Rating == nil {
+			break
+		}
+
+		return e.complexity.Venue.Rating(childComplexity), true
+
+	case "Venue.url":
+		if e.complexity.Venue.URL == nil {
+			break
+		}
+
+		return e.complexity.Venue.URL(childComplexity), true
+
+	case "Venue.virtual":
+		if e.complexity.Venue.Virtual == nil {
+			break
+		}
+
+		return e.complexity.Venue.Virtual(childComplexity), true
+
 	}
 	return 0, false
 }
@@ -878,7 +902,7 @@ type Event {
         sponsors : [Sponsor]
         hostID: Int!
         ticket : Ticket
-        status: String
+        status: Int!
         image1: String
         image2: String
         image3: String
@@ -888,11 +912,14 @@ type Event {
 type Venue {
         id: ID!
         name: String!
-        address: String!
-        postal_code:String!
-        city: String!
-        province: String!
-        country_code: String!
+        address: String
+        postal_code:String
+        city: String
+        province: String
+        country_code: String
+        url: String
+        virtual: Boolean!
+        rating: Float!
         }
 
 input Login {
@@ -908,20 +935,21 @@ type LoginResponse{
 }
 input NewVenue {
         name: String!
-        address: String!
-        postal_code:String!
-        city: String!
-        province: String!
-        country_code: String!
+        address: String
+        postal_code:String
+        city: String
+        province: String
+        country_code: String
+        url: String
+        virtual: Boolean!
 }
 
 input GetEvent{
         category: Int!
         subcategory: Int!,
-        city :String,
-        province: String
         pageSize: Int!
         offset: Int!
+        status: Int!
 }
 input NewEvent {
         title: String!
@@ -934,7 +962,7 @@ input NewEvent {
         user_id: ID!
         category: Int!
         subcategory: Int!
-        status: String
+        status: Int!
         image1: String
         image2: String
         image3: String
@@ -1007,7 +1035,7 @@ type Query{
         getEvent(input: ID!): Event
         getVenue(input: ID!): Venue
         getUsers : [User!]
-        getEventByProperties(input: GetEvent!): [Event!]
+        getEvents(input: GetEvent!): [Event!]
 
 }`, BuiltIn: false},
 }
@@ -1137,13 +1165,13 @@ func (ec *executionContext) field_Query___type_args(ctx context.Context, rawArgs
 	return args, nil
 }
 
-func (ec *executionContext) field_Query_getEventByProperties_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Query_getEvent_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 GetEvent
+	var arg0 int32
 	if tmp, ok := rawArgs["input"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-		arg0, err = ec.unmarshalNGetEvent2githubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgqlgenᚐGetEvent(ctx, tmp)
+		arg0, err = ec.unmarshalNID2int32(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -1152,13 +1180,13 @@ func (ec *executionContext) field_Query_getEventByProperties_args(ctx context.Co
 	return args, nil
 }
 
-func (ec *executionContext) field_Query_getEvent_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Query_getEvents_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 int32
+	var arg0 GetEvent
 	if tmp, ok := rawArgs["input"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-		arg0, err = ec.unmarshalNID2int32(ctx, tmp)
+		arg0, err = ec.unmarshalNGetEvent2githubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgqlgenᚐGetEvent(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -1843,11 +1871,14 @@ func (ec *executionContext) _Event_status(ctx context.Context, field graphql.Col
 		return graphql.Null
 	}
 	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
 		return graphql.Null
 	}
-	res := resTmp.(*string)
+	res := resTmp.(int)
 	fc.Result = res
-	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+	return ec.marshalNInt2int(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Event_image1(ctx context.Context, field graphql.CollectedField, obj *Event) (ret graphql.Marshaler) {
@@ -2782,7 +2813,7 @@ func (ec *executionContext) _Query_getUsers(ctx context.Context, field graphql.C
 	return ec.marshalOUser2ᚕgithubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgqlgenᚐUserᚄ(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Query_getEventByProperties(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+func (ec *executionContext) _Query_getEvents(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -2799,7 +2830,7 @@ func (ec *executionContext) _Query_getEventByProperties(ctx context.Context, fie
 
 	ctx = graphql.WithFieldContext(ctx, fc)
 	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := ec.field_Query_getEventByProperties_args(ctx, rawArgs)
+	args, err := ec.field_Query_getEvents_args(ctx, rawArgs)
 	if err != nil {
 		ec.Error(ctx, err)
 		return graphql.Null
@@ -2807,7 +2838,7 @@ func (ec *executionContext) _Query_getEventByProperties(ctx context.Context, fie
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().GetEventByProperties(rctx, args["input"].(GetEvent))
+		return ec.resolvers.Query().GetEvents(rctx, args["input"].(GetEvent))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -3780,14 +3811,11 @@ func (ec *executionContext) _Venue_address(ctx context.Context, field graphql.Co
 		return graphql.Null
 	}
 	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
 		return graphql.Null
 	}
-	res := resTmp.(string)
+	res := resTmp.(*string)
 	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Venue_postal_code(ctx context.Context, field graphql.CollectedField, obj *Venue) (ret graphql.Marshaler) {
@@ -3815,14 +3843,11 @@ func (ec *executionContext) _Venue_postal_code(ctx context.Context, field graphq
 		return graphql.Null
 	}
 	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
 		return graphql.Null
 	}
-	res := resTmp.(string)
+	res := resTmp.(*string)
 	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Venue_city(ctx context.Context, field graphql.CollectedField, obj *Venue) (ret graphql.Marshaler) {
@@ -3850,14 +3875,11 @@ func (ec *executionContext) _Venue_city(ctx context.Context, field graphql.Colle
 		return graphql.Null
 	}
 	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
 		return graphql.Null
 	}
-	res := resTmp.(string)
+	res := resTmp.(*string)
 	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Venue_province(ctx context.Context, field graphql.CollectedField, obj *Venue) (ret graphql.Marshaler) {
@@ -3885,14 +3907,11 @@ func (ec *executionContext) _Venue_province(ctx context.Context, field graphql.C
 		return graphql.Null
 	}
 	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
 		return graphql.Null
 	}
-	res := resTmp.(string)
+	res := resTmp.(*string)
 	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Venue_country_code(ctx context.Context, field graphql.CollectedField, obj *Venue) (ret graphql.Marshaler) {
@@ -3920,14 +3939,113 @@ func (ec *executionContext) _Venue_country_code(ctx context.Context, field graph
 		return graphql.Null
 	}
 	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Venue_url(ctx context.Context, field graphql.CollectedField, obj *Venue) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Venue",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.URL, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Venue_virtual(ctx context.Context, field graphql.CollectedField, obj *Venue) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Venue",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Virtual, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
 		if !graphql.HasFieldError(ctx, fc) {
 			ec.Errorf(ctx, "must not be null")
 		}
 		return graphql.Null
 	}
-	res := resTmp.(string)
+	res := resTmp.(bool)
 	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
+	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Venue_rating(ctx context.Context, field graphql.CollectedField, obj *Venue) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Venue",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Rating, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(float64)
+	fc.Result = res
+	return ec.marshalNFloat2float64(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) ___Directive_name(ctx context.Context, field graphql.CollectedField, obj *introspection.Directive) (ret graphql.Marshaler) {
@@ -5039,22 +5157,6 @@ func (ec *executionContext) unmarshalInputGetEvent(ctx context.Context, obj inte
 			if err != nil {
 				return it, err
 			}
-		case "city":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("city"))
-			it.City, err = ec.unmarshalOString2ᚖstring(ctx, v)
-			if err != nil {
-				return it, err
-			}
-		case "province":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("province"))
-			it.Province, err = ec.unmarshalOString2ᚖstring(ctx, v)
-			if err != nil {
-				return it, err
-			}
 		case "pageSize":
 			var err error
 
@@ -5068,6 +5170,14 @@ func (ec *executionContext) unmarshalInputGetEvent(ctx context.Context, obj inte
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("offset"))
 			it.Offset, err = ec.unmarshalNInt2int(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "status":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("status"))
+			it.Status, err = ec.unmarshalNInt2int(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -5195,7 +5305,7 @@ func (ec *executionContext) unmarshalInputNewEvent(ctx context.Context, obj inte
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("status"))
-			it.Status, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			it.Status, err = ec.unmarshalNInt2int(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -5439,7 +5549,7 @@ func (ec *executionContext) unmarshalInputNewVenue(ctx context.Context, obj inte
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("address"))
-			it.Address, err = ec.unmarshalNString2string(ctx, v)
+			it.Address, err = ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -5447,7 +5557,7 @@ func (ec *executionContext) unmarshalInputNewVenue(ctx context.Context, obj inte
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("postal_code"))
-			it.PostalCode, err = ec.unmarshalNString2string(ctx, v)
+			it.PostalCode, err = ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -5455,7 +5565,7 @@ func (ec *executionContext) unmarshalInputNewVenue(ctx context.Context, obj inte
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("city"))
-			it.City, err = ec.unmarshalNString2string(ctx, v)
+			it.City, err = ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -5463,7 +5573,7 @@ func (ec *executionContext) unmarshalInputNewVenue(ctx context.Context, obj inte
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("province"))
-			it.Province, err = ec.unmarshalNString2string(ctx, v)
+			it.Province, err = ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -5471,7 +5581,23 @@ func (ec *executionContext) unmarshalInputNewVenue(ctx context.Context, obj inte
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("country_code"))
-			it.CountryCode, err = ec.unmarshalNString2string(ctx, v)
+			it.CountryCode, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "url":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("url"))
+			it.URL, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "virtual":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("virtual"))
+			it.Virtual, err = ec.unmarshalNBoolean2bool(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -5617,6 +5743,9 @@ func (ec *executionContext) _Event(ctx context.Context, sel ast.SelectionSet, ob
 			out.Values[i] = ec._Event_ticket(ctx, field, obj)
 		case "status":
 			out.Values[i] = ec._Event_status(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		case "image1":
 			out.Values[i] = ec._Event_image1(ctx, field, obj)
 		case "image2":
@@ -5853,7 +5982,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 				res = ec._Query_getUsers(ctx, field)
 				return res
 			})
-		case "getEventByProperties":
+		case "getEvents":
 			field := field
 			out.Concurrently(i, func() (res graphql.Marshaler) {
 				defer func() {
@@ -5861,7 +5990,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
-				res = ec._Query_getEventByProperties(ctx, field)
+				res = ec._Query_getEvents(ctx, field)
 				return res
 			})
 		case "__type":
@@ -6115,26 +6244,23 @@ func (ec *executionContext) _Venue(ctx context.Context, sel ast.SelectionSet, ob
 			}
 		case "address":
 			out.Values[i] = ec._Venue_address(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
 		case "postal_code":
 			out.Values[i] = ec._Venue_postal_code(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
 		case "city":
 			out.Values[i] = ec._Venue_city(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
 		case "province":
 			out.Values[i] = ec._Venue_province(ctx, field, obj)
+		case "country_code":
+			out.Values[i] = ec._Venue_country_code(ctx, field, obj)
+		case "url":
+			out.Values[i] = ec._Venue_url(ctx, field, obj)
+		case "virtual":
+			out.Values[i] = ec._Venue_virtual(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
-		case "country_code":
-			out.Values[i] = ec._Venue_country_code(ctx, field, obj)
+		case "rating":
+			out.Values[i] = ec._Venue_rating(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
@@ -6458,6 +6584,21 @@ func (ec *executionContext) marshalNEvent2ᚖgithubᚗcomᚋBigListRyRyᚋharbou
 		return graphql.Null
 	}
 	return ec._Event(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalNFloat2float64(ctx context.Context, v interface{}) (float64, error) {
+	res, err := graphql.UnmarshalFloat(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNFloat2float64(ctx context.Context, sel ast.SelectionSet, v float64) graphql.Marshaler {
+	res := graphql.MarshalFloat(v)
+	if res == graphql.Null {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+	}
+	return res
 }
 
 func (ec *executionContext) unmarshalNGetEvent2githubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgqlgenᚐGetEvent(ctx context.Context, v interface{}) (GetEvent, error) {

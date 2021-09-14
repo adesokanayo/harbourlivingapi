@@ -2,16 +2,16 @@
 SELECT * FROM events
 WHERE id = $1 LIMIT 1;
 
--- name: GetEventsByFilter :many
+-- name: GetEvents :many
 SELECT * FROM events e
 inner join venue v on  e.venue = v.id
 WHERE category = $1
 and subcategory =$2
-and v.city = $3
-and v.province = $4
+and e.status=$3
 ORDER BY e.id desc
-LIMIT $5
-OFFSET $6;
+LIMIT $4
+OFFSET $5;
+
 
 -- name: DeleteEvent :exec
 DELETE FROM events

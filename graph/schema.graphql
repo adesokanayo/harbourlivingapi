@@ -44,7 +44,7 @@ type Event {
         sponsors : [Sponsor]
         hostID: Int!
         ticket : Ticket
-        status: String
+        status: Int!
         image1: String
         image2: String
         image3: String
@@ -54,11 +54,14 @@ type Event {
 type Venue {
         id: ID!
         name: String!
-        address: String!
-        postal_code:String!
-        city: String!
-        province: String!
-        country_code: String!
+        address: String
+        postal_code:String
+        city: String
+        province: String
+        country_code: String
+        url: String
+        virtual: Boolean!
+        rating: Float!
         }
 
 input Login {
@@ -74,20 +77,21 @@ type LoginResponse{
 }
 input NewVenue {
         name: String!
-        address: String!
-        postal_code:String!
-        city: String!
-        province: String!
-        country_code: String!
+        address: String
+        postal_code:String
+        city: String
+        province: String
+        country_code: String
+        url: String
+        virtual: Boolean!
 }
 
 input GetEvent{
         category: Int!
         subcategory: Int!,
-        city :String,
-        province: String
         pageSize: Int!
         offset: Int!
+        status: Int!
 }
 input NewEvent {
         title: String!
@@ -100,7 +104,7 @@ input NewEvent {
         user_id: ID!
         category: Int!
         subcategory: Int!
-        status: String
+        status: Int!
         image1: String
         image2: String
         image3: String
@@ -173,6 +177,6 @@ type Query{
         getEvent(input: ID!): Event
         getVenue(input: ID!): Venue
         getUsers : [User!]
-        getEventByProperties(input: GetEvent!): [Event!]
+        getEvents(input: GetEvent!): [Event!]
 
 }

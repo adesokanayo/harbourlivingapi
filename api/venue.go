@@ -28,10 +28,7 @@ func (s *Server) CreateVenue(ctx *gin.Context) {
 
 	createEventReq := db.CreateVenueParams{
 		Name:        req.Name,
-		Address:     req.Address,
-		City:        req.City,
-		Province:    req.Province,
-		CountryCode: req.CountryCode,
+
 	}
 
 	user, err := s.store.CreateVenue(ctx, createEventReq)

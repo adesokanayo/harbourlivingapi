@@ -42,27 +42,93 @@ type Resolver struct {
 }
 
 func (r *mutationResolver) CreateVenue(ctx context.Context, input NewVenue) (*Venue, error) {
-	createEventReq := db.CreateVenueParams{
-		Name:        input.Name,
-		Address:     input.Address,
-		PostalCode:  input.PostalCode,
-		City:        input.City,
-		Province:    input.Province,
-		CountryCode: input.CountryCode,
+
+	if input.Virtual {
+		createVirtual := db.CreateVirtualVenueParams{
+			Name:    input.Name,
+			Url:     sql.NullString{
+				Valid: true,
+				String: *input.URL,
+			},
+			Virtual: false,
+		}
+		venue, err := store.CreateVirtualVenue(ctx, createVirtual)
+		if err != nil {
+			return nil, err
+		}
+		return &Venue{Name: venue.Name, ID: venue.ID},nil
 	}
-	venue, err := store.CreateVenue(ctx, createEventReq)
+
+
+	var result Venue
+	var createVenueReq db.CreateVenueParams
+
+	createVenueReq.Name = input.Name
+
+	if input.Address != nil {
+		createVenueReq.Address = sql.NullString{
+			String: *input.Address,
+			Valid:  true,
+		}
+	}
+
+	if input.City != nil {
+		createVenueReq.City = sql.NullString{
+			String: *input.City,
+			Valid:  true,
+		}
+	}
+
+	if input.PostalCode != nil {
+		createVenueReq.PostalCode = sql.NullString{
+			String: *input.PostalCode,
+			Valid:  true,
+		}
+	}
+
+	if input.Province != nil {
+		createVenueReq.Province = sql.NullString{
+			String: *input.Province,
+			Valid:  true,
+		}
+	}
+
+	if input.CountryCode != nil {
+		createVenueReq.CountryCode = sql.NullString{
+			String: *input.CountryCode,
+			Valid:  true,
+		}
+	}
+
+
+	venue, err := store.CreateVenue(ctx, createVenueReq)
 	if err != nil {
 		return nil, err
 	}
-	return &Venue{
-		ID:          venue.ID,
-		Name:        venue.Name,
-		PostalCode:  venue.PostalCode,
-		Address:     venue.Address,
-		City:        venue.City,
-		Province:    venue.Province,
-		CountryCode: venue.CountryCode,
-	}, nil
+
+	result.ID = venue.ID
+	result.Name = venue.Name
+
+	if venue.PostalCode.Valid {
+		result.PostalCode = &venue.PostalCode.String
+	}
+	if venue.City.Valid {
+		result.City = &venue.City.String
+	}
+	if venue.Province.Valid {
+		result.Province = &venue.Province.String
+	}
+	if venue.CountryCode.Valid {
+		result.CountryCode = &venue.CountryCode.String
+	}
+	if venue.Address.Valid {
+		result.Address = &venue.Address.String
+	}
+	if venue.Rating.Valid{
+		result.Rating = venue.Rating.Float64
+	}
+
+	return &result, nil
 }
 
 func (r *mutationResolver) CreateUser(ctx context.Context, input NewUser) (*User, error) {
@@ -118,7 +184,7 @@ func (r *mutationResolver) CreateEvent(ctx context.Context, input NewEvent) (*Ev
 		UserID:      int32(input.UserID),
 		Category:    int32(input.Category),
 		Subcategory: int32(input.Subcategory),
-		Status:      sql.NullString{},
+		Status:      int32(input.Status),
 		Image1:      sql.NullString{},
 		Image2:      sql.NullString{},
 		Image3:      sql.NullString{},
@@ -163,6 +229,7 @@ func (r *mutationResolver) CreateEvent(ctx context.Context, input NewEvent) (*Ev
 			Subcategory: int(event.Subcategory),
 			Category:    int(event.Category),
 			HostID:      int(linkedEventHost.HostID),
+
 		}
 		return nil
 	})
@@ -245,20 +312,29 @@ func (r *queryResolver) GetUser(ctx context.Context, input int32) (*User, error)
 }
 
 func (r *queryResolver) GetVenue(ctx context.Context, input int32) (*Venue, error) {
-
+	var result Venue
 	venue, err := store.GetVenue(ctx, input)
 	if err != nil {
 		return nil, err
 	}
-	return &Venue{
-		ID:          venue.ID,
-		Name:        venue.Name,
-		PostalCode:  venue.PostalCode,
-		Address:     venue.Address,
-		City:        venue.City,
-		Province:    venue.Province,
-		CountryCode: venue.CountryCode,
-	}, nil
+
+	result.ID = venue.ID
+	if venue.Province.Valid {
+		result.Province = &venue.Province.String
+	}
+	if venue.City.Valid {
+		result.City = &venue.City.String
+	}
+	if venue.PostalCode.Valid {
+		result.PostalCode = &venue.PostalCode.String
+	}
+	if venue.Address.Valid {
+		result.Address = &venue.Address.String
+	}
+	if venue.CountryCode.Valid {
+		result.CountryCode = &venue.CountryCode.String
+	}
+	return &result, nil
 }
 
 func (r *queryResolver) GetEvent(ctx context.Context, input int32) (*Event, error) {
@@ -295,7 +371,7 @@ func (r *queryResolver) GetEvent(ctx context.Context, input int32) (*Event, erro
 		Category:    int(event.Category),
 		Subcategory: int(event.Subcategory),
 		Sponsors:    result,
-		Status:      nil,
+		Status:      int(event.Status),
 		Image1:      nil,
 		Image2:      nil,
 		Image3:      nil,
@@ -304,20 +380,19 @@ func (r *queryResolver) GetEvent(ctx context.Context, input int32) (*Event, erro
 	}, nil
 }
 
-func (r *queryResolver) GetEventByProperties(ctx context.Context, input GetEvent) ([]Event, error) {
+func (r *queryResolver) GetEvents(ctx context.Context, input GetEvent) ([]Event, error) {
 
 	var result []Event
 	var eventSponsors []*Sponsor
 
-	arg := db.GetEventsByFilterParams{
+	arg := db.GetEventsParams{
 		Category:    int32(input.Category),
 		Subcategory: int32(input.Subcategory),
-		City:        *input.City,
-		Province:    *input.Province,
+		Status: int32(input.Status),
 		Limit:       int32(input.PageSize),
 		Offset:      int32(input.Offset),
 	}
-	events, err := store.GetEventsByFilter(ctx, arg)
+	events, err := store.GetEvents(ctx, arg)
 	if err != nil {
 		return nil, err
 	}

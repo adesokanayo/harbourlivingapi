@@ -27,7 +27,7 @@ type Event struct {
 	Subcategory int32          `json:"subcategory"`
 	TicketID    sql.NullInt32  `json:"ticket_id"`
 	Recurring   sql.NullBool   `json:"recurring"`
-	Status      sql.NullString `json:"status"`
+	Status      int32          `json:"status"`
 	Image1      sql.NullString `json:"image1"`
 	Image2      sql.NullString `json:"image2"`
 	Image3      sql.NullString `json:"image3"`
@@ -54,6 +54,12 @@ type EventsSponsor struct {
 	EventID   int32     `json:"event_id"`
 	SponsorID int32     `json:"sponsor_id"`
 	CreatedAt time.Time `json:"created_at"`
+}
+
+type EventsStatus struct {
+	ID        int32          `json:"id"`
+	Desc      sql.NullString `json:"desc"`
+	CreatedAt time.Time      `json:"created_at"`
 }
 
 type Host struct {
@@ -122,11 +128,14 @@ type Usertype struct {
 }
 
 type Venue struct {
-	ID          int32  `json:"id"`
-	Name        string `json:"name"`
-	Address     string `json:"address"`
-	PostalCode  string `json:"postal_code"`
-	City        string `json:"city"`
-	Province    string `json:"province"`
-	CountryCode string `json:"country_code"`
+	ID          int32           `json:"id"`
+	Name        string          `json:"name"`
+	Address     sql.NullString  `json:"address"`
+	PostalCode  sql.NullString  `json:"postal_code"`
+	City        sql.NullString  `json:"city"`
+	Province    sql.NullString  `json:"province"`
+	CountryCode sql.NullString  `json:"country_code"`
+	Url         sql.NullString  `json:"url"`
+	Virtual     bool            `json:"virtual"`
+	Rating      sql.NullFloat64 `json:"rating"`
 }

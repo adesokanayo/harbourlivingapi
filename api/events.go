@@ -85,13 +85,13 @@ func (s *Server) ListEvents(ctx *gin.Context) {
 		return
 	}
 
-	arg := db.GetEventsByFilterParams{
+	arg := db.GetEventsParams{
 		Category:    req.Category,
 		Subcategory: req.SubCategory,
 		Limit:       req.PageSize,
 		Offset:      (req.PageID - 1) * req.PageSize,
 	}
-	events, err := s.store.GetEventsByFilter(ctx, arg)
+	events, err := s.store.GetEvents(ctx, arg)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return

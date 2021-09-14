@@ -2,6 +2,7 @@ package db
 
 import (
 	"context"
+	"database/sql"
 	"github.com/stretchr/testify/require"
 	"testing"
 )
@@ -9,11 +10,14 @@ import (
 func TestCreateVenue(t *testing.T) {
 
 	arg := CreateVenueParams{
-		Name:        "Test Venue",
-		Address:     "adekunle ",
-		City:        "lagos",
-		Province:    "AB",
-		CountryCode: "CAN",
+		Name: "Test Venue",
+		Address: sql.NullString{
+			String: "adekunle",
+			Valid:  true,
+		},
+		City:        sql.NullString{String: "Calgary", Valid: true},
+		Province:    sql.NullString{String: "AB", Valid: true},
+		CountryCode: sql.NullString{String: "CAN", Valid: true},
 	}
 	venue, err := testQueries.CreateVenue(context.Background(), arg)
 
@@ -40,12 +44,16 @@ func TestGetVenue(t *testing.T) {
 
 func CreateRandomVenue() Venue {
 	arg := CreateVenueParams{
-		Name:        "Test Venue",
-		Address:     "lagos",
-		City:        "lagos",
-		Province:    "AB",
-		CountryCode: "CAN",
+		Name: "Test Venue",
+		Address: sql.NullString{
+			String: "adekunle",
+			Valid:  true,
+		},
+		City:        sql.NullString{String: "Calgary", Valid: true},
+		Province:    sql.NullString{String: "AB", Valid: true},
+		CountryCode: sql.NullString{String: "CAN", Valid: true},
 	}
+
 	venue, err := testQueries.CreateVenue(context.Background(), arg)
 	if err != nil {
 

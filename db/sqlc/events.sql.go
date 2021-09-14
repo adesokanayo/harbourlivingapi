@@ -42,7 +42,7 @@ type CreateEventParams struct {
 	UserID      int32          `json:"user_id"`
 	Category    int32          `json:"category"`
 	Subcategory int32          `json:"subcategory"`
-	Status      sql.NullString `json:"status"`
+	Status      int32          `json:"status"`
 	Image1      sql.NullString `json:"image1"`
 	Image2      sql.NullString `json:"image2"`
 	Image3      sql.NullString `json:"image3"`
@@ -138,63 +138,63 @@ func (q *Queries) GetEvent(ctx context.Context, id int32) (Event, error) {
 	return i, err
 }
 
-const getEventsByFilter = `-- name: GetEventsByFilter :many
-SELECT e.id, title, description, banner_image, start_date, end_date, venue, type, user_id, category, subcategory, ticket_id, recurring, status, image1, image2, image3, video1, video2, created_at, v.id, name, address, postal_code, city, province, country_code FROM events e
+const getEvents = `-- name: GetEvents :many
+SELECT e.id, title, description, banner_image, start_date, end_date, venue, type, user_id, category, subcategory, ticket_id, recurring, status, image1, image2, image3, video1, video2, created_at, v.id, name, address, postal_code, city, province, country_code, url, virtual, rating FROM events e
 inner join venue v on  e.venue = v.id
 WHERE category = $1
 and subcategory =$2
-and v.city = $3
-and v.province = $4
+and e.status=$3
 ORDER BY e.id desc
-LIMIT $5
-OFFSET $6
+LIMIT $4
+OFFSET $5
 `
 
-type GetEventsByFilterParams struct {
-	Category    int32  `json:"category"`
-	Subcategory int32  `json:"subcategory"`
-	City        string `json:"city"`
-	Province    string `json:"province"`
-	Limit       int32  `json:"limit"`
-	Offset      int32  `json:"offset"`
+type GetEventsParams struct {
+	Category    int32 `json:"category"`
+	Subcategory int32 `json:"subcategory"`
+	Status      int32 `json:"status"`
+	Limit       int32 `json:"limit"`
+	Offset      int32 `json:"offset"`
 }
 
-type GetEventsByFilterRow struct {
-	ID          int32          `json:"id"`
-	Title       string         `json:"title"`
-	Description string         `json:"description"`
-	BannerImage string         `json:"banner_image"`
-	StartDate   time.Time      `json:"start_date"`
-	EndDate     time.Time      `json:"end_date"`
-	Venue       int32          `json:"venue"`
-	Type        int32          `json:"type"`
-	UserID      int32          `json:"user_id"`
-	Category    int32          `json:"category"`
-	Subcategory int32          `json:"subcategory"`
-	TicketID    sql.NullInt32  `json:"ticket_id"`
-	Recurring   sql.NullBool   `json:"recurring"`
-	Status      sql.NullString `json:"status"`
-	Image1      sql.NullString `json:"image1"`
-	Image2      sql.NullString `json:"image2"`
-	Image3      sql.NullString `json:"image3"`
-	Video1      sql.NullString `json:"video1"`
-	Video2      sql.NullString `json:"video2"`
-	CreatedAt   sql.NullTime   `json:"created_at"`
-	ID_2        int32          `json:"id_2"`
-	Name        string         `json:"name"`
-	Address     string         `json:"address"`
-	PostalCode  string         `json:"postal_code"`
-	City        string         `json:"city"`
-	Province    string         `json:"province"`
-	CountryCode string         `json:"country_code"`
+type GetEventsRow struct {
+	ID          int32           `json:"id"`
+	Title       string          `json:"title"`
+	Description string          `json:"description"`
+	BannerImage string          `json:"banner_image"`
+	StartDate   time.Time       `json:"start_date"`
+	EndDate     time.Time       `json:"end_date"`
+	Venue       int32           `json:"venue"`
+	Type        int32           `json:"type"`
+	UserID      int32           `json:"user_id"`
+	Category    int32           `json:"category"`
+	Subcategory int32           `json:"subcategory"`
+	TicketID    sql.NullInt32   `json:"ticket_id"`
+	Recurring   sql.NullBool    `json:"recurring"`
+	Status      int32           `json:"status"`
+	Image1      sql.NullString  `json:"image1"`
+	Image2      sql.NullString  `json:"image2"`
+	Image3      sql.NullString  `json:"image3"`
+	Video1      sql.NullString  `json:"video1"`
+	Video2      sql.NullString  `json:"video2"`
+	CreatedAt   sql.NullTime    `json:"created_at"`
+	ID_2        int32           `json:"id_2"`
+	Name        string          `json:"name"`
+	Address     sql.NullString  `json:"address"`
+	PostalCode  sql.NullString  `json:"postal_code"`
+	City        sql.NullString  `json:"city"`
+	Province    sql.NullString  `json:"province"`
+	CountryCode sql.NullString  `json:"country_code"`
+	Url         sql.NullString  `json:"url"`
+	Virtual     bool            `json:"virtual"`
+	Rating      sql.NullFloat64 `json:"rating"`
 }
 
-func (q *Queries) GetEventsByFilter(ctx context.Context, arg GetEventsByFilterParams) ([]GetEventsByFilterRow, error) {
-	rows, err := q.db.QueryContext(ctx, getEventsByFilter,
+func (q *Queries) GetEvents(ctx context.Context, arg GetEventsParams) ([]GetEventsRow, error) {
+	rows, err := q.db.QueryContext(ctx, getEvents,
 		arg.Category,
 		arg.Subcategory,
-		arg.City,
-		arg.Province,
+		arg.Status,
 		arg.Limit,
 		arg.Offset,
 	)
@@ -202,9 +202,9 @@ func (q *Queries) GetEventsByFilter(ctx context.Context, arg GetEventsByFilterPa
 		return nil, err
 	}
 	defer rows.Close()
-	items := []GetEventsByFilterRow{}
+	items := []GetEventsRow{}
 	for rows.Next() {
-		var i GetEventsByFilterRow
+		var i GetEventsRow
 		if err := rows.Scan(
 			&i.ID,
 			&i.Title,
@@ -233,6 +233,9 @@ func (q *Queries) GetEventsByFilter(ctx context.Context, arg GetEventsByFilterPa
 			&i.City,
 			&i.Province,
 			&i.CountryCode,
+			&i.Url,
+			&i.Virtual,
+			&i.Rating,
 		); err != nil {
 			return nil, err
 		}

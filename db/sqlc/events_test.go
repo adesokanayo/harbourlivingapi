@@ -21,6 +21,7 @@ func createRandomEvent(t *testing.T) Event {
 		Type:        1,
 		Category:    1,
 		Subcategory: 1,
+		Status: 1,
 	}
 
 	event, err := testQueries.CreateEvent(context.Background(), arg)
@@ -42,6 +43,7 @@ func createRandomEvent(t *testing.T) Event {
 	require.NotZero(t, event.StartDate)
 	require.NotZero(t, event.EndDate)
 	require.NotZero(t, event.CreatedAt)
+	require.Equal(t, arg.Status, event.Status,)
 
 	return event
 }
@@ -66,13 +68,13 @@ func TestGetAllEvents(t *testing.T) {
 		createRandomEvent(t)
 	}
 
-	arg := GetEventsByFilterParams{
+	arg := GetEventsParams{
 		Limit:       1,
 		Offset:      1,
 		Category:    1,
 		Subcategory: 1,
 	}
-	events, err := testQueries.GetEventsByFilter(context.Background(), arg)
+	events, err := testQueries.GetEvents(context.Background(), arg)
 	require.NoError(t, err)
 	for _, event := range events {
 		require.NotEmpty(t, event)

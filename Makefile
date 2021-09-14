@@ -20,6 +20,6 @@ sqlc:
 gq:
 	gqlgen generate
 
-server:
+start:
 	go run main.go
-.PHONY: postgres createdb dropdb migrateup migratedown sqlc test server gq
+.PHONY: postgres createdb dropdb migrateup migratedown sqlc test server gq start

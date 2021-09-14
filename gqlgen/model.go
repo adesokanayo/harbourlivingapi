@@ -23,7 +23,7 @@ type Event struct {
 	Sponsors    []*Sponsor `json:"sponsors"`
 	HostID      int        `json:"hostID"`
 	Ticket      *Ticket    `json:"ticket"`
-	Status      *string    `json:"status"`
+	Status      int        `json:"status"`
 	Image1      *string    `json:"image1"`
 	Image2      *string    `json:"image2"`
 	Image3      *string    `json:"image3"`
@@ -38,12 +38,11 @@ type EventType struct {
 }
 
 type GetEvent struct {
-	Category    int     `json:"category"`
-	Subcategory int     `json:"subcategory"`
-	City        *string `json:"city"`
-	Province    *string `json:"province"`
-	PageSize    int     `json:"pageSize"`
-	Offset      int     `json:"offset"`
+	Category    int `json:"category"`
+	Subcategory int `json:"subcategory"`
+	PageSize    int `json:"pageSize"`
+	Offset      int `json:"offset"`
+	Status      int `json:"status"`
 }
 
 type Host struct {
@@ -75,7 +74,7 @@ type NewEvent struct {
 	UserID      int32   `json:"user_id"`
 	Category    int     `json:"category"`
 	Subcategory int     `json:"subcategory"`
-	Status      *string `json:"status"`
+	Status      int     `json:"status"`
 	Image1      *string `json:"image1"`
 	Image2      *string `json:"image2"`
 	Image3      *string `json:"image3"`
@@ -112,12 +111,14 @@ type NewUser struct {
 }
 
 type NewVenue struct {
-	Name        string `json:"name"`
-	Address     string `json:"address"`
-	PostalCode  string `json:"postal_code"`
-	City        string `json:"city"`
-	Province    string `json:"province"`
-	CountryCode string `json:"country_code"`
+	Name        string  `json:"name"`
+	Address     *string `json:"address"`
+	PostalCode  *string `json:"postal_code"`
+	City        *string `json:"city"`
+	Province    *string `json:"province"`
+	CountryCode *string `json:"country_code"`
+	URL         *string `json:"url"`
+	Virtual     bool    `json:"virtual"`
 }
 
 type RefreshTokenInput struct {
@@ -163,11 +164,14 @@ type Usertype struct {
 }
 
 type Venue struct {
-	ID          int32  `json:"id"`
-	Name        string `json:"name"`
-	Address     string `json:"address"`
-	PostalCode  string `json:"postal_code"`
-	City        string `json:"city"`
-	Province    string `json:"province"`
-	CountryCode string `json:"country_code"`
+	ID          int32   `json:"id"`
+	Name        string  `json:"name"`
+	Address     *string `json:"address"`
+	PostalCode  *string `json:"postal_code"`
+	City        *string `json:"city"`
+	Province    *string `json:"province"`
+	CountryCode *string `json:"country_code"`
+	URL         *string `json:"url"`
+	Virtual     bool    `json:"virtual"`
+	Rating      float64 `json:"rating"`
 }

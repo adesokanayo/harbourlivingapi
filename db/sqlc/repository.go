@@ -8,7 +8,7 @@ import (
 type Repository interface {
 	CreateEvent(ctx context.Context, arg CreateEventParams) (Event, error)
 	DeleteEvents(ctx context.Context, id int32) error
-	GetEventsByFilter(ctx context.Context, arg GetEventsByFilterParams) ([]Event, error)
+	GetEvents(ctx context.Context, arg GetEventsParams) ([]Event, error)
 	GetEvent(ctx context.Context, id int32) (Event, error)
 
 	CreateUser(ctx context.Context, arg CreateUserParams) (User, error)
