@@ -6,8 +6,8 @@
   <component name="ChangeListManager">
     <list default="true" id="2224c95a-bf4c-4405-865f-f2c5fdc42389" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/db/query/events.sql" beforeDir="false" afterPath="$PROJECT_DIR$/db/query/events.sql" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/db/sqlc/events.sql.go" beforeDir="false" afterPath="$PROJECT_DIR$/db/sqlc/events.sql.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/db/migration/000001_init_schema.up.sql" beforeDir="false" afterPath="$PROJECT_DIR$/db/migration/000001_init_schema.up.sql" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/db/sqlc/models.go" beforeDir="false" afterPath="$PROJECT_DIR$/db/sqlc/models.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/gqlgen/exec.go" beforeDir="false" afterPath="$PROJECT_DIR$/gqlgen/exec.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/gqlgen/model.go" beforeDir="false" afterPath="$PROJECT_DIR$/gqlgen/model.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/gqlgen/resolvers.go" beforeDir="false" afterPath="$PROJECT_DIR$/gqlgen/resolvers.go" afterDir="false" />
@@ -67,6 +67,14 @@
       <script-mode>FILE</script-mode>
       <method v="2" />
     </configuration>
+    <configuration default="true" type="GoApplicationRunConfiguration" factoryName="Go Application">
+      <module name="HarbourLivingAPI" />
+      <working_directory value="$PROJECT_DIR$" />
+      <kind value="FILE" />
+      <directory value="$PROJECT_DIR$" />
+      <filePath value="$PROJECT_DIR$" />
+      <method v="2" />
+    </configuration>
     <configuration name="go build main.go" type="GoApplicationRunConfiguration" factoryName="Go Application" temporary="true" nameIsGenerated="true">
       <module name="HarbourLivingAPI" />
       <working_directory value="$PROJECT_DIR$" />
@@ -97,6 +105,15 @@
       <filePath value="$PROJECT_DIR$" />
       <framework value="gotest" />
       <pattern value="^\QTestParseToken\E$" />
+      <method v="2" />
+    </configuration>
+    <configuration default="true" type="GoTestRunConfiguration" factoryName="Go Test">
+      <module name="HarbourLivingAPI" />
+      <working_directory value="$PROJECT_DIR$" />
+      <kind value="DIRECTORY" />
+      <directory value="$PROJECT_DIR$" />
+      <filePath value="$PROJECT_DIR$" />
+      <framework value="gotest" />
       <method v="2" />
     </configuration>
     <configuration name="Makefile" type="MAKEFILE_TARGET_RUN_CONFIGURATION" factoryName="Makefile" temporary="true">

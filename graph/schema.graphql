@@ -11,23 +11,23 @@ type User {
 
 type Usertype {
         id: ID!
-        desc: String
+        desc: String!
         status: Int
         }
 type EventType {
         id: ID!
-        desc: String
-        status: Int
+        desc: String!
+        status: Int!
         }
 type Category {
         id: ID!
-        desc: String
-        status: Int
+        desc: String!
+        status: Int!
         }
 type Subcategory {
         id: ID!
-        desc: String
-        status: Int
+        desc: String!
+        status: Int!
         }
 type Event {
         id: ID!
@@ -191,5 +191,7 @@ type Query{
         getVenue(input: ID!): Venue
         getUsers : [User!]
         getEvents(input: GetEvent!): [Event!]
-
+        getCategory( input: ID!): Category!
+        getSubcategory( input: ID!): Subcategory!
+        getCategories: [Category!]
 }

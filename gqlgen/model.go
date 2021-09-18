@@ -3,9 +3,9 @@
 package gqlgen
 
 type Category struct {
-	ID     int32   `json:"id"`
-	Desc   *string `json:"desc"`
-	Status *int    `json:"status"`
+	ID     int32  `json:"id"`
+	Desc   string `json:"desc"`
+	Status int    `json:"status"`
 }
 
 type Event struct {
@@ -32,9 +32,9 @@ type Event struct {
 }
 
 type EventType struct {
-	ID     int32   `json:"id"`
-	Desc   *string `json:"desc"`
-	Status *int    `json:"status"`
+	ID     int32  `json:"id"`
+	Desc   string `json:"desc"`
+	Status int    `json:"status"`
 }
 
 type GetEvent struct {
@@ -132,9 +132,9 @@ type Sponsor struct {
 }
 
 type Subcategory struct {
-	ID     int32   `json:"id"`
-	Desc   *string `json:"desc"`
-	Status *int    `json:"status"`
+	ID     int32  `json:"id"`
+	Desc   string `json:"desc"`
+	Status int    `json:"status"`
 }
 
 type Ticket struct {
@@ -168,9 +168,9 @@ type User struct {
 }
 
 type Usertype struct {
-	ID     int32   `json:"id"`
-	Desc   *string `json:"desc"`
-	Status *int    `json:"status"`
+	ID     int32  `json:"id"`
+	Desc   string `json:"desc"`
+	Status *int   `json:"status"`
 }
 
 type Venue struct {

@@ -8,9 +8,9 @@ import (
 )
 
 type Category struct {
-	ID     int32          `json:"id"`
-	Desc   sql.NullString `json:"desc"`
-	Status sql.NullInt32  `json:"status"`
+	ID     int32         `json:"id"`
+	Desc   string        `json:"desc"`
+	Status sql.NullInt32 `json:"status"`
 }
 
 type Event struct {
@@ -37,9 +37,9 @@ type Event struct {
 }
 
 type EventType struct {
-	ID     int32          `json:"id"`
-	Desc   sql.NullString `json:"desc"`
-	Status sql.NullInt32  `json:"status"`
+	ID     int32         `json:"id"`
+	Desc   string        `json:"desc"`
+	Status sql.NullInt32 `json:"status"`
 }
 
 type EventsHost struct {
@@ -75,9 +75,10 @@ type Sponsor struct {
 }
 
 type Subcategory struct {
-	ID     int32          `json:"id"`
-	Desc   sql.NullString `json:"desc"`
-	Status sql.NullInt32  `json:"status"`
+	ID         int32         `json:"id"`
+	CategoryID int32         `json:"category_id"`
+	Desc       string        `json:"desc"`
+	Status     sql.NullInt32 `json:"status"`
 }
 
 type Ticket struct {
@@ -122,9 +123,9 @@ type UserTicket struct {
 }
 
 type Usertype struct {
-	ID     int32          `json:"id"`
-	Desc   sql.NullString `json:"desc"`
-	Status sql.NullInt32  `json:"status"`
+	ID     int32         `json:"id"`
+	Desc   string        `json:"desc"`
+	Status sql.NullInt32 `json:"status"`
 }
 
 type Venue struct {

@@ -507,17 +507,62 @@ func (r *mutationResolver) CreateSponsorForEvent(ctx context.Context, input NewS
 }
 
 func (r *mutationResolver) UpdateEventStatus(ctx context.Context, input UpdateEventStatus) (*UpdateEventState, error) {
-	arg:= db.UpdateEventStatusParams{
-     ID: int32(input.EventID),
+	arg := db.UpdateEventStatusParams{
+		ID:     int32(input.EventID),
 		Status: int32(input.EventStatus),
 	}
 	result, err := store.UpdateEventStatus(ctx, arg)
 	if err != nil {
 		return nil, err
 	}
-return &UpdateEventState{
-		EventID:  int(result.ID)    ,
-		EventStatus:int(result.Status),
+	return &UpdateEventState{
+		EventID:     int(result.ID),
+		EventStatus: int(result.Status),
+	}, nil
+}
+
+func (q *queryResolver) GetCategory(ctx context.Context, id int32) (*Category, error) {
+
+	category, err := store.GetCategory(ctx, id)
+
+	if err != nil {
+		return nil, err
+	}
+	return &Category{
+		ID:     category.ID,
+		Desc:   category.Desc,
+		Status: int(category.Status.Int32),
+	}, nil
+}
+func (q *queryResolver) GetCategories(ctx context.Context) ([]Category, error) {
+
+	var result []Category
+	categories, err := store.GetCategories(ctx)
+
+	if err != nil {
+		return nil, err
+	}
+
+	for _, v := range categories {
+		result = append(result, Category{
+			v.ID,
+			v.Desc,
+			int(v.Status.Int32),
+		})
+	}
+
+	return result, nil
+}
+
+func (q *queryResolver) GetSubcategory(ctx context.Context, id int32) (*Subcategory, error) {
+	subcategory, err := store.GetSubCategory(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+	return &Subcategory{
+		ID:     subcategory.ID,
+		Desc:   subcategory.Desc,
+		Status: int(subcategory.Status.Int32),
 	}, nil
 }
 

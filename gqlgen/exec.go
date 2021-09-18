@@ -8,6 +8,7 @@ import (
 	"errors"
 	"strconv"
 	"sync"
+	"sync/atomic"
 
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/graphql/introspection"
@@ -101,11 +102,14 @@ type ComplexityRoot struct {
 	}
 
 	Query struct {
-		GetEvent  func(childComplexity int, input int32) int
-		GetEvents func(childComplexity int, input GetEvent) int
-		GetUser   func(childComplexity int, input int32) int
-		GetUsers  func(childComplexity int) int
-		GetVenue  func(childComplexity int, input int32) int
+		GetCategories  func(childComplexity int) int
+		GetCategory    func(childComplexity int, input int32) int
+		GetEvent       func(childComplexity int, input int32) int
+		GetEvents      func(childComplexity int, input GetEvent) int
+		GetSubcategory func(childComplexity int, input int32) int
+		GetUser        func(childComplexity int, input int32) int
+		GetUsers       func(childComplexity int) int
+		GetVenue       func(childComplexity int, input int32) int
 	}
 
 	Sponsor struct {
@@ -181,6 +185,9 @@ type QueryResolver interface {
 	GetVenue(ctx context.Context, input int32) (*Venue, error)
 	GetUsers(ctx context.Context) ([]User, error)
 	GetEvents(ctx context.Context, input GetEvent) ([]Event, error)
+	GetCategory(ctx context.Context, input int32) (*Category, error)
+	GetSubcategory(ctx context.Context, input int32) (*Subcategory, error)
+	GetCategories(ctx context.Context) ([]Category, error)
 }
 
 type executableSchema struct {
@@ -525,6 +532,25 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.UpdateEventStatus(childComplexity, args["input"].(UpdateEventStatus)), true
 
+	case "Query.getCategories":
+		if e.complexity.Query.GetCategories == nil {
+			break
+		}
+
+		return e.complexity.Query.GetCategories(childComplexity), true
+
+	case "Query.getCategory":
+		if e.complexity.Query.GetCategory == nil {
+			break
+		}
+
+		args, err := ec.field_Query_getCategory_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.GetCategory(childComplexity, args["input"].(int32)), true
+
 	case "Query.getEvent":
 		if e.complexity.Query.GetEvent == nil {
 			break
@@ -548,6 +574,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.GetEvents(childComplexity, args["input"].(GetEvent)), true
+
+	case "Query.getSubcategory":
+		if e.complexity.Query.GetSubcategory == nil {
+			break
+		}
+
+		args, err := ec.field_Query_getSubcategory_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.GetSubcategory(childComplexity, args["input"].(int32)), true
 
 	case "Query.getUser":
 		if e.complexity.Query.GetUser == nil {
@@ -902,23 +940,23 @@ var sources = []*ast.Source{
 
 type Usertype {
         id: ID!
-        desc: String
+        desc: String!
         status: Int
         }
 type EventType {
         id: ID!
-        desc: String
-        status: Int
+        desc: String!
+        status: Int!
         }
 type Category {
         id: ID!
-        desc: String
-        status: Int
+        desc: String!
+        status: Int!
         }
 type Subcategory {
         id: ID!
-        desc: String
-        status: Int
+        desc: String!
+        status: Int!
         }
 type Event {
         id: ID!
@@ -1082,7 +1120,9 @@ type Query{
         getVenue(input: ID!): Venue
         getUsers : [User!]
         getEvents(input: GetEvent!): [Event!]
-
+        getCategory( input: ID!): Category!
+        getSubcategory( input: ID!): Subcategory!
+        getCategories: [Category!]
 }`, BuiltIn: false},
 }
 var parsedSchema = gqlparser.MustLoadSchema(sources...)
@@ -1226,6 +1266,21 @@ func (ec *executionContext) field_Query___type_args(ctx context.Context, rawArgs
 	return args, nil
 }
 
+func (ec *executionContext) field_Query_getCategory_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 int32
+	if tmp, ok := rawArgs["input"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+		arg0, err = ec.unmarshalNID2int32(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["input"] = arg0
+	return args, nil
+}
+
 func (ec *executionContext) field_Query_getEvent_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -1248,6 +1303,21 @@ func (ec *executionContext) field_Query_getEvents_args(ctx context.Context, rawA
 	if tmp, ok := rawArgs["input"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
 		arg0, err = ec.unmarshalNGetEvent2githubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgqlgenᚐGetEvent(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["input"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_getSubcategory_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 int32
+	if tmp, ok := rawArgs["input"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+		arg0, err = ec.unmarshalNID2int32(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -1384,11 +1454,14 @@ func (ec *executionContext) _Category_desc(ctx context.Context, field graphql.Co
 		return graphql.Null
 	}
 	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
 		return graphql.Null
 	}
-	res := resTmp.(*string)
+	res := resTmp.(string)
 	fc.Result = res
-	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Category_status(ctx context.Context, field graphql.CollectedField, obj *Category) (ret graphql.Marshaler) {
@@ -1416,11 +1489,14 @@ func (ec *executionContext) _Category_status(ctx context.Context, field graphql.
 		return graphql.Null
 	}
 	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
 		return graphql.Null
 	}
-	res := resTmp.(*int)
+	res := resTmp.(int)
 	fc.Result = res
-	return ec.marshalOInt2ᚖint(ctx, field.Selections, res)
+	return ec.marshalNInt2int(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Event_id(ctx context.Context, field graphql.CollectedField, obj *Event) (ret graphql.Marshaler) {
@@ -2162,11 +2238,14 @@ func (ec *executionContext) _EventType_desc(ctx context.Context, field graphql.C
 		return graphql.Null
 	}
 	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
 		return graphql.Null
 	}
-	res := resTmp.(*string)
+	res := resTmp.(string)
 	fc.Result = res
-	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _EventType_status(ctx context.Context, field graphql.CollectedField, obj *EventType) (ret graphql.Marshaler) {
@@ -2194,11 +2273,14 @@ func (ec *executionContext) _EventType_status(ctx context.Context, field graphql
 		return graphql.Null
 	}
 	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
 		return graphql.Null
 	}
-	res := resTmp.(*int)
+	res := resTmp.(int)
 	fc.Result = res
-	return ec.marshalOInt2ᚖint(ctx, field.Selections, res)
+	return ec.marshalNInt2int(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Host_id(ctx context.Context, field graphql.CollectedField, obj *Host) (ret graphql.Marshaler) {
@@ -2955,6 +3037,122 @@ func (ec *executionContext) _Query_getEvents(ctx context.Context, field graphql.
 	return ec.marshalOEvent2ᚕgithubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgqlgenᚐEventᚄ(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _Query_getCategory(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Query_getCategory_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().GetCategory(rctx, args["input"].(int32))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*Category)
+	fc.Result = res
+	return ec.marshalNCategory2ᚖgithubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgqlgenᚐCategory(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_getSubcategory(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Query_getSubcategory_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().GetSubcategory(rctx, args["input"].(int32))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*Subcategory)
+	fc.Result = res
+	return ec.marshalNSubcategory2ᚖgithubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgqlgenᚐSubcategory(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_getCategories(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().GetCategories(rctx)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]Category)
+	fc.Result = res
+	return ec.marshalOCategory2ᚕgithubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgqlgenᚐCategoryᚄ(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _Query___type(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -3191,11 +3389,14 @@ func (ec *executionContext) _Subcategory_desc(ctx context.Context, field graphql
 		return graphql.Null
 	}
 	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
 		return graphql.Null
 	}
-	res := resTmp.(*string)
+	res := resTmp.(string)
 	fc.Result = res
-	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Subcategory_status(ctx context.Context, field graphql.CollectedField, obj *Subcategory) (ret graphql.Marshaler) {
@@ -3223,11 +3424,14 @@ func (ec *executionContext) _Subcategory_status(ctx context.Context, field graph
 		return graphql.Null
 	}
 	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
 		return graphql.Null
 	}
-	res := resTmp.(*int)
+	res := resTmp.(int)
 	fc.Result = res
-	return ec.marshalOInt2ᚖint(ctx, field.Selections, res)
+	return ec.marshalNInt2int(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Ticket_id(ctx context.Context, field graphql.CollectedField, obj *Ticket) (ret graphql.Marshaler) {
@@ -3850,11 +4054,14 @@ func (ec *executionContext) _Usertype_desc(ctx context.Context, field graphql.Co
 		return graphql.Null
 	}
 	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
 		return graphql.Null
 	}
-	res := resTmp.(*string)
+	res := resTmp.(string)
 	fc.Result = res
-	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Usertype_status(ctx context.Context, field graphql.CollectedField, obj *Usertype) (ret graphql.Marshaler) {
@@ -5854,8 +6061,14 @@ func (ec *executionContext) _Category(ctx context.Context, sel ast.SelectionSet,
 			}
 		case "desc":
 			out.Values[i] = ec._Category_desc(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		case "status":
 			out.Values[i] = ec._Category_status(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -5986,8 +6199,14 @@ func (ec *executionContext) _EventType(ctx context.Context, sel ast.SelectionSet
 			}
 		case "desc":
 			out.Values[i] = ec._EventType_desc(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		case "status":
 			out.Values[i] = ec._EventType_status(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -6199,6 +6418,45 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 				res = ec._Query_getEvents(ctx, field)
 				return res
 			})
+		case "getCategory":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_getCategory(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
+		case "getSubcategory":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_getSubcategory(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
+		case "getCategories":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_getCategories(ctx, field)
+				return res
+			})
 		case "__type":
 			out.Values[i] = ec._Query___type(ctx, field)
 		case "__schema":
@@ -6269,8 +6527,14 @@ func (ec *executionContext) _Subcategory(ctx context.Context, sel ast.SelectionS
 			}
 		case "desc":
 			out.Values[i] = ec._Subcategory_desc(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		case "status":
 			out.Values[i] = ec._Subcategory_status(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -6446,6 +6710,9 @@ func (ec *executionContext) _Usertype(ctx context.Context, sel ast.SelectionSet,
 			}
 		case "desc":
 			out.Values[i] = ec._Usertype_desc(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		case "status":
 			out.Values[i] = ec._Usertype_status(ctx, field, obj)
 		default:
@@ -6773,6 +7040,20 @@ func (ec *executionContext) marshalNBoolean2bool(ctx context.Context, sel ast.Se
 	return res
 }
 
+func (ec *executionContext) marshalNCategory2githubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgqlgenᚐCategory(ctx context.Context, sel ast.SelectionSet, v Category) graphql.Marshaler {
+	return ec._Category(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNCategory2ᚖgithubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgqlgenᚐCategory(ctx context.Context, sel ast.SelectionSet, v *Category) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._Category(ctx, sel, v)
+}
+
 func (ec *executionContext) marshalNEvent2githubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgqlgenᚐEvent(ctx context.Context, sel ast.SelectionSet, v Event) graphql.Marshaler {
 	return ec._Event(ctx, sel, &v)
 }
@@ -6936,6 +7217,20 @@ func (ec *executionContext) marshalNString2string(ctx context.Context, sel ast.S
 		}
 	}
 	return res
+}
+
+func (ec *executionContext) marshalNSubcategory2githubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgqlgenᚐSubcategory(ctx context.Context, sel ast.SelectionSet, v Subcategory) graphql.Marshaler {
+	return ec._Subcategory(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNSubcategory2ᚖgithubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgqlgenᚐSubcategory(ctx context.Context, sel ast.SelectionSet, v *Subcategory) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._Subcategory(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalNTicket2githubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgqlgenᚐTicket(ctx context.Context, sel ast.SelectionSet, v Ticket) graphql.Marshaler {
@@ -7250,6 +7545,46 @@ func (ec *executionContext) marshalOBoolean2ᚖbool(ctx context.Context, sel ast
 		return graphql.Null
 	}
 	return graphql.MarshalBoolean(*v)
+}
+
+func (ec *executionContext) marshalOCategory2ᚕgithubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgqlgenᚐCategoryᚄ(ctx context.Context, sel ast.SelectionSet, v []Category) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNCategory2githubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgqlgenᚐCategory(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+	return ret
 }
 
 func (ec *executionContext) marshalOEvent2ᚕgithubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgqlgenᚐEventᚄ(ctx context.Context, sel ast.SelectionSet, v []Event) graphql.Marshaler {
