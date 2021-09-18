@@ -38,3 +38,9 @@ INSERT INTO events (
 ) VALUES
     ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15,$16) RETURNING *;
 
+
+-- name: UpdateEventStatus :one
+UPDATE events
+set status = $1
+where id = $2 RETURNING events.Id, events.status;
+

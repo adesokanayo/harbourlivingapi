@@ -249,3 +249,26 @@ func (q *Queries) GetEvents(ctx context.Context, arg GetEventsParams) ([]GetEven
 	}
 	return items, nil
 }
+
+const updateEventStatus = `-- name: UpdateEventStatus :one
+UPDATE events
+set status = $1
+where id = $2 RETURNING events.Id, events.status
+`
+
+type UpdateEventStatusParams struct {
+	Status int32 `json:"status"`
+	ID     int32 `json:"id"`
+}
+
+type UpdateEventStatusRow struct {
+	ID     int32 `json:"id"`
+	Status int32 `json:"status"`
+}
+
+func (q *Queries) UpdateEventStatus(ctx context.Context, arg UpdateEventStatusParams) (UpdateEventStatusRow, error) {
+	row := q.db.QueryRowContext(ctx, updateEventStatus, arg.Status, arg.ID)
+	var i UpdateEventStatusRow
+	err := row.Scan(&i.ID, &i.Status)
+	return i, err
+}

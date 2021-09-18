@@ -45,9 +45,9 @@ func (r *mutationResolver) CreateVenue(ctx context.Context, input NewVenue) (*Ve
 
 	if input.Virtual {
 		createVirtual := db.CreateVirtualVenueParams{
-			Name:    input.Name,
-			Url:     sql.NullString{
-				Valid: true,
+			Name: input.Name,
+			Url: sql.NullString{
+				Valid:  true,
 				String: *input.URL,
 			},
 			Virtual: false,
@@ -56,9 +56,8 @@ func (r *mutationResolver) CreateVenue(ctx context.Context, input NewVenue) (*Ve
 		if err != nil {
 			return nil, err
 		}
-		return &Venue{Name: venue.Name, ID: venue.ID},nil
+		return &Venue{Name: venue.Name, ID: venue.ID}, nil
 	}
-
 
 	var result Venue
 	var createVenueReq db.CreateVenueParams
@@ -100,7 +99,6 @@ func (r *mutationResolver) CreateVenue(ctx context.Context, input NewVenue) (*Ve
 		}
 	}
 
-
 	venue, err := store.CreateVenue(ctx, createVenueReq)
 	if err != nil {
 		return nil, err
@@ -124,7 +122,7 @@ func (r *mutationResolver) CreateVenue(ctx context.Context, input NewVenue) (*Ve
 	if venue.Address.Valid {
 		result.Address = &venue.Address.String
 	}
-	if venue.Rating.Valid{
+	if venue.Rating.Valid {
 		result.Rating = venue.Rating.Float64
 	}
 
@@ -229,7 +227,6 @@ func (r *mutationResolver) CreateEvent(ctx context.Context, input NewEvent) (*Ev
 			Subcategory: int(event.Subcategory),
 			Category:    int(event.Category),
 			HostID:      int(linkedEventHost.HostID),
-
 		}
 		return nil
 	})
@@ -388,7 +385,7 @@ func (r *queryResolver) GetEvents(ctx context.Context, input GetEvent) ([]Event,
 	arg := db.GetEventsParams{
 		Category:    int32(input.Category),
 		Subcategory: int32(input.Subcategory),
-		Status: int32(input.Status),
+		Status:      int32(input.Status),
 		Limit:       int32(input.PageSize),
 		Offset:      int32(input.Offset),
 	}
@@ -507,6 +504,21 @@ func (r *mutationResolver) CreateSponsorForEvent(ctx context.Context, input NewS
 		return nil, err
 	}
 	return result, nil
+}
+
+func (r *mutationResolver) UpdateEventStatus(ctx context.Context, input UpdateEventStatus) (*UpdateEventState, error) {
+	arg:= db.UpdateEventStatusParams{
+     ID: int32(input.EventID),
+		Status: int32(input.EventStatus),
+	}
+	result, err := store.UpdateEventStatus(ctx, arg)
+	if err != nil {
+		return nil, err
+	}
+return &UpdateEventState{
+		EventID:  int(result.ID)    ,
+		EventStatus:int(result.Status),
+	}, nil
 }
 
 // Mutation returns MutationResolver implementation.

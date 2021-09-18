@@ -146,6 +146,11 @@ input NewHost {
         event_id: Int!
 }
 
+type UpdateEventState{
+        event_id: Int!
+        event_status: Int!
+}
+
 type Ticket {
         id: ID!
         name: String!
@@ -162,6 +167,13 @@ input NewTicket {
         quantity: Int!
         status: Int!
 }
+
+input UpdateEventStatus{
+    event_id: Int!
+    event_status: Int!
+}
+
+
 type Mutation {
         createVenue(input: NewVenue!): Venue!
         createUser(input: NewUser!): User!
@@ -170,6 +182,7 @@ type Mutation {
         refreshToken(input: RefreshTokenInput!): String
         createTicket(input: NewTicket!): Ticket!
         createSponsorForEvent(input: NewSponsor!): Sponsor!
+        updateEventStatus(input: UpdateEventStatus!): UpdateEventState!
 }
 
 type Query{

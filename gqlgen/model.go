@@ -146,6 +146,16 @@ type Ticket struct {
 	Status   int    `json:"status"`
 }
 
+type UpdateEventState struct {
+	EventID     int `json:"event_id"`
+	EventStatus int `json:"event_status"`
+}
+
+type UpdateEventStatus struct {
+	EventID     int `json:"event_id"`
+	EventStatus int `json:"event_status"`
+}
+
 type User struct {
 	ID        int32  `json:"id"`
 	Title     string `json:"title"`
