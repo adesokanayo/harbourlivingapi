@@ -29,14 +29,9 @@ INSERT INTO events (
     user_id,
     category,
     subcategory,
-    status,
-    image1,
-    image2,
-    image3,
-    video1,
-    video2
+    status
 ) VALUES
-    ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15,$16) RETURNING *;
+    ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) RETURNING *;
 
 
 -- name: UpdateEventStatus :one

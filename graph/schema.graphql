@@ -7,6 +7,7 @@ type User {
         username: String!
         password: String!
         usertype: Int!
+        avatar : String!
         }
 
 type Usertype {
@@ -22,6 +23,7 @@ type EventType {
 type Category {
         id: ID!
         desc: String!
+        image: String!
         status: Int!
         }
 type Subcategory {
@@ -45,11 +47,8 @@ type Event {
         hostID: Int!
         ticket : Ticket
         status: Int!
-        image1: String
-        image2: String
-        image3: String
-        video1: String
-        video2: String
+        images: [Image]
+        videos: [Video]
         }
 type Venue {
         id: ID!
@@ -59,6 +58,8 @@ type Venue {
         city: String
         province: String
         country_code: String
+        Longitude: Float
+        Latitude : Float
         url: String
         virtual: Boolean!
         rating: Float!
@@ -75,6 +76,29 @@ type LoginResponse{
       success: Boolean!
       message: String
 }
+
+type Image{
+        id: ID!
+        event_id: ID!
+        name: String!
+        url: String
+}
+
+input NewImage{
+        name: String!
+        url: String
+}
+type Video{
+        id: ID!
+        event_id: ID!
+        name: String!
+        url: String
+}
+
+input NewVideo{
+        name: String!
+        url: String
+}
 input NewVenue {
         name: String!
         address: String
@@ -84,6 +108,8 @@ input NewVenue {
         country_code: String
         url: String
         virtual: Boolean!
+        longitude: Float
+        latitude: Float
 }
 
 input GetEvent{
@@ -105,15 +131,14 @@ input NewEvent {
         category: Int!
         subcategory: Int!
         status: Int!
-        image1: String
-        image2: String
-        image3: String
-        video1: String
-        video2: String
+        images: [NewImage]
+        vidoes: [NewVideo]        
 }
 input RefreshTokenInput{
         token: String!
 }
+
+
 
 input NewUser {
         title: String!
@@ -123,6 +148,7 @@ input NewUser {
         username: String!
         password: String!
         usertype: Int!
+        avatar: string!
 }
 
 type Sponsor {

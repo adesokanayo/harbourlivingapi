@@ -5,6 +5,7 @@ package gqlgen
 type Category struct {
 	ID     int32  `json:"id"`
 	Desc   string `json:"desc"`
+	Image  string `json:"image"`
 	Status int    `json:"status"`
 }
 
@@ -24,11 +25,8 @@ type Event struct {
 	HostID      int        `json:"hostID"`
 	Ticket      *Ticket    `json:"ticket"`
 	Status      int        `json:"status"`
-	Image1      *string    `json:"image1"`
-	Image2      *string    `json:"image2"`
-	Image3      *string    `json:"image3"`
-	Video1      *string    `json:"video1"`
-	Video2      *string    `json:"video2"`
+	Images      []*Image   `json:"images"`
+	Videos      []*Video   `json:"videos"`
 }
 
 type EventType struct {
@@ -51,6 +49,13 @@ type Host struct {
 	Events []*Event `json:"events"`
 }
 
+type Image struct {
+	ID      int32   `json:"id"`
+	EventID int32   `json:"event_id"`
+	Name    string  `json:"name"`
+	URL     *string `json:"url"`
+}
+
 type Login struct {
 	Username string `json:"username"`
 	Password string `json:"password"`
@@ -64,27 +69,29 @@ type LoginResponse struct {
 }
 
 type NewEvent struct {
-	Title       string  `json:"title"`
-	Description string  `json:"description"`
-	BannerImage string  `json:"banner_image"`
-	StartDate   string  `json:"startDate"`
-	EndDate     string  `json:"endDate"`
-	Venue       int     `json:"venue"`
-	Type        int     `json:"type"`
-	UserID      int32   `json:"user_id"`
-	Category    int     `json:"category"`
-	Subcategory int     `json:"subcategory"`
-	Status      int     `json:"status"`
-	Image1      *string `json:"image1"`
-	Image2      *string `json:"image2"`
-	Image3      *string `json:"image3"`
-	Video1      *string `json:"video1"`
-	Video2      *string `json:"video2"`
+	Title       string      `json:"title"`
+	Description string      `json:"description"`
+	BannerImage string      `json:"banner_image"`
+	StartDate   string      `json:"startDate"`
+	EndDate     string      `json:"endDate"`
+	Venue       int         `json:"venue"`
+	Type        int         `json:"type"`
+	UserID      int32       `json:"user_id"`
+	Category    int         `json:"category"`
+	Subcategory int         `json:"subcategory"`
+	Status      int         `json:"status"`
+	Images      []*NewImage `json:"images"`
+	Vidoes      []*NewVideo `json:"vidoes"`
 }
 
 type NewHost struct {
 	UserID  int `json:"user_id"`
 	EventID int `json:"event_id"`
+}
+
+type NewImage struct {
+	Name string  `json:"name"`
+	URL  *string `json:"url"`
 }
 
 type NewSponsor struct {
@@ -111,14 +118,21 @@ type NewUser struct {
 }
 
 type NewVenue struct {
-	Name        string  `json:"name"`
-	Address     *string `json:"address"`
-	PostalCode  *string `json:"postal_code"`
-	City        *string `json:"city"`
-	Province    *string `json:"province"`
-	CountryCode *string `json:"country_code"`
-	URL         *string `json:"url"`
-	Virtual     bool    `json:"virtual"`
+	Name        string   `json:"name"`
+	Address     *string  `json:"address"`
+	PostalCode  *string  `json:"postal_code"`
+	City        *string  `json:"city"`
+	Province    *string  `json:"province"`
+	CountryCode *string  `json:"country_code"`
+	URL         *string  `json:"url"`
+	Virtual     bool     `json:"virtual"`
+	Longitude   *float64 `json:"longitude"`
+	Latitude    *float64 `json:"latitude"`
+}
+
+type NewVideo struct {
+	Name string  `json:"name"`
+	URL  *string `json:"url"`
 }
 
 type RefreshTokenInput struct {
@@ -165,6 +179,7 @@ type User struct {
 	Username  string `json:"username"`
 	Password  string `json:"password"`
 	Usertype  int    `json:"usertype"`
+	Avatar    string `json:"avatar"`
 }
 
 type Usertype struct {
@@ -174,14 +189,23 @@ type Usertype struct {
 }
 
 type Venue struct {
-	ID          int32   `json:"id"`
-	Name        string  `json:"name"`
-	Address     *string `json:"address"`
-	PostalCode  *string `json:"postal_code"`
-	City        *string `json:"city"`
-	Province    *string `json:"province"`
-	CountryCode *string `json:"country_code"`
-	URL         *string `json:"url"`
-	Virtual     bool    `json:"virtual"`
-	Rating      float64 `json:"rating"`
+	ID          int32    `json:"id"`
+	Name        string   `json:"name"`
+	Address     *string  `json:"address"`
+	PostalCode  *string  `json:"postal_code"`
+	City        *string  `json:"city"`
+	Province    *string  `json:"province"`
+	CountryCode *string  `json:"country_code"`
+	Longitude   *float64 `json:"Longitude"`
+	Latitude    *float64 `json:"Latitude"`
+	URL         *string  `json:"url"`
+	Virtual     bool     `json:"virtual"`
+	Rating      float64  `json:"rating"`
+}
+
+type Video struct {
+	ID      int32   `json:"id"`
+	EventID int32   `json:"event_id"`
+	Name    string  `json:"name"`
+	URL     *string `json:"url"`
 }

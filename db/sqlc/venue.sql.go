@@ -17,20 +17,24 @@ INSERT INTO venue (
     province,
     country_code,
     url,
-    virtual
+    virtual,
+    longitude, 
+    latitude
 ) VALUES
-    ($1, $2, $3, $4, $5, $6,$7, $8) RETURNING id, name, address, postal_code, city, province, country_code, url, virtual, rating
+    ($1, $2, $3, $4, $5, $6,$7, $8,$9,$10) RETURNING id, name, address, postal_code, city, province, country_code, url, virtual, rating, longitude, latitude
 `
 
 type CreateVenueParams struct {
-	Name        string         `json:"name"`
-	Address     sql.NullString `json:"address"`
-	PostalCode  sql.NullString `json:"postal_code"`
-	City        sql.NullString `json:"city"`
-	Province    sql.NullString `json:"province"`
-	CountryCode sql.NullString `json:"country_code"`
-	Url         sql.NullString `json:"url"`
-	Virtual     bool           `json:"virtual"`
+	Name        string          `json:"name"`
+	Address     sql.NullString  `json:"address"`
+	PostalCode  sql.NullString  `json:"postal_code"`
+	City        sql.NullString  `json:"city"`
+	Province    sql.NullString  `json:"province"`
+	CountryCode sql.NullString  `json:"country_code"`
+	Url         sql.NullString  `json:"url"`
+	Virtual     bool            `json:"virtual"`
+	Longitude   sql.NullFloat64 `json:"longitude"`
+	Latitude    sql.NullFloat64 `json:"latitude"`
 }
 
 func (q *Queries) CreateVenue(ctx context.Context, arg CreateVenueParams) (Venue, error) {
@@ -43,6 +47,8 @@ func (q *Queries) CreateVenue(ctx context.Context, arg CreateVenueParams) (Venue
 		arg.CountryCode,
 		arg.Url,
 		arg.Virtual,
+		arg.Longitude,
+		arg.Latitude,
 	)
 	var i Venue
 	err := row.Scan(
@@ -56,6 +62,8 @@ func (q *Queries) CreateVenue(ctx context.Context, arg CreateVenueParams) (Venue
 		&i.Url,
 		&i.Virtual,
 		&i.Rating,
+		&i.Longitude,
+		&i.Latitude,
 	)
 	return i, err
 }
@@ -66,7 +74,7 @@ INSERT INTO venue (
     url,
     virtual
 ) VALUES
-    ($1, $2, $3) RETURNING id, name, address, postal_code, city, province, country_code, url, virtual, rating
+    ($1, $2, $3) RETURNING id, name, address, postal_code, city, province, country_code, url, virtual, rating, longitude, latitude
 `
 
 type CreateVirtualVenueParams struct {
@@ -89,6 +97,8 @@ func (q *Queries) CreateVirtualVenue(ctx context.Context, arg CreateVirtualVenue
 		&i.Url,
 		&i.Virtual,
 		&i.Rating,
+		&i.Longitude,
+		&i.Latitude,
 	)
 	return i, err
 }
@@ -104,7 +114,7 @@ func (q *Queries) DeleteVenue(ctx context.Context, id int32) error {
 }
 
 const getAllVenues = `-- name: GetAllVenues :many
-SELECT id, name, address, postal_code, city, province, country_code, url, virtual, rating FROM venue
+SELECT id, name, address, postal_code, city, province, country_code, url, virtual, rating, longitude, latitude FROM venue
 ORDER  by id
 `
 
@@ -128,6 +138,8 @@ func (q *Queries) GetAllVenues(ctx context.Context) ([]Venue, error) {
 			&i.Url,
 			&i.Virtual,
 			&i.Rating,
+			&i.Longitude,
+			&i.Latitude,
 		); err != nil {
 			return nil, err
 		}
@@ -143,7 +155,7 @@ func (q *Queries) GetAllVenues(ctx context.Context) ([]Venue, error) {
 }
 
 const getVenue = `-- name: GetVenue :one
-SELECT id, name, address, postal_code, city, province, country_code, url, virtual, rating FROM venue
+SELECT id, name, address, postal_code, city, province, country_code, url, virtual, rating, longitude, latitude FROM venue
 WHERE id = $1 LIMIT 1
 `
 
@@ -161,6 +173,8 @@ func (q *Queries) GetVenue(ctx context.Context, id int32) (Venue, error) {
 		&i.Url,
 		&i.Virtual,
 		&i.Rating,
+		&i.Longitude,
+		&i.Latitude,
 	)
 	return i, err
 }

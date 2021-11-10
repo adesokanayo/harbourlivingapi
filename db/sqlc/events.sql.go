@@ -21,33 +21,23 @@ INSERT INTO events (
     user_id,
     category,
     subcategory,
-    status,
-    image1,
-    image2,
-    image3,
-    video1,
-    video2
+    status
 ) VALUES
-    ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15,$16) RETURNING id, title, description, banner_image, start_date, end_date, venue, type, user_id, category, subcategory, ticket_id, recurring, status, image1, image2, image3, video1, video2, created_at
+    ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) RETURNING id, title, description, banner_image, start_date, end_date, venue, type, user_id, category, subcategory, ticket_id, recurring, status, created_at
 `
 
 type CreateEventParams struct {
-	Title       string         `json:"title"`
-	Description string         `json:"description"`
-	BannerImage string         `json:"banner_image"`
-	StartDate   time.Time      `json:"start_date"`
-	EndDate     time.Time      `json:"end_date"`
-	Venue       int32          `json:"venue"`
-	Type        int32          `json:"type"`
-	UserID      int32          `json:"user_id"`
-	Category    int32          `json:"category"`
-	Subcategory int32          `json:"subcategory"`
-	Status      int32          `json:"status"`
-	Image1      sql.NullString `json:"image1"`
-	Image2      sql.NullString `json:"image2"`
-	Image3      sql.NullString `json:"image3"`
-	Video1      sql.NullString `json:"video1"`
-	Video2      sql.NullString `json:"video2"`
+	Title       string    `json:"title"`
+	Description string    `json:"description"`
+	BannerImage string    `json:"banner_image"`
+	StartDate   time.Time `json:"start_date"`
+	EndDate     time.Time `json:"end_date"`
+	Venue       int32     `json:"venue"`
+	Type        int32     `json:"type"`
+	UserID      int32     `json:"user_id"`
+	Category    int32     `json:"category"`
+	Subcategory int32     `json:"subcategory"`
+	Status      int32     `json:"status"`
 }
 
 func (q *Queries) CreateEvent(ctx context.Context, arg CreateEventParams) (Event, error) {
@@ -63,11 +53,6 @@ func (q *Queries) CreateEvent(ctx context.Context, arg CreateEventParams) (Event
 		arg.Category,
 		arg.Subcategory,
 		arg.Status,
-		arg.Image1,
-		arg.Image2,
-		arg.Image3,
-		arg.Video1,
-		arg.Video2,
 	)
 	var i Event
 	err := row.Scan(
@@ -85,11 +70,6 @@ func (q *Queries) CreateEvent(ctx context.Context, arg CreateEventParams) (Event
 		&i.TicketID,
 		&i.Recurring,
 		&i.Status,
-		&i.Image1,
-		&i.Image2,
-		&i.Image3,
-		&i.Video1,
-		&i.Video2,
 		&i.CreatedAt,
 	)
 	return i, err
@@ -106,7 +86,7 @@ func (q *Queries) DeleteEvent(ctx context.Context, id int32) error {
 }
 
 const getEvent = `-- name: GetEvent :one
-SELECT id, title, description, banner_image, start_date, end_date, venue, type, user_id, category, subcategory, ticket_id, recurring, status, image1, image2, image3, video1, video2, created_at FROM events
+SELECT id, title, description, banner_image, start_date, end_date, venue, type, user_id, category, subcategory, ticket_id, recurring, status, created_at FROM events
 WHERE id = $1 LIMIT 1
 `
 
@@ -128,18 +108,13 @@ func (q *Queries) GetEvent(ctx context.Context, id int32) (Event, error) {
 		&i.TicketID,
 		&i.Recurring,
 		&i.Status,
-		&i.Image1,
-		&i.Image2,
-		&i.Image3,
-		&i.Video1,
-		&i.Video2,
 		&i.CreatedAt,
 	)
 	return i, err
 }
 
 const getEvents = `-- name: GetEvents :many
-SELECT e.id, title, description, banner_image, start_date, end_date, venue, type, user_id, category, subcategory, ticket_id, recurring, status, image1, image2, image3, video1, video2, created_at, v.id, name, address, postal_code, city, province, country_code, url, virtual, rating FROM events e
+SELECT e.id, title, description, banner_image, start_date, end_date, venue, type, user_id, category, subcategory, ticket_id, recurring, status, created_at, v.id, name, address, postal_code, city, province, country_code, url, virtual, rating, longitude, latitude FROM events e
 inner join venue v on  e.venue = v.id
 WHERE category = $1
 and subcategory =$2
@@ -172,11 +147,6 @@ type GetEventsRow struct {
 	TicketID    sql.NullInt32   `json:"ticket_id"`
 	Recurring   sql.NullBool    `json:"recurring"`
 	Status      int32           `json:"status"`
-	Image1      sql.NullString  `json:"image1"`
-	Image2      sql.NullString  `json:"image2"`
-	Image3      sql.NullString  `json:"image3"`
-	Video1      sql.NullString  `json:"video1"`
-	Video2      sql.NullString  `json:"video2"`
 	CreatedAt   sql.NullTime    `json:"created_at"`
 	ID_2        int32           `json:"id_2"`
 	Name        string          `json:"name"`
@@ -188,6 +158,8 @@ type GetEventsRow struct {
 	Url         sql.NullString  `json:"url"`
 	Virtual     bool            `json:"virtual"`
 	Rating      sql.NullFloat64 `json:"rating"`
+	Longitude   sql.NullFloat64 `json:"longitude"`
+	Latitude    sql.NullFloat64 `json:"latitude"`
 }
 
 func (q *Queries) GetEvents(ctx context.Context, arg GetEventsParams) ([]GetEventsRow, error) {
@@ -220,11 +192,6 @@ func (q *Queries) GetEvents(ctx context.Context, arg GetEventsParams) ([]GetEven
 			&i.TicketID,
 			&i.Recurring,
 			&i.Status,
-			&i.Image1,
-			&i.Image2,
-			&i.Image3,
-			&i.Video1,
-			&i.Video2,
 			&i.CreatedAt,
 			&i.ID_2,
 			&i.Name,
@@ -236,6 +203,8 @@ func (q *Queries) GetEvents(ctx context.Context, arg GetEventsParams) ([]GetEven
 			&i.Url,
 			&i.Virtual,
 			&i.Rating,
+			&i.Longitude,
+			&i.Latitude,
 		); err != nil {
 			return nil, err
 		}

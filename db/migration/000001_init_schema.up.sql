@@ -8,6 +8,7 @@ CREATE TABLE "users" (
                          "password" varchar NOT NULL,
                          "password_changed_at" timestamp,
                          "usertype" int NOT NULL,
+                         "avatar_url" varchar,
                          "date_of_birth" timestamp NOT NULL,
                          "created_at" timestamp NOT NULL DEFAULT (now())
 );
@@ -27,6 +28,7 @@ CREATE TABLE "event_type" (
 CREATE TABLE "category" (
                             "id" SERIAL PRIMARY KEY,
                             "desc" varchar NOT NULL,
+                            "image" varchar,
                             "status" int
 );
 
@@ -35,6 +37,18 @@ CREATE TABLE "subcategory" (
                                "category_id" int NOT NULL,
                                "desc" varchar NOT NULL,
                                "status" int
+);
+
+CREATE TABLE "images" (
+                              "id" SERIAL PRIMARY KEY,
+                              "name" varchar,
+                              "url" varchar NOT NULL
+);
+
+CREATE TABLE "videos" (
+                              "id" SERIAL PRIMARY KEY,
+                              "name" varchar,
+                              "url" varchar NOT NULL
 );
 
 CREATE TABLE "events" (
@@ -52,11 +66,6 @@ CREATE TABLE "events" (
                           "ticket_id" int,
                           "recurring" boolean,
                           "status" int NOT NULL,
-                          "image1" varchar,
-                          "image2" varchar,
-                          "image3" varchar,
-                          "video1" varchar,
-                          "video2" varchar,
                           "created_at" timestamp DEFAULT (now())
 );
 
@@ -70,7 +79,9 @@ CREATE TABLE "venue" (
                          "country_code" varchar,
                          "url" varchar,
                          "virtual" boolean NOT NULL,
-                         "rating" float DEFAULT (0.00)
+                         "rating" float DEFAULT (0.00),
+                         "longitude" float, 
+                         "latitude" float 
 );
 
 CREATE TABLE "ticket" (
@@ -113,6 +124,19 @@ CREATE TABLE "events_sponsor" (
                                   "created_at" timestamp NOT NULL DEFAULT (now())
 );
 
+CREATE TABLE "events_videos" (
+                                  "id" SERIAL PRIMARY KEY,
+                                  "event_id" int NOT NULL,
+                                  "video_id" int NOT NULL,
+                                  "created_at" timestamp NOT NULL DEFAULT (now())
+);
+
+CREATE TABLE "events_images" (
+                                  "id" SERIAL PRIMARY KEY,
+                                  "event_id" int NOT NULL,
+                                  "image_id" int NOT NULL,
+                                  "created_at" timestamp NOT NULL DEFAULT (now())
+);
 CREATE TABLE "host" (
                         "id" SERIAL PRIMARY KEY,
                         "user_id" int NOT NULL,
@@ -161,6 +185,11 @@ ALTER TABLE "sponsor" ADD FOREIGN KEY ("user_id") REFERENCES "users" ("id");
 ALTER TABLE "events_sponsor" ADD FOREIGN KEY ("event_id") REFERENCES "events" ("id");
 
 ALTER TABLE "events_sponsor" ADD FOREIGN KEY ("sponsor_id") REFERENCES "sponsor" ("id");
+ALTER TABLE "events_images" ADD FOREIGN KEY ("image_id") REFERENCES "images" ("id");
+ALTER TABLE "events_images" ADD FOREIGN KEY ("event_id") REFERENCES "events" ("id");
+
+ALTER TABLE "events_videos" ADD FOREIGN KEY ("video_id") REFERENCES "videos" ("id");
+ALTER TABLE "events_videos" ADD FOREIGN KEY ("event_id") REFERENCES "events" ("id");
 
 ALTER TABLE "host" ADD FOREIGN KEY ("user_id") REFERENCES "users" ("id");
 
@@ -239,3 +268,13 @@ VALUES
     ( 'Rejected'),
     ( 'Completed'),
     ( 'Deleted');
+
+
+
+INSERT  INTO images ("name","url" )
+VALUES
+    ( 'face', 'https://www.gravatar.com/avatar/205e460b479e2e5b48aec07710c08d50');
+   
+INSERT  INTO videos ("name","url" )
+VALUES
+    ( 'face', 'https://www.gravatar.com/avatar/205e460b479e2e5b48aec07710c08d50');

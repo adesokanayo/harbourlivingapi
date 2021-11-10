@@ -3,12 +3,13 @@ package api
 import (
 	"database/sql"
 	"errors"
-	db "github.com/BigListRyRy/harbourlivingapi/db/sqlc"
-	"github.com/BigListRyRy/harbourlivingapi/util"
-	"github.com/gin-gonic/gin"
 	"net/http"
 	"strings"
 	"time"
+
+	db "github.com/BigListRyRy/harbourlivingapi/db/sqlc"
+	"github.com/BigListRyRy/harbourlivingapi/util"
+	"github.com/gin-gonic/gin"
 )
 
 type CreateUserRequest struct {
@@ -23,7 +24,7 @@ type CreateUserRequest struct {
 }
 
 type GetUserRequest struct {
-	ID int32 `uri:"id",binding:"required,min=1"`
+	ID int32 `uri:"id",binding:"required",min=1;`
 }
 
 type loginUserRequest struct {

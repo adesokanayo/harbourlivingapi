@@ -7,9 +7,11 @@ INSERT INTO venue (
     province,
     country_code,
     url,
-    virtual
+    virtual,
+    longitude, 
+    latitude
 ) VALUES
-    ($1, $2, $3, $4, $5, $6,$7, $8) RETURNING *;
+    ($1, $2, $3, $4, $5, $6,$7, $8,$9,$10) RETURNING *;
 
 -- name: GetVenue :one
 SELECT * FROM venue

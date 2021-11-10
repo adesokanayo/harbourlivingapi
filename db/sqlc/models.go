@@ -8,32 +8,28 @@ import (
 )
 
 type Category struct {
-	ID     int32         `json:"id"`
-	Desc   string        `json:"desc"`
-	Status sql.NullInt32 `json:"status"`
+	ID     int32          `json:"id"`
+	Desc   string         `json:"desc"`
+	Image  sql.NullString `json:"image"`
+	Status sql.NullInt32  `json:"status"`
 }
 
 type Event struct {
-	ID          int32          `json:"id"`
-	Title       string         `json:"title"`
-	Description string         `json:"description"`
-	BannerImage string         `json:"banner_image"`
-	StartDate   time.Time      `json:"start_date"`
-	EndDate     time.Time      `json:"end_date"`
-	Venue       int32          `json:"venue"`
-	Type        int32          `json:"type"`
-	UserID      int32          `json:"user_id"`
-	Category    int32          `json:"category"`
-	Subcategory int32          `json:"subcategory"`
-	TicketID    sql.NullInt32  `json:"ticket_id"`
-	Recurring   sql.NullBool   `json:"recurring"`
-	Status      int32          `json:"status"`
-	Image1      sql.NullString `json:"image1"`
-	Image2      sql.NullString `json:"image2"`
-	Image3      sql.NullString `json:"image3"`
-	Video1      sql.NullString `json:"video1"`
-	Video2      sql.NullString `json:"video2"`
-	CreatedAt   sql.NullTime   `json:"created_at"`
+	ID          int32         `json:"id"`
+	Title       string        `json:"title"`
+	Description string        `json:"description"`
+	BannerImage string        `json:"banner_image"`
+	StartDate   time.Time     `json:"start_date"`
+	EndDate     time.Time     `json:"end_date"`
+	Venue       int32         `json:"venue"`
+	Type        int32         `json:"type"`
+	UserID      int32         `json:"user_id"`
+	Category    int32         `json:"category"`
+	Subcategory int32         `json:"subcategory"`
+	TicketID    sql.NullInt32 `json:"ticket_id"`
+	Recurring   sql.NullBool  `json:"recurring"`
+	Status      int32         `json:"status"`
+	CreatedAt   sql.NullTime  `json:"created_at"`
 }
 
 type EventType struct {
@@ -46,6 +42,13 @@ type EventsHost struct {
 	ID        int32     `json:"id"`
 	EventID   int32     `json:"event_id"`
 	HostID    int32     `json:"host_id"`
+	CreatedAt time.Time `json:"created_at"`
+}
+
+type EventsImage struct {
+	ID        int32     `json:"id"`
+	EventID   int32     `json:"event_id"`
+	ImageID   int32     `json:"image_id"`
 	CreatedAt time.Time `json:"created_at"`
 }
 
@@ -62,10 +65,23 @@ type EventsStatus struct {
 	CreatedAt time.Time      `json:"created_at"`
 }
 
+type EventsVideo struct {
+	ID        int32     `json:"id"`
+	EventID   int32     `json:"event_id"`
+	VideoID   int32     `json:"video_id"`
+	CreatedAt time.Time `json:"created_at"`
+}
+
 type Host struct {
 	ID        int32     `json:"id"`
 	UserID    int32     `json:"user_id"`
 	CreatedAt time.Time `json:"created_at"`
+}
+
+type Image struct {
+	ID   int32          `json:"id"`
+	Name sql.NullString `json:"name"`
+	Url  string         `json:"url"`
 }
 
 type Sponsor struct {
@@ -97,17 +113,18 @@ type TicketStatus struct {
 }
 
 type User struct {
-	ID                int32        `json:"id"`
-	Title             string       `json:"title"`
-	FirstName         string       `json:"first_name"`
-	LastName          string       `json:"last_name"`
-	Email             string       `json:"email"`
-	Username          string       `json:"username"`
-	Password          string       `json:"password"`
-	PasswordChangedAt sql.NullTime `json:"password_changed_at"`
-	Usertype          int32        `json:"usertype"`
-	DateOfBirth       time.Time    `json:"date_of_birth"`
-	CreatedAt         time.Time    `json:"created_at"`
+	ID                int32          `json:"id"`
+	Title             string         `json:"title"`
+	FirstName         string         `json:"first_name"`
+	LastName          string         `json:"last_name"`
+	Email             string         `json:"email"`
+	Username          string         `json:"username"`
+	Password          string         `json:"password"`
+	PasswordChangedAt sql.NullTime   `json:"password_changed_at"`
+	Usertype          int32          `json:"usertype"`
+	AvatarUrl         sql.NullString `json:"avatar_url"`
+	DateOfBirth       time.Time      `json:"date_of_birth"`
+	CreatedAt         time.Time      `json:"created_at"`
 }
 
 type UserTicket struct {
@@ -139,4 +156,12 @@ type Venue struct {
 	Url         sql.NullString  `json:"url"`
 	Virtual     bool            `json:"virtual"`
 	Rating      sql.NullFloat64 `json:"rating"`
+	Longitude   sql.NullFloat64 `json:"longitude"`
+	Latitude    sql.NullFloat64 `json:"latitude"`
+}
+
+type Video struct {
+	ID   int32          `json:"id"`
+	Name sql.NullString `json:"name"`
+	Url  string         `json:"url"`
 }

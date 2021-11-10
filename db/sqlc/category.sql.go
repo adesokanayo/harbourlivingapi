@@ -9,7 +9,7 @@ import (
 )
 
 const getCategories = `-- name: GetCategories :many
-SELECT id, "desc", status FROM category
+SELECT id, "desc", image, status FROM category
 `
 
 func (q *Queries) GetCategories(ctx context.Context) ([]Category, error) {
@@ -21,7 +21,12 @@ func (q *Queries) GetCategories(ctx context.Context) ([]Category, error) {
 	items := []Category{}
 	for rows.Next() {
 		var i Category
-		if err := rows.Scan(&i.ID, &i.Desc, &i.Status); err != nil {
+		if err := rows.Scan(
+			&i.ID,
+			&i.Desc,
+			&i.Image,
+			&i.Status,
+		); err != nil {
 			return nil, err
 		}
 		items = append(items, i)
@@ -36,14 +41,19 @@ func (q *Queries) GetCategories(ctx context.Context) ([]Category, error) {
 }
 
 const getCategory = `-- name: GetCategory :one
-SELECT id, "desc", status FROM category
+SELECT id, "desc", image, status FROM category
 WHERE id = $1 LIMIT 1
 `
 
 func (q *Queries) GetCategory(ctx context.Context, id int32) (Category, error) {
 	row := q.db.QueryRowContext(ctx, getCategory, id)
 	var i Category
-	err := row.Scan(&i.ID, &i.Desc, &i.Status)
+	err := row.Scan(
+		&i.ID,
+		&i.Desc,
+		&i.Image,
+		&i.Status,
+	)
 	return i, err
 }
 

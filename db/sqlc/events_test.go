@@ -37,8 +37,6 @@ func createRandomEvent(t *testing.T) Event {
 	require.Equal(t, arg.UserID, event.UserID)
 	require.Equal(t, arg.Category, event.Category)
 	require.Equal(t, arg.Subcategory, event.Subcategory)
-	require.Equal(t, arg.Image1, event.Image1)
-	require.Equal(t, arg.Image2, event.Image2)
 	require.NotZero(t, event.ID)
 	require.NotZero(t, event.StartDate)
 	require.NotZero(t, event.EndDate)
@@ -59,7 +57,6 @@ func TestGetEvent(t *testing.T) {
 	require.Equal(t, event1.Title, event2.Title)
 	require.Equal(t, event1.Description, event2.Description)
 	require.Equal(t, event1.BannerImage, event2.BannerImage)
-	require.Equal(t, event1.Image2, event2.Image2)
 }
 
 func TestGetAllEvents(t *testing.T) {

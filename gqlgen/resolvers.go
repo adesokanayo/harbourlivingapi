@@ -15,13 +15,15 @@ import (
 	"github.com/pkg/errors"
 )
 
-var store *db.Store
+var (
+	store *db.Store
+)
 var tokenMaker token.Maker
 
 func init() {
 	config, err := util.LoadConfig(".")
 	if err != nil {
-		log.Fatal("cannot local config", err)
+		log.Fatal("cannot find config ", err)
 	}
 
 	conn, err := sql.Open(config.DBDriver, config.DBSource)
@@ -52,6 +54,7 @@ func (r *mutationResolver) CreateVenue(ctx context.Context, input NewVenue) (*Ve
 			},
 			Virtual: false,
 		}
+
 		venue, err := store.CreateVirtualVenue(ctx, createVirtual)
 		if err != nil {
 			return nil, err
@@ -99,6 +102,16 @@ func (r *mutationResolver) CreateVenue(ctx context.Context, input NewVenue) (*Ve
 		}
 	}
 
+	if input.Longitude != nil && input.Latitude != nil {
+		createVenueReq.Longitude = sql.NullFloat64{
+			Float64: *input.Longitude,
+			Valid:   true,
+		}
+		createVenueReq.Latitude = sql.NullFloat64{
+			Float64: *input.Latitude,
+			Valid:   true,
+		}
+	}
 	venue, err := store.CreateVenue(ctx, createVenueReq)
 	if err != nil {
 		return nil, err
@@ -125,6 +138,12 @@ func (r *mutationResolver) CreateVenue(ctx context.Context, input NewVenue) (*Ve
 	if venue.Rating.Valid {
 		result.Rating = venue.Rating.Float64
 	}
+	if venue.Longitude.Valid {
+		result.Longitude = &venue.Longitude.Float64
+	}
+	if venue.Latitude.Valid {
+		result.Latitude = &venue.Latitude.Float64
+	}
 
 	return &result, nil
 }
@@ -144,6 +163,7 @@ func (r *mutationResolver) CreateUser(ctx context.Context, input NewUser) (*User
 		Username:  input.Username,
 		Usertype:  int32(input.Usertype),
 	}
+
 	user, err := store.CreateUser(context.Background(), arg)
 	if err != nil {
 		return nil, err
@@ -183,11 +203,6 @@ func (r *mutationResolver) CreateEvent(ctx context.Context, input NewEvent) (*Ev
 		Category:    int32(input.Category),
 		Subcategory: int32(input.Subcategory),
 		Status:      int32(input.Status),
-		Image1:      sql.NullString{},
-		Image2:      sql.NullString{},
-		Image3:      sql.NullString{},
-		Video1:      sql.NullString{},
-		Video2:      sql.NullString{},
 	}
 
 	//Use Transaction
@@ -205,8 +220,7 @@ func (r *mutationResolver) CreateEvent(ctx context.Context, input NewEvent) (*Ev
 			return err
 		}
 
-		//Link Host with Event
-
+		// link Host with Event
 		arg := db.LinkHostToEventParams{
 			HostID:  host.ID,
 			EventID: event.ID,
@@ -214,7 +228,82 @@ func (r *mutationResolver) CreateEvent(ctx context.Context, input NewEvent) (*Ev
 
 		linkedEventHost, err := store.LinkHostToEvent(ctx, arg)
 		if err != nil {
-			return nil
+			return err
+		}
+
+		//create images
+		var images []*Image
+		if input.Images != nil {
+			for _, i := range input.Images {
+
+				arg := db.CreateImageParams{
+					Name: sql.NullString{
+						String: i.Name,
+						Valid:  true},
+					Url: *i.URL,
+				}
+
+				image, err := store.CreateImage(ctx, arg)
+				if err != nil {
+					return err
+				}
+
+				//link Image to Events
+				argImageLink := db.LinkImageToEventParams{
+					EventID: event.ID,
+					ImageID: image.ID,
+				}
+
+				errs := store.LinkImageToEvent(ctx, argImageLink)
+				if errs != nil {
+					return errs
+				}
+
+				images = append(images, &Image{
+					ID:      image.ID,
+					EventID: event.ID,
+					Name:    image.Name.String,
+					URL:     &image.Url,
+				})
+
+			}
+		}
+
+		//create vidoes and link to Event
+		var videos []*Video
+		if input.Vidoes != nil {
+			for _, i := range input.Vidoes {
+
+				arg := db.CreateVideoParams{
+					Name: sql.NullString{
+						String: i.Name,
+						Valid:  true},
+					Url: *i.URL,
+				}
+
+				video, err := store.CreateVideo(ctx, arg)
+				if err != nil {
+					return err
+				}
+
+				//link Video to Events
+				argVideoLink := db.LinkVideoToEventParams{
+					EventID: event.ID,
+					VideoID: video.ID,
+				}
+
+				errs := store.LinkVideoToEvent(ctx, argVideoLink)
+				if errs != nil {
+					return errs
+				}
+
+				videos = append(videos, &Video{
+					ID:      video.ID,
+					EventID: event.ID,
+					Name:    video.Name.String,
+					URL:     &video.Url,
+				})
+			}
 		}
 
 		result = &Event{
@@ -227,6 +316,8 @@ func (r *mutationResolver) CreateEvent(ctx context.Context, input NewEvent) (*Ev
 			Subcategory: int(event.Subcategory),
 			Category:    int(event.Category),
 			HostID:      int(linkedEventHost.HostID),
+			Images:      images,
+			Videos:      videos,
 		}
 		return nil
 	})
@@ -331,12 +422,22 @@ func (r *queryResolver) GetVenue(ctx context.Context, input int32) (*Venue, erro
 	if venue.CountryCode.Valid {
 		result.CountryCode = &venue.CountryCode.String
 	}
+
+	if venue.Latitude.Valid {
+		result.Latitude = &venue.Latitude.Float64
+	}
+
+	if venue.Longitude.Valid {
+		result.Longitude = &venue.Longitude.Float64
+	}
 	return &result, nil
 }
 
 func (r *queryResolver) GetEvent(ctx context.Context, input int32) (*Event, error) {
 
-	var result []*Sponsor
+	var sponsors []*Sponsor
+	var images []*Image
+	var videos []*Video
 	event, err := store.GetEvent(ctx, input)
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -344,15 +445,43 @@ func (r *queryResolver) GetEvent(ctx context.Context, input int32) (*Event, erro
 		}
 		return nil, err
 	}
-	//Fetch  Sponsors
 
+	//Fetch  Sponsors
 	eventSponsors, err := store.GetSponsorByEvent(ctx, input)
 	if err != nil {
 		return nil, err
 	}
 
 	for _, s := range eventSponsors {
-		result = append(result, &Sponsor{ID: s.SponsorID})
+		sponsors = append(sponsors, &Sponsor{ID: s.SponsorID})
+	}
+
+	// fetch images
+	eventImages, err := store.GetImagesByEvent(ctx, input)
+	if err != nil {
+		return nil, err
+	}
+	for _, i := range eventImages {
+		images = append(images, &Image{
+			ID:      i.ID,
+			EventID: i.EventID,
+			Name:    i.Name.String,
+			URL:     &i.Url,
+		})
+	}
+
+	// fetch videos
+	eventVideos, err := store.GetVideosByEvent(ctx, input)
+	if err != nil {
+		return nil, err
+	}
+	for _, i := range eventVideos {
+		videos = append(videos, &Video{
+			ID:      i.ID,
+			EventID: i.EventID,
+			Name:    i.Name.String,
+			URL:     &i.Url,
+		})
 	}
 
 	return &Event{
@@ -367,13 +496,10 @@ func (r *queryResolver) GetEvent(ctx context.Context, input int32) (*Event, erro
 		UserID:      event.UserID,
 		Category:    int(event.Category),
 		Subcategory: int(event.Subcategory),
-		Sponsors:    result,
+		Sponsors:    sponsors,
 		Status:      int(event.Status),
-		Image1:      nil,
-		Image2:      nil,
-		Image3:      nil,
-		Video1:      nil,
-		Video2:      nil,
+		Images:      images,
+		Videos:      videos,
 	}, nil
 }
 
@@ -393,6 +519,7 @@ func (r *queryResolver) GetEvents(ctx context.Context, input GetEvent) ([]Event,
 	if err != nil {
 		return nil, err
 	}
+
 	// Get all the Sponsors for these events
 
 	for _, event := range events {
@@ -442,6 +569,7 @@ func (r *queryResolver) GetUsers(ctx context.Context) ([]User, error) {
 			Username:  u.Username,
 			Password:  u.Password,
 			Usertype:  int(u.Usertype),
+			Avatar:    u.AvatarUrl.String,
 		})
 	}
 	return AllUsers, nil
@@ -547,6 +675,7 @@ func (q *queryResolver) GetCategories(ctx context.Context) ([]Category, error) {
 		result = append(result, Category{
 			v.ID,
 			v.Desc,
+			v.Image.String,
 			int(v.Status.Int32),
 		})
 	}
