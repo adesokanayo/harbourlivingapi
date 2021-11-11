@@ -1155,6 +1155,7 @@ input NewUser {
         username: String!
         password: String!
         usertype: Int!
+        avatar: String!
 }
 
 type Sponsor {
@@ -6321,6 +6322,14 @@ func (ec *executionContext) unmarshalInputNewUser(ctx context.Context, obj inter
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("usertype"))
 			it.Usertype, err = ec.unmarshalNInt2int(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "avatar":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("avatar"))
+			it.Avatar, err = ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}

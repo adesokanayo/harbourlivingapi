@@ -115,6 +115,7 @@ type NewUser struct {
 	Username  string `json:"username"`
 	Password  string `json:"password"`
 	Usertype  int    `json:"usertype"`
+	Avatar    string `json:"avatar"`
 }
 
 type NewVenue struct {

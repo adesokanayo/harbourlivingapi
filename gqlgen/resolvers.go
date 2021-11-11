@@ -154,6 +154,7 @@ func (r *mutationResolver) CreateUser(ctx context.Context, input NewUser) (*User
 	if err != nil {
 		return nil, err
 	}
+
 	arg := db.CreateUserParams{
 		Title:     input.Title,
 		FirstName: input.FirstName,
@@ -162,6 +163,7 @@ func (r *mutationResolver) CreateUser(ctx context.Context, input NewUser) (*User
 		Password:  hashedPassword,
 		Username:  input.Username,
 		Usertype:  int32(input.Usertype),
+		AvatarUrl: sql.NullString{String: input.Avatar},
 	}
 
 	user, err := store.CreateUser(context.Background(), arg)

@@ -1,29 +1,28 @@
---name: GetSponsors: many
-SELECT * FROM sponsor
-where user_id = $1;
+-- name: CreateUser :one
+INSERT INTO users (
+    title,
+    first_name,
+    last_name,
+    email,
+    password,
+    username,
+    usertype,
+    date_of_birth,
+    avatar_url
+) VALUES
+    ($1, $2, $3, $4, $5, $6, $7,$8,$9) RETURNING *;
 
---name: CreateSponsor: one
-INSERT INTO sponsor ( user_id )
-VALUES ($1) RETURNING *;
+-- name: GetUser :one
+SELECT * FROM users
+WHERE id = $1 LIMIT 1;
 
---name: DeleteSponsor: exec
-DELETE  from sponsor where
-user_id = $1;
+-- name: GetUsername :one
+SELECT * FROM users
+WHERE username = $1 LIMIT 1;
+-- name: GetAllUsers :many
+SELECT * FROM users
+ORDER  by id;
 
---name: GetSponsorsForEvents: many
-SELECT * FROM events_sponsor
-where sponsor_id = $1 and event_id = $2;--name: GetSponsors: many
-SELECT * FROM sponsor
-where user_id = $1;
-
---name: CreateSponsor: one
-INSERT INTO sponsor ( user_id )
-VALUES ($1) RETURNING *;
-
---name: DeleteSponsor: exec
-DELETE  from sponsor where
-user_id = $1;
-
---name: GetSponsorsForEvents: many
-SELECT * FROM events_sponsor
-where sponsor_id = $1 and event_id = $2;
+-- name: DeleteUser :exec
+DELETE FROM users
+WHERE id = $1;

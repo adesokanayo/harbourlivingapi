@@ -5,6 +5,7 @@ package db
 
 import (
 	"context"
+	"database/sql"
 	"time"
 )
 
@@ -17,20 +18,22 @@ INSERT INTO users (
     password,
     username,
     usertype,
-    date_of_birth
+    date_of_birth,
+    avatar_url
 ) VALUES
-    ($1, $2, $3, $4, $5, $6, $7,$8) RETURNING id, title, first_name, last_name, email, username, password, password_changed_at, usertype, date_of_birth, created_at
+    ($1, $2, $3, $4, $5, $6, $7,$8,$9) RETURNING id, title, first_name, last_name, email, username, password, password_changed_at, usertype, avatar_url, date_of_birth, created_at
 `
 
 type CreateUserParams struct {
-	Title       string    `json:"title"`
-	FirstName   string    `json:"first_name"`
-	LastName    string    `json:"last_name"`
-	Email       string    `json:"email"`
-	Password    string    `json:"password"`
-	Username    string    `json:"username"`
-	Usertype    int32     `json:"usertype"`
-	DateOfBirth time.Time `json:"date_of_birth"`
+	Title       string         `json:"title"`
+	FirstName   string         `json:"first_name"`
+	LastName    string         `json:"last_name"`
+	Email       string         `json:"email"`
+	Password    string         `json:"password"`
+	Username    string         `json:"username"`
+	Usertype    int32          `json:"usertype"`
+	DateOfBirth time.Time      `json:"date_of_birth"`
+	AvatarUrl   sql.NullString `json:"avatar_url"`
 }
 
 func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, error) {
@@ -43,6 +46,7 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, e
 		arg.Username,
 		arg.Usertype,
 		arg.DateOfBirth,
+		arg.AvatarUrl,
 	)
 	var i User
 	err := row.Scan(
@@ -55,6 +59,7 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, e
 		&i.Password,
 		&i.PasswordChangedAt,
 		&i.Usertype,
+		&i.AvatarUrl,
 		&i.DateOfBirth,
 		&i.CreatedAt,
 	)
@@ -72,7 +77,7 @@ func (q *Queries) DeleteUser(ctx context.Context, id int32) error {
 }
 
 const getAllUsers = `-- name: GetAllUsers :many
-SELECT id, title, first_name, last_name, email, username, password, password_changed_at, usertype, date_of_birth, created_at FROM users
+SELECT id, title, first_name, last_name, email, username, password, password_changed_at, usertype, avatar_url, date_of_birth, created_at FROM users
 ORDER  by id
 `
 
@@ -95,6 +100,7 @@ func (q *Queries) GetAllUsers(ctx context.Context) ([]User, error) {
 			&i.Password,
 			&i.PasswordChangedAt,
 			&i.Usertype,
+			&i.AvatarUrl,
 			&i.DateOfBirth,
 			&i.CreatedAt,
 		); err != nil {
@@ -112,7 +118,7 @@ func (q *Queries) GetAllUsers(ctx context.Context) ([]User, error) {
 }
 
 const getUser = `-- name: GetUser :one
-SELECT id, title, first_name, last_name, email, username, password, password_changed_at, usertype, date_of_birth, created_at FROM users
+SELECT id, title, first_name, last_name, email, username, password, password_changed_at, usertype, avatar_url, date_of_birth, created_at FROM users
 WHERE id = $1 LIMIT 1
 `
 
@@ -129,6 +135,7 @@ func (q *Queries) GetUser(ctx context.Context, id int32) (User, error) {
 		&i.Password,
 		&i.PasswordChangedAt,
 		&i.Usertype,
+		&i.AvatarUrl,
 		&i.DateOfBirth,
 		&i.CreatedAt,
 	)
@@ -136,7 +143,7 @@ func (q *Queries) GetUser(ctx context.Context, id int32) (User, error) {
 }
 
 const getUsername = `-- name: GetUsername :one
-SELECT id, title, first_name, last_name, email, username, password, password_changed_at, usertype, date_of_birth, created_at FROM users
+SELECT id, title, first_name, last_name, email, username, password, password_changed_at, usertype, avatar_url, date_of_birth, created_at FROM users
 WHERE username = $1 LIMIT 1
 `
 
@@ -153,6 +160,7 @@ func (q *Queries) GetUsername(ctx context.Context, username string) (User, error
 		&i.Password,
 		&i.PasswordChangedAt,
 		&i.Usertype,
+		&i.AvatarUrl,
 		&i.DateOfBirth,
 		&i.CreatedAt,
 	)
