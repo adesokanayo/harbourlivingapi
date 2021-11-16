@@ -156,13 +156,13 @@ CREATE TABLE "events_status" (
                                  "created_at" timestamp NOT NULL DEFAULT (now())
 );
 
-ALTER TABLE "users" ADD FOREIGN KEY ("usertype") REFERENCES "usertype" ("id");
+ALTER TABLE "users" ADD FOREIGN KEY ("usertype") REFERENCES "users_type" ("id");
 
 ALTER TABLE "subcategories" ADD FOREIGN KEY ("category_id") REFERENCES "categories" ("id");
 
-ALTER TABLE "events" ADD FOREIGN KEY ("venue") REFERENCES "venue" ("id");
+ALTER TABLE "events" ADD FOREIGN KEY ("venue") REFERENCES "venues" ("id");
 
-ALTER TABLE "events" ADD FOREIGN KEY ("type") REFERENCES "event_type" ("id");
+ALTER TABLE "events" ADD FOREIGN KEY ("type") REFERENCES "events_type" ("id");
 
 ALTER TABLE "events" ADD FOREIGN KEY ("user_id") REFERENCES "users" ("id");
 
@@ -174,11 +174,11 @@ ALTER TABLE "events" ADD FOREIGN KEY ("status") REFERENCES "events_status" ("id"
 
 ALTER TABLE "tickets" ADD FOREIGN KEY ("event_id") REFERENCES "events" ("id");
 
-ALTER TABLE "tickets_status" ADD FOREIGN KEY ("status") REFERENCES "ticket_status" ("id");
+ALTER TABLE "tickets_status" ADD FOREIGN KEY ("status") REFERENCES "tickets_status" ("id");
 
 ALTER TABLE "users_tickets" ADD FOREIGN KEY ("user_id") REFERENCES "users" ("id");
 
-ALTER TABLE "users_tickets" ADD FOREIGN KEY ("ticket_id") REFERENCES "ticket" ("id");
+ALTER TABLE "users_tickets" ADD FOREIGN KEY ("ticket_id") REFERENCES "tickets" ("id");
 
 ALTER TABLE "sponsors" ADD FOREIGN KEY ("user_id") REFERENCES "users" ("id");
 
@@ -217,7 +217,7 @@ CREATE INDEX ON "events" ("type");
 
 
 
-INSERT  INTO userstype ( "desc", "status")
+INSERT  INTO users_type ( "desc", "status")
 VALUES
     ('Attendee',1),
     ('Host',1),
