@@ -13,26 +13,26 @@ CREATE TABLE "users" (
                          "created_at" timestamp NOT NULL DEFAULT (now())
 );
 
-CREATE TABLE "usertype" (
+CREATE TABLE "users_type" (
                             "id" SERIAL PRIMARY KEY,
                             "desc" varchar NOT NULL,
                             "status" int
 );
 
-CREATE TABLE "event_type" (
+CREATE TABLE "events_type" (
                               "id" SERIAL PRIMARY KEY,
                               "desc" varchar NOT NULL,
                               "status" int
 );
 
-CREATE TABLE "category" (
+CREATE TABLE "categories" (
                             "id" SERIAL PRIMARY KEY,
                             "desc" varchar NOT NULL,
                             "image" varchar,
                             "status" int
 );
 
-CREATE TABLE "subcategory" (
+CREATE TABLE "subcategories" (
                                "id" SERIAL PRIMARY KEY,
                                "category_id" int NOT NULL,
                                "desc" varchar NOT NULL,
@@ -69,7 +69,7 @@ CREATE TABLE "events" (
                           "created_at" timestamp DEFAULT (now())
 );
 
-CREATE TABLE "venue" (
+CREATE TABLE "venues" (
                          "id" SERIAL PRIMARY KEY,
                          "name" varchar NOT NULL,
                          "address" varchar,
@@ -84,7 +84,7 @@ CREATE TABLE "venue" (
                          "latitude" float 
 );
 
-CREATE TABLE "ticket" (
+CREATE TABLE "tickets" (
                           "id" SERIAL PRIMARY KEY,
                           "name" varchar NOT NULL,
                           "event_id" int NOT NULL,
@@ -93,13 +93,13 @@ CREATE TABLE "ticket" (
                           "status" int NOT NULL
 );
 
-CREATE TABLE "ticket_status" (
+CREATE TABLE "tickets_status" (
                                  "id" SERIAL PRIMARY KEY,
                                  "desc" varchar,
                                  "status" int NOT NULL
 );
 
-CREATE TABLE "user_tickets" (
+CREATE TABLE "users_tickets" (
                                 "id" SERIAL PRIMARY KEY,
                                 "user_id" int NOT NULL,
                                 "ticket_id" int NOT NULL,
@@ -111,13 +111,13 @@ CREATE TABLE "user_tickets" (
                                 "created_at" timestamp NOT NULL DEFAULT (now())
 );
 
-CREATE TABLE "sponsor" (
+CREATE TABLE "sponsors" (
                            "id" SERIAL PRIMARY KEY,
                            "user_id" int NOT NULL,
                            "created_at" timestamp NOT NULL DEFAULT (now())
 );
 
-CREATE TABLE "events_sponsor" (
+CREATE TABLE "events_sponsors" (
                                   "id" SERIAL PRIMARY KEY,
                                   "event_id" int NOT NULL,
                                   "sponsor_id" int NOT NULL,
@@ -137,13 +137,13 @@ CREATE TABLE "events_images" (
                                   "image_id" int NOT NULL,
                                   "created_at" timestamp NOT NULL DEFAULT (now())
 );
-CREATE TABLE "host" (
+CREATE TABLE "hosts" (
                         "id" SERIAL PRIMARY KEY,
                         "user_id" int NOT NULL,
                         "created_at" timestamp NOT NULL DEFAULT (now())
 );
 
-CREATE TABLE "events_host" (
+CREATE TABLE "events_hosts" (
                                "id" SERIAL PRIMARY KEY,
                                "event_id" int NOT NULL,
                                "host_id" int NOT NULL,
@@ -158,7 +158,7 @@ CREATE TABLE "events_status" (
 
 ALTER TABLE "users" ADD FOREIGN KEY ("usertype") REFERENCES "usertype" ("id");
 
-ALTER TABLE "subcategory" ADD FOREIGN KEY ("category_id") REFERENCES "category" ("id");
+ALTER TABLE "subcategories" ADD FOREIGN KEY ("category_id") REFERENCES "categories" ("id");
 
 ALTER TABLE "events" ADD FOREIGN KEY ("venue") REFERENCES "venue" ("id");
 
@@ -166,36 +166,36 @@ ALTER TABLE "events" ADD FOREIGN KEY ("type") REFERENCES "event_type" ("id");
 
 ALTER TABLE "events" ADD FOREIGN KEY ("user_id") REFERENCES "users" ("id");
 
-ALTER TABLE "events" ADD FOREIGN KEY ("category") REFERENCES "category" ("id");
+ALTER TABLE "events" ADD FOREIGN KEY ("category") REFERENCES "categories" ("id");
 
-ALTER TABLE "events" ADD FOREIGN KEY ("subcategory") REFERENCES "subcategory" ("id");
+ALTER TABLE "events" ADD FOREIGN KEY ("subcategory") REFERENCES "subcategories" ("id");
 
 ALTER TABLE "events" ADD FOREIGN KEY ("status") REFERENCES "events_status" ("id");
 
-ALTER TABLE "ticket" ADD FOREIGN KEY ("event_id") REFERENCES "events" ("id");
+ALTER TABLE "tickets" ADD FOREIGN KEY ("event_id") REFERENCES "events" ("id");
 
-ALTER TABLE "ticket_status" ADD FOREIGN KEY ("status") REFERENCES "ticket_status" ("id");
+ALTER TABLE "tickets_status" ADD FOREIGN KEY ("status") REFERENCES "ticket_status" ("id");
 
-ALTER TABLE "user_tickets" ADD FOREIGN KEY ("user_id") REFERENCES "users" ("id");
+ALTER TABLE "users_tickets" ADD FOREIGN KEY ("user_id") REFERENCES "users" ("id");
 
-ALTER TABLE "user_tickets" ADD FOREIGN KEY ("ticket_id") REFERENCES "ticket" ("id");
+ALTER TABLE "users_tickets" ADD FOREIGN KEY ("ticket_id") REFERENCES "ticket" ("id");
 
-ALTER TABLE "sponsor" ADD FOREIGN KEY ("user_id") REFERENCES "users" ("id");
+ALTER TABLE "sponsors" ADD FOREIGN KEY ("user_id") REFERENCES "users" ("id");
 
-ALTER TABLE "events_sponsor" ADD FOREIGN KEY ("event_id") REFERENCES "events" ("id");
+ALTER TABLE "events_sponsors" ADD FOREIGN KEY ("event_id") REFERENCES "events" ("id");
 
-ALTER TABLE "events_sponsor" ADD FOREIGN KEY ("sponsor_id") REFERENCES "sponsor" ("id");
+ALTER TABLE "events_sponsors" ADD FOREIGN KEY ("sponsor_id") REFERENCES "sponsors" ("id");
 ALTER TABLE "events_images" ADD FOREIGN KEY ("image_id") REFERENCES "images" ("id");
 ALTER TABLE "events_images" ADD FOREIGN KEY ("event_id") REFERENCES "events" ("id");
 
 ALTER TABLE "events_videos" ADD FOREIGN KEY ("video_id") REFERENCES "videos" ("id");
 ALTER TABLE "events_videos" ADD FOREIGN KEY ("event_id") REFERENCES "events" ("id");
 
-ALTER TABLE "host" ADD FOREIGN KEY ("user_id") REFERENCES "users" ("id");
+ALTER TABLE "hosts" ADD FOREIGN KEY ("user_id") REFERENCES "users" ("id");
 
-ALTER TABLE "events_host" ADD FOREIGN KEY ("event_id") REFERENCES "events" ("id");
+ALTER TABLE "events_hosts" ADD FOREIGN KEY ("event_id") REFERENCES "events" ("id");
 
-ALTER TABLE "events_host" ADD FOREIGN KEY ("host_id") REFERENCES "host" ("id");
+ALTER TABLE "events_hosts" ADD FOREIGN KEY ("host_id") REFERENCES "hosts" ("id");
 
 CREATE INDEX ON "users" ("id");
 
@@ -217,19 +217,19 @@ CREATE INDEX ON "events" ("type");
 
 
 
-INSERT  INTO usertype ( "desc", "status")
+INSERT  INTO userstype ( "desc", "status")
 VALUES
     ('Attendee',1),
     ('Host',1),
     ('Sponsor',1);
 
-INSERT  INTO event_type ("desc", "status")
+INSERT  INTO events_type ("desc", "status")
 VALUES
     ( 'Free',1),
     ( 'Paid',1),
     ( 'Special',1);
 
-INSERT  INTO category ( "desc", "status")
+INSERT  INTO categories ( "desc", "status")
 VALUES
     ('Education',1),
     ('Food ',1),
@@ -238,7 +238,7 @@ VALUES
     ('Business',1);
 
 
-INSERT  INTO subcategory ( "desc","category_id", "status")
+INSERT  INTO subcategories ( "desc","category_id", "status")
 VALUES
     ( 'Sleeping',1,1),
     ( 'Eating Habits ',2,1),
@@ -246,7 +246,7 @@ VALUES
     ( 'Running',3,1),
     ( 'P&L',4,1);
 
-INSERT  INTO venue ("name", "address", "postal_code","city","province","country_code",virtual)
+INSERT  INTO venues ("name", "address", "postal_code","city","province","country_code",virtual)
 VALUES
     ('Eko Hotels','34 TempleBy Way,54532 ','T2A6YG','Calgary','AB','CAN',false ),
     ('Eko Hotels','34 TempleBy Way,54532 ','T2A6YG','Calgary','AB','CAN',false),
@@ -254,7 +254,7 @@ VALUES
     ('Eko Hotels','34 TempleBy Way 54532','T2A6YG','Calgary','AB','CAN',false),
     ('Eko Hotels','34 TempleBy Way,54532','T2A6YG','Calgary','AB','CAN',false);
 
-INSERT  INTO ticket_status ("desc", "status")
+INSERT  INTO tickets_status ("desc", "status")
 VALUES
     ( 'Active',1),
     ( 'Cancelled',2),

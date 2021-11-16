@@ -67,7 +67,7 @@ func (q *Queries) GetImage(ctx context.Context, id int32) (Image, error) {
 
 const getImagesByEvent = `-- name: GetImagesByEvent :many
 SELECT a.id, name, url, b.id, event_id, image_id, created_at FROM images a, events_images b
-WHERE event_id = $1 and a.event_id = b.event_id
+WHERE event_id = $1 and a.id = b.image_id
 `
 
 type GetImagesByEventRow struct {

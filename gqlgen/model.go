@@ -43,6 +43,12 @@ type GetEvent struct {
 	Status      int `json:"status"`
 }
 
+type GetEventByLocation struct {
+	Latitude  float64 `json:"latitude"`
+	Longitude float64 `json:"longitude"`
+	Miles     int     `json:"miles"`
+}
+
 type Host struct {
 	ID     int32    `json:"id"`
 	UserID int      `json:"user_id"`

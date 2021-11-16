@@ -508,6 +508,8 @@ func (r *queryResolver) GetEvent(ctx context.Context, input int32) (*Event, erro
 func (r *queryResolver) GetEvents(ctx context.Context, input GetEvent) ([]Event, error) {
 
 	var result []Event
+	var images []*Image
+	var videos []*Video
 	var eventSponsors []*Sponsor
 
 	arg := db.GetEventsParams{
@@ -518,6 +520,83 @@ func (r *queryResolver) GetEvents(ctx context.Context, input GetEvent) ([]Event,
 		Offset:      int32(input.Offset),
 	}
 	events, err := store.GetEvents(ctx, arg)
+	if err != nil {
+		return nil, err
+	}
+
+	// Get all the Sponsors for these events
+	for _, event := range events {
+		sponsors, err := store.GetSponsorByEvent(ctx, event.ID)
+
+		if err != nil {
+			return nil, err
+		}
+
+		for _, v := range sponsors {
+			eventSponsors = append(eventSponsors, &Sponsor{
+				ID: v.ID})
+		}
+
+		// fetch images
+		eventImages, err := store.GetImagesByEvent(ctx, event.ID)
+		if err != nil {
+			return nil, err
+		}
+		for _, i := range eventImages {
+			images = append(images, &Image{
+				ID:      i.ID,
+				EventID: i.EventID,
+				Name:    i.Name.String,
+				URL:     &i.Url,
+			})
+		}
+
+		// fetch videos
+		eventVideos, err := store.GetVideosByEvent(ctx, event.ID)
+		if err != nil {
+			return nil, err
+		}
+		for _, i := range eventVideos {
+			videos = append(videos, &Video{
+				ID:      i.ID,
+				EventID: i.EventID,
+				Name:    i.Name.String,
+				URL:     &i.Url,
+			})
+		}
+
+		result = append(result, Event{
+			ID:          event.ID,
+			Title:       event.Title,
+			Description: event.Description,
+			StartDate:   event.StartDate.String(),
+			EndDate:     event.EndDate.String(),
+			Category:    int(event.Category),
+			Subcategory: int(event.Subcategory),
+			Type:        int(event.Type),
+			UserID:      event.UserID,
+			Venue:       int(event.Venue),
+			BannerImage: event.BannerImage,
+			Sponsors:    eventSponsors,
+			Images:      images,
+			Videos:      videos,
+		})
+	}
+
+	return result, nil
+}
+
+func (r *queryResolver) GetEventsByLocation(ctx context.Context, input GetEventByLocation) ([]Event, error) {
+
+	var result []Event
+	var eventSponsors []*Sponsor
+
+	arg := db.GetEventsByLocationParams{
+		Point:     input.Latitude,
+		Point_2:   input.Longitude,
+		Longitude: sql.NullFloat64{Valid: true, Float64: float64(input.Miles)},
+	}
+	events, err := store.GetEventsByLocation(ctx, arg)
 	if err != nil {
 		return nil, err
 	}

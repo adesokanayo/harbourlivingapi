@@ -1,5 +1,5 @@
 -- name: CreateTicket :one
-INSERT INTO ticket (
+INSERT INTO tickets (
   name,
   event_id,
   quantity, 
@@ -9,13 +9,13 @@ INSERT INTO ticket (
     ($1, $2, $3, $4,$5) RETURNING *;
 
 -- name: GetTicket :one
-SELECT * FROM ticket
+SELECT * FROM tickets
 WHERE id = $1 LIMIT 1;
 
 -- name: GetAllTickets :many
-SELECT * FROM ticket
+SELECT * FROM tickets
 ORDER  by id;
 
 -- name: DeleteTicket :exec
-DELETE FROM ticket
+DELETE FROM tickets
 WHERE id = $1;

@@ -11,7 +11,7 @@ where id =$1 ;
 
 -- name: GetImagesByEvent :many
 SELECT * FROM images a, events_images b
-WHERE event_id = $1 and a.event_id = b.event_id ;
+WHERE event_id = $1 and a.id = b.image_id ;
 
 -- name: LinkImageToEvent :exec
 INSERT into events_images (event_id, image_id)

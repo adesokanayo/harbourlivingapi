@@ -1,33 +1,33 @@
 -- name: GetCategory :one
-SELECT * FROM category
+SELECT * FROM categories
 WHERE id = $1 LIMIT 1;
 
 -- name: GetCategories :many
-SELECT * FROM category;
+SELECT * FROM categories;
 
 -- name: UpdateCategoryStatus :exec
-UPDATE Category
+UPDATE categories
 set status = $1
 where id = $2;
 
 --name: DeleteCategory :exec
-DELETE  from Category
+DELETE  from categories
 where id =$1 ;
 
 -- name: GetSubCategory :one
-SELECT * FROM subcategory
+SELECT * FROM subcategories
 WHERE category_id = $1 LIMIT 1;
 
 
 -- name: GetSubCategories :many
-SELECT * FROM subcategory
+SELECT * FROM subcategories
 WHERE category_id = $1;
 
 -- name: UpdateSubCategoryStatus :exec
-UPDATE Category
+UPDATE categories
 set status = $1
 where id = $2;
 
 --name: DeleteSubCategory :exec
-DELETE  from Subcategory
+DELETE  from Subcategories
 where id =$1;

@@ -32,12 +32,6 @@ type Event struct {
 	CreatedAt   sql.NullTime  `json:"created_at"`
 }
 
-type EventType struct {
-	ID     int32         `json:"id"`
-	Desc   string        `json:"desc"`
-	Status sql.NullInt32 `json:"status"`
-}
-
 type EventsHost struct {
 	ID        int32     `json:"id"`
 	EventID   int32     `json:"event_id"`
@@ -63,6 +57,12 @@ type EventsStatus struct {
 	ID        int32          `json:"id"`
 	Desc      sql.NullString `json:"desc"`
 	CreatedAt time.Time      `json:"created_at"`
+}
+
+type EventsType struct {
+	ID     int32         `json:"id"`
+	Desc   string        `json:"desc"`
+	Status sql.NullInt32 `json:"status"`
 }
 
 type EventsVideo struct {
@@ -106,7 +106,7 @@ type Ticket struct {
 	Status   int32   `json:"status"`
 }
 
-type TicketStatus struct {
+type TicketsStatus struct {
 	ID     int32          `json:"id"`
 	Desc   sql.NullString `json:"desc"`
 	Status int32          `json:"status"`
@@ -127,7 +127,7 @@ type User struct {
 	CreatedAt         time.Time      `json:"created_at"`
 }
 
-type UserTicket struct {
+type UsersTicket struct {
 	ID            int32           `json:"id"`
 	UserID        int32           `json:"user_id"`
 	TicketID      int32           `json:"ticket_id"`
@@ -139,7 +139,7 @@ type UserTicket struct {
 	CreatedAt     time.Time       `json:"created_at"`
 }
 
-type Usertype struct {
+type UsersType struct {
 	ID     int32         `json:"id"`
 	Desc   string        `json:"desc"`
 	Status sql.NullInt32 `json:"status"`

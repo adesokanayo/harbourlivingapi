@@ -119,6 +119,12 @@ input GetEvent{
         offset: Int!
         status: Int!
 }
+
+input GetEventByLocation{
+        latitude: Float!
+        longitude: Float!,
+        miles: Int!
+}
 input NewEvent {
         title: String!
         description: String!
@@ -217,6 +223,7 @@ type Query{
         getVenue(input: ID!): Venue
         getUsers : [User!]
         getEvents(input: GetEvent!): [Event!]
+        getEventsByLocation(input: GetEventByLocation!): [Event!]
         getCategory( input: ID!): Category!
         getSubcategory( input: ID!): Subcategory!
         getCategories: [Category!]
