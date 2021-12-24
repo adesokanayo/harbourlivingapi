@@ -98,7 +98,7 @@ func (s *Server) CreateUser(ctx *gin.Context) {
 	}
 
 	createUserReq := db.CreateUserParams{
-		Phone:       req.Phone,
+		Phone:       sql.NullString{String: req.Title},
 		FirstName:   req.FirstName,
 		Username:    req.Username,
 		LastName:    req.LastName,

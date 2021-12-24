@@ -12,7 +12,7 @@ import (
 
 func createRandomUser(t *testing.T) User {
 	arg := CreateUserParams{
-		Phone:       sql.NullString{String: util.RandomName()},
+		Phone:       sql.NullString{String: "08067648635", Valid: true},
 		FirstName:   util.RandomName(),
 		LastName:    util.RandomName(),
 		Email:       util.RandomEmail(),
