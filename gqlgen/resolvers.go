@@ -156,7 +156,7 @@ func (r *mutationResolver) CreateUser(ctx context.Context, input NewUser) (*User
 	}
 
 	arg := db.CreateUserParams{
-		Title:     input.Title,
+		Phone:     sql.NullString{String: *input.Phone},
 		FirstName: input.FirstName,
 		LastName:  input.LastName,
 		Email:     input.Email,
@@ -172,7 +172,7 @@ func (r *mutationResolver) CreateUser(ctx context.Context, input NewUser) (*User
 	}
 	return &User{
 		ID:        user.ID,
-		Title:     user.Title,
+		Phone:     &user.Phone.String,
 		FirstName: user.FirstName,
 		LastName:  user.LastName,
 		Email:     user.Email,
@@ -357,7 +357,7 @@ func (r *mutationResolver) Login(ctx context.Context, input Login) (*LoginRespon
 			Usertype:  int(user.Usertype),
 			Username:  user.Username,
 			LastName:  user.LastName,
-			Title:     user.Title,
+			Phone:     &user.Phone.String,
 			FirstName: user.FirstName,
 		},
 		Success: true,
@@ -391,7 +391,7 @@ func (r *queryResolver) GetUser(ctx context.Context, input int32) (*User, error)
 
 	return &User{
 		ID:        user.ID,
-		Title:     user.Title,
+		Phone:     &user.Phone.String,
 		FirstName: user.FirstName,
 		LastName:  user.LastName,
 		Email:     user.Email,
@@ -643,7 +643,7 @@ func (r *queryResolver) GetUsers(ctx context.Context) ([]User, error) {
 	for _, u := range users {
 		AllUsers = append(AllUsers, User{
 			ID:        u.ID,
-			Title:     u.Title,
+			Phone:     &u.Phone.String,
 			FirstName: u.FirstName,
 			LastName:  u.LastName,
 			Email:     u.Email,

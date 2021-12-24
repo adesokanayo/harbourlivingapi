@@ -114,7 +114,7 @@ type TicketsStatus struct {
 
 type User struct {
 	ID                int32          `json:"id"`
-	Title             string         `json:"title"`
+	Phone             sql.NullString `json:"phone"`
 	FirstName         string         `json:"first_name"`
 	LastName          string         `json:"last_name"`
 	Email             string         `json:"email"`

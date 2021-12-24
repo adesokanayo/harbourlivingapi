@@ -3,15 +3,16 @@ package db
 import (
 	"context"
 	"database/sql"
-	"github.com/BigListRyRy/harbourlivingapi/util"
-	"github.com/stretchr/testify/require"
 	"testing"
 	"time"
+
+	"github.com/BigListRyRy/harbourlivingapi/util"
+	"github.com/stretchr/testify/require"
 )
 
 func createRandomUser(t *testing.T) User {
 	arg := CreateUserParams{
-		Title:       util.RandomName(),
+		Phone:       sql.NullString{String: util.RandomName()},
 		FirstName:   util.RandomName(),
 		LastName:    util.RandomName(),
 		Email:       util.RandomEmail(),
@@ -25,7 +26,7 @@ func createRandomUser(t *testing.T) User {
 	require.NoError(t, err)
 	require.NotEmpty(t, user)
 
-	require.Equal(t, arg.Title, user.Title)
+	require.Equal(t, arg.Phone, user.Phone)
 	require.Equal(t, arg.Email, user.Email)
 	require.Equal(t, arg.FirstName, user.FirstName)
 	require.Equal(t, arg.LastName, user.LastName)
@@ -45,7 +46,7 @@ func TestGetUser(t *testing.T) {
 	user1 := createRandomUser(t)
 	user2, err := testQueries.GetUser(context.Background(), user1.ID)
 	require.NoError(t, err)
-	require.Equal(t, user1.Title, user2.Title)
+	require.Equal(t, user1.Phone, user2.Phone)
 	require.Equal(t, user1.FirstName, user2.FirstName)
 	require.Equal(t, user1.LastName, user2.LastName)
 	require.Equal(t, user1.Email, user2.Email)
