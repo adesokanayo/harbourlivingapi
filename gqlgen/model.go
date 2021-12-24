@@ -114,14 +114,14 @@ type NewTicket struct {
 }
 
 type NewUser struct {
-	Title     string `json:"title"`
-	FirstName string `json:"first_name"`
-	LastName  string `json:"last_name"`
-	Email     string `json:"email"`
-	Username  string `json:"username"`
-	Password  string `json:"password"`
-	Usertype  int    `json:"usertype"`
-	Avatar    string `json:"avatar"`
+	Phone     *string `json:"phone"`
+	FirstName string  `json:"first_name"`
+	LastName  string  `json:"last_name"`
+	Email     string  `json:"email"`
+	Username  string  `json:"username"`
+	Password  string  `json:"password"`
+	Usertype  int     `json:"usertype"`
+	Avatar    string  `json:"avatar"`
 }
 
 type NewVenue struct {
@@ -178,15 +178,15 @@ type UpdateEventStatus struct {
 }
 
 type User struct {
-	ID        int32  `json:"id"`
-	Title     string `json:"title"`
-	FirstName string `json:"first_name"`
-	LastName  string `json:"last_name"`
-	Email     string `json:"email"`
-	Username  string `json:"username"`
-	Password  string `json:"password"`
-	Usertype  int    `json:"usertype"`
-	Avatar    string `json:"avatar"`
+	ID        int32   `json:"id"`
+	Phone     *string `json:"phone"`
+	FirstName string  `json:"first_name"`
+	LastName  string  `json:"last_name"`
+	Email     string  `json:"email"`
+	Username  string  `json:"username"`
+	Password  string  `json:"password"`
+	Usertype  int     `json:"usertype"`
+	Avatar    string  `json:"avatar"`
 }
 
 type Usertype struct {

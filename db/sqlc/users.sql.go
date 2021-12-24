@@ -11,7 +11,7 @@ import (
 
 const createUser = `-- name: CreateUser :one
 INSERT INTO users (
-    title,
+    phone,
     first_name,
     last_name,
     email,
@@ -21,11 +21,11 @@ INSERT INTO users (
     date_of_birth,
     avatar_url
 ) VALUES
-    ($1, $2, $3, $4, $5, $6, $7,$8,$9) RETURNING id, title, first_name, last_name, email, username, password, password_changed_at, usertype, avatar_url, date_of_birth, created_at
+    ($1, $2, $3, $4, $5, $6, $7,$8,$9) RETURNING id, phone, first_name, last_name, email, username, password, password_changed_at, usertype, avatar_url, date_of_birth, created_at
 `
 
 type CreateUserParams struct {
-	Title       string         `json:"title"`
+	Phone       sql.NullString `json:"phone"`
 	FirstName   string         `json:"first_name"`
 	LastName    string         `json:"last_name"`
 	Email       string         `json:"email"`
@@ -38,7 +38,7 @@ type CreateUserParams struct {
 
 func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, error) {
 	row := q.db.QueryRowContext(ctx, createUser,
-		arg.Title,
+		arg.Phone,
 		arg.FirstName,
 		arg.LastName,
 		arg.Email,
@@ -51,7 +51,7 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, e
 	var i User
 	err := row.Scan(
 		&i.ID,
-		&i.Title,
+		&i.Phone,
 		&i.FirstName,
 		&i.LastName,
 		&i.Email,
@@ -77,7 +77,7 @@ func (q *Queries) DeleteUser(ctx context.Context, id int32) error {
 }
 
 const getAllUsers = `-- name: GetAllUsers :many
-SELECT id, title, first_name, last_name, email, username, password, password_changed_at, usertype, avatar_url, date_of_birth, created_at FROM users
+SELECT id, phone, first_name, last_name, email, username, password, password_changed_at, usertype, avatar_url, date_of_birth, created_at FROM users
 ORDER  by id
 `
 
@@ -92,7 +92,7 @@ func (q *Queries) GetAllUsers(ctx context.Context) ([]User, error) {
 		var i User
 		if err := rows.Scan(
 			&i.ID,
-			&i.Title,
+			&i.Phone,
 			&i.FirstName,
 			&i.LastName,
 			&i.Email,
@@ -118,7 +118,7 @@ func (q *Queries) GetAllUsers(ctx context.Context) ([]User, error) {
 }
 
 const getUser = `-- name: GetUser :one
-SELECT id, title, first_name, last_name, email, username, password, password_changed_at, usertype, avatar_url, date_of_birth, created_at FROM users
+SELECT id, phone, first_name, last_name, email, username, password, password_changed_at, usertype, avatar_url, date_of_birth, created_at FROM users
 WHERE id = $1 LIMIT 1
 `
 
@@ -127,7 +127,7 @@ func (q *Queries) GetUser(ctx context.Context, id int32) (User, error) {
 	var i User
 	err := row.Scan(
 		&i.ID,
-		&i.Title,
+		&i.Phone,
 		&i.FirstName,
 		&i.LastName,
 		&i.Email,
@@ -143,7 +143,7 @@ func (q *Queries) GetUser(ctx context.Context, id int32) (User, error) {
 }
 
 const getUsername = `-- name: GetUsername :one
-SELECT id, title, first_name, last_name, email, username, password, password_changed_at, usertype, avatar_url, date_of_birth, created_at FROM users
+SELECT id, phone, first_name, last_name, email, username, password, password_changed_at, usertype, avatar_url, date_of_birth, created_at FROM users
 WHERE username = $1 LIMIT 1
 `
 
@@ -152,7 +152,7 @@ func (q *Queries) GetUsername(ctx context.Context, username string) (User, error
 	var i User
 	err := row.Scan(
 		&i.ID,
-		&i.Title,
+		&i.Phone,
 		&i.FirstName,
 		&i.LastName,
 		&i.Email,
