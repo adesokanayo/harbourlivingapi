@@ -192,7 +192,7 @@ func (r *mutationResolver) CreateUser(ctx context.Context, input NewUser) (*User
 		Username:  user.Username,
 		Password:  user.Password,
 		Usertype:  int(user.Usertype),
-		Avatar: user.AvatarUrl.String,
+		Avatar:    user.AvatarUrl.String,
 	}, nil
 }
 
@@ -518,6 +518,20 @@ func (r *mutationResolver) UpdateEvent(ctx context.Context, input UpdateEvent) (
 	return result, nil
 }
 
+func (r *mutationResolver) DeleteEvent(ctx context.Context, input int32) (bool, error) {
+
+	_, err := store.GetEvent(ctx, input)
+	if err != nil {
+		return false, err
+	}
+
+	err = store.DeleteEvent(ctx, input)
+	if err != nil {
+		return false, err
+	}
+	return true, nil
+}
+
 func (r *mutationResolver) Login(ctx context.Context, input Login) (*LoginResponse, error) {
 
 	user, err := store.GetUsername(ctx, input.Username)
@@ -690,6 +704,7 @@ func (r *queryResolver) GetEvent(ctx context.Context, input int32) (*Event, erro
 			EventID:  int(v.EventID),
 			Quantity: int(v.Quantity),
 			Status:   int(v.Status),
+			Currency: v.Currency,
 		})
 	}
 
@@ -871,6 +886,7 @@ func (r *mutationResolver) CreateTicket(ctx context.Context, input NewTicket) (*
 		Price:    float64(input.Price),
 		Status:   int32(input.Status),
 		Name:     input.Name,
+		Currency: input.Currency,
 	}
 
 	ticket, err := store.CreateTicket(ctx, arg)
@@ -885,6 +901,7 @@ func (r *mutationResolver) CreateTicket(ctx context.Context, input NewTicket) (*
 		EventID:  int(ticket.EventID),
 		Quantity: int(ticket.Quantity),
 		Status:   int(ticket.Status),
+		Currency: ticket.Currency,
 	}, nil
 }
 

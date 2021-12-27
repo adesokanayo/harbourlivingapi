@@ -67,7 +67,7 @@ func (q *Queries) GetVideo(ctx context.Context, id int32) (Video, error) {
 
 const getVideosByEvent = `-- name: GetVideosByEvent :many
 SELECT a.id, name, url, b.id, event_id, video_id, created_at FROM videos a, events_videos b
-WHERE event_id = $1 and a.event_id = b.event_id
+WHERE event_id = $1 and a.id = b.event_id
 `
 
 type GetVideosByEventRow struct {

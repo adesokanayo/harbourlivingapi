@@ -101,6 +101,7 @@ type ComplexityRoot struct {
 		CreateTicket          func(childComplexity int, input NewTicket) int
 		CreateUser            func(childComplexity int, input NewUser) int
 		CreateVenue           func(childComplexity int, input NewVenue) int
+		DeleteEvent           func(childComplexity int, input int32) int
 		Login                 func(childComplexity int, input Login) int
 		RefreshToken          func(childComplexity int, input RefreshTokenInput) int
 		UpdateEvent           func(childComplexity int, input UpdateEvent) int
@@ -132,6 +133,7 @@ type ComplexityRoot struct {
 	}
 
 	Ticket struct {
+		Currency func(childComplexity int) int
 		EventID  func(childComplexity int) int
 		ID       func(childComplexity int) int
 		Name     func(childComplexity int) int
@@ -191,6 +193,7 @@ type MutationResolver interface {
 	CreateUser(ctx context.Context, input NewUser) (*User, error)
 	CreateEvent(ctx context.Context, input NewEvent) (*Event, error)
 	UpdateEvent(ctx context.Context, input UpdateEvent) (*Event, error)
+	DeleteEvent(ctx context.Context, input int32) (bool, error)
 	Login(ctx context.Context, input Login) (*LoginResponse, error)
 	RefreshToken(ctx context.Context, input RefreshTokenInput) (*string, error)
 	CreateTicket(ctx context.Context, input NewTicket) (*Ticket, error)
@@ -529,6 +532,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.CreateVenue(childComplexity, args["input"].(NewVenue)), true
 
+	case "Mutation.deleteEvent":
+		if e.complexity.Mutation.DeleteEvent == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_deleteEvent_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.DeleteEvent(childComplexity, args["input"].(int32)), true
+
 	case "Mutation.login":
 		if e.complexity.Mutation.Login == nil {
 			break
@@ -716,6 +731,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Subcategory.Status(childComplexity), true
+
+	case "Ticket.currency":
+		if e.complexity.Ticket.Currency == nil {
+			break
+		}
+
+		return e.complexity.Ticket.Currency(childComplexity), true
 
 	case "Ticket.event_id":
 		if e.complexity.Ticket.EventID == nil {
@@ -1241,6 +1263,7 @@ type Ticket {
         event_id: Int!
         quantity: Int!
         status: Int!
+        currency: String!
 }
 
 input NewTicket {
@@ -1249,6 +1272,7 @@ input NewTicket {
         event_id: Int!
         quantity: Int!
         status: Int!
+        currency: String!
 }
 
 input UpdateEventStatus{
@@ -1262,6 +1286,7 @@ type Mutation {
         createUser(input: NewUser!): User!
         createEvent(input: NewEvent!):Event!
         updateEvent(input: UpdateEvent!):Event!
+        deleteEvent(input: ID!): Boolean!
         login(input: Login!): LoginResponse
         refreshToken(input: RefreshTokenInput!): String
         createTicket(input: NewTicket!): Ticket!
@@ -1354,6 +1379,21 @@ func (ec *executionContext) field_Mutation_createVenue_args(ctx context.Context,
 	if tmp, ok := rawArgs["input"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
 		arg0, err = ec.unmarshalNNewVenue2githubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgqlgenᚐNewVenue(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["input"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_deleteEvent_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 int32
+	if tmp, ok := rawArgs["input"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+		arg0, err = ec.unmarshalNID2int32(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -2949,6 +2989,48 @@ func (ec *executionContext) _Mutation_updateEvent(ctx context.Context, field gra
 	return ec.marshalNEvent2ᚖgithubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgqlgenᚐEvent(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _Mutation_deleteEvent(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_deleteEvent_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().DeleteEvent(rctx, args["input"].(int32))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(bool)
+	fc.Result = res
+	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _Mutation_login(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -3985,6 +4067,41 @@ func (ec *executionContext) _Ticket_status(ctx context.Context, field graphql.Co
 	res := resTmp.(int)
 	fc.Result = res
 	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Ticket_currency(ctx context.Context, field graphql.CollectedField, obj *Ticket) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Ticket",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Currency, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _UpdateEventState_event_id(ctx context.Context, field graphql.CollectedField, obj *UpdateEventState) (ret graphql.Marshaler) {
@@ -6453,6 +6570,14 @@ func (ec *executionContext) unmarshalInputNewTicket(ctx context.Context, obj int
 			if err != nil {
 				return it, err
 			}
+		case "currency":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("currency"))
+			it.Currency, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		}
 	}
 
@@ -7137,6 +7262,11 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
+		case "deleteEvent":
+			out.Values[i] = ec._Mutation_deleteEvent(ctx, field)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		case "login":
 			out.Values[i] = ec._Mutation_login(ctx, field)
 		case "refreshToken":
@@ -7414,6 +7544,11 @@ func (ec *executionContext) _Ticket(ctx context.Context, sel ast.SelectionSet, o
 			}
 		case "status":
 			out.Values[i] = ec._Ticket_status(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "currency":
+			out.Values[i] = ec._Ticket_currency(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}

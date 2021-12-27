@@ -11,7 +11,7 @@ where id =$1 ;
 
 -- name: GetVideosByEvent :many
 SELECT * FROM videos a, events_videos b
-WHERE event_id = $1 and a.event_id = b.event_id ;
+WHERE event_id = $1 and a.id = b.event_id ;
 
 -- name: LinkVideoToEvent :exec
 INSERT into events_videos (event_id, video_id)

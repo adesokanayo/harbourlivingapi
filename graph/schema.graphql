@@ -206,6 +206,7 @@ type Ticket {
         event_id: Int!
         quantity: Int!
         status: Int!
+        currency: String!
 }
 
 input NewTicket {
@@ -214,6 +215,7 @@ input NewTicket {
         event_id: Int!
         quantity: Int!
         status: Int!
+        currency: String!
 }
 
 input UpdateEventStatus{
@@ -227,6 +229,7 @@ type Mutation {
         createUser(input: NewUser!): User!
         createEvent(input: NewEvent!):Event!
         updateEvent(input: UpdateEvent!):Event!
+        deleteEvent(input: ID!): Boolean!
         login(input: Login!): LoginResponse
         refreshToken(input: RefreshTokenInput!): String
         createTicket(input: NewTicket!): Ticket!

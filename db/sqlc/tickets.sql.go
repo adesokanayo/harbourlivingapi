@@ -13,9 +13,10 @@ INSERT INTO tickets (
   event_id,
   quantity, 
   price, 
-  status
+  status,
+  currency
 ) VALUES
-    ($1, $2, $3, $4,$5) RETURNING id, name, event_id, price, quantity, status
+    ($1, $2, $3, $4, $5, $6) RETURNING id, name, event_id, price, quantity, status, currency
 `
 
 type CreateTicketParams struct {
@@ -24,6 +25,7 @@ type CreateTicketParams struct {
 	Quantity int32   `json:"quantity"`
 	Price    float64 `json:"price"`
 	Status   int32   `json:"status"`
+	Currency string  `json:"currency"`
 }
 
 func (q *Queries) CreateTicket(ctx context.Context, arg CreateTicketParams) (Ticket, error) {
@@ -33,6 +35,7 @@ func (q *Queries) CreateTicket(ctx context.Context, arg CreateTicketParams) (Tic
 		arg.Quantity,
 		arg.Price,
 		arg.Status,
+		arg.Currency,
 	)
 	var i Ticket
 	err := row.Scan(
@@ -42,6 +45,7 @@ func (q *Queries) CreateTicket(ctx context.Context, arg CreateTicketParams) (Tic
 		&i.Price,
 		&i.Quantity,
 		&i.Status,
+		&i.Currency,
 	)
 	return i, err
 }
@@ -57,7 +61,7 @@ func (q *Queries) DeleteTicket(ctx context.Context, id int32) error {
 }
 
 const getAllTickets = `-- name: GetAllTickets :many
-SELECT id, name, event_id, price, quantity, status FROM tickets
+SELECT id, name, event_id, price, quantity, status, currency FROM tickets
 ORDER  by id
 `
 
@@ -77,6 +81,7 @@ func (q *Queries) GetAllTickets(ctx context.Context) ([]Ticket, error) {
 			&i.Price,
 			&i.Quantity,
 			&i.Status,
+			&i.Currency,
 		); err != nil {
 			return nil, err
 		}
@@ -92,7 +97,7 @@ func (q *Queries) GetAllTickets(ctx context.Context) ([]Ticket, error) {
 }
 
 const getTicket = `-- name: GetTicket :one
-SELECT id, name, event_id, price, quantity, status FROM tickets
+SELECT id, name, event_id, price, quantity, status, currency FROM tickets
 WHERE id = $1 LIMIT 1
 `
 
@@ -106,12 +111,13 @@ func (q *Queries) GetTicket(ctx context.Context, id int32) (Ticket, error) {
 		&i.Price,
 		&i.Quantity,
 		&i.Status,
+		&i.Currency,
 	)
 	return i, err
 }
 
 const getTicketsByEventID = `-- name: GetTicketsByEventID :many
-SELECT id, name, event_id, price, quantity, status FROM tickets
+SELECT id, name, event_id, price, quantity, status, currency FROM tickets
 where event_id = $1
 `
 
@@ -131,6 +137,7 @@ func (q *Queries) GetTicketsByEventID(ctx context.Context, eventID int32) ([]Tic
 			&i.Price,
 			&i.Quantity,
 			&i.Status,
+			&i.Currency,
 		); err != nil {
 			return nil, err
 		}

@@ -111,6 +111,7 @@ type NewTicket struct {
 	EventID  int    `json:"event_id"`
 	Quantity int    `json:"quantity"`
 	Status   int    `json:"status"`
+	Currency string `json:"currency"`
 }
 
 type NewUser struct {
@@ -165,6 +166,7 @@ type Ticket struct {
 	EventID  int    `json:"event_id"`
 	Quantity int    `json:"quantity"`
 	Status   int    `json:"status"`
+	Currency string `json:"currency"`
 }
 
 type UpdateEvent struct {

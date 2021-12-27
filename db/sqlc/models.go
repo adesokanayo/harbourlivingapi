@@ -126,6 +126,7 @@ type Ticket struct {
 	Price    float64 `json:"price"`
 	Quantity int32   `json:"quantity"`
 	Status   int32   `json:"status"`
+	Currency string  `json:"currency"`
 }
 
 type TicketsStatus struct {

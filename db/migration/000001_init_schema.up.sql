@@ -90,7 +90,8 @@ CREATE TABLE "tickets" (
                           "event_id" int NOT NULL,
                           "price" float NOT NULL DEFAULT (0.00),
                           "quantity" int NOT NULL DEFAULT (0),
-                          "status" int NOT NULL
+                          "status" int NOT NULL,
+                          "currency" varchar NOT NULL
 );
 
 CREATE TABLE "tickets_status" (
@@ -199,31 +200,44 @@ ALTER TABLE "tickets" ADD FOREIGN KEY ("event_id") REFERENCES "events" ("id");
 
 ALTER TABLE "tickets_status" ADD FOREIGN KEY ("status") REFERENCES "tickets_status" ("id");
 
-ALTER TABLE "users_tickets" ADD FOREIGN KEY ("user_id") REFERENCES "users" ("id");
+ALTER TABLE "users_tickets" ADD FOREIGN KEY ("user_id") REFERENCES "users" ("id")
+ON UPDATE CASCADE ON DELETE CASCADE;
 
-ALTER TABLE "users_tickets" ADD FOREIGN KEY ("ticket_id") REFERENCES "tickets" ("id");
+ALTER TABLE "users_tickets" ADD FOREIGN KEY ("ticket_id") REFERENCES "tickets" ("id")
+ON UPDATE CASCADE ON DELETE CASCADE;
 
 ALTER TABLE "sponsors" ADD FOREIGN KEY ("user_id") REFERENCES "users" ("id");
 
-ALTER TABLE "events_sponsors" ADD FOREIGN KEY ("event_id") REFERENCES "events" ("id");
+ALTER TABLE "events_sponsors" ADD FOREIGN KEY ("event_id") REFERENCES "events" ("id")
+ON UPDATE CASCADE ON DELETE CASCADE;
 
-ALTER TABLE "events_sponsors" ADD FOREIGN KEY ("sponsor_id") REFERENCES "sponsors" ("id");
+ALTER TABLE "events_sponsors" ADD FOREIGN KEY ("sponsor_id") REFERENCES "sponsors" ("id")
+ON UPDATE CASCADE ON DELETE CASCADE;
+
 ALTER TABLE "events_images" ADD FOREIGN KEY ("image_id") REFERENCES "images" ("id")
 ON UPDATE CASCADE ON DELETE CASCADE;
 
-ALTER TABLE "events_images" ADD FOREIGN KEY ("event_id") REFERENCES "events" ("id");
+ALTER TABLE "events_images" ADD FOREIGN KEY ("event_id") REFERENCES "events" ("id")
+ON UPDATE CASCADE ON DELETE CASCADE;
 
-ALTER TABLE "events_videos" ADD FOREIGN KEY ("video_id") REFERENCES "videos" ("id");
-ALTER TABLE "events_videos" ADD FOREIGN KEY ("event_id") REFERENCES "events" ("id");
+ALTER TABLE "events_videos" ADD FOREIGN KEY ("video_id") REFERENCES "videos" ("id")
+ON UPDATE CASCADE ON DELETE CASCADE;
+
+ALTER TABLE "events_videos" ADD FOREIGN KEY ("event_id") REFERENCES "events" ("id")
+ON UPDATE CASCADE ON DELETE CASCADE;
 
 ALTER TABLE "hosts" ADD FOREIGN KEY ("user_id") REFERENCES "users" ("id");
 
-ALTER TABLE "events_hosts" ADD FOREIGN KEY ("event_id") REFERENCES "events" ("id");
+ALTER TABLE "events_hosts" ADD FOREIGN KEY ("event_id") REFERENCES "events" ("id")
+ON UPDATE CASCADE ON DELETE CASCADE;
 
-ALTER TABLE "events_hosts" ADD FOREIGN KEY ("host_id") REFERENCES "hosts" ("id");
+ALTER TABLE "events_hosts" ADD FOREIGN KEY ("host_id") REFERENCES "hosts" ("id")
+ON UPDATE CASCADE ON DELETE CASCADE;
 
 ALTER TABLE "artists" ADD FOREIGN KEY ("user_id") REFERENCES "users" ("id");
-ALTER TABLE "events_artists" ADD FOREIGN KEY ("artist_id") REFERENCES "artists" ("id");
+
+ALTER TABLE "events_artists" ADD FOREIGN KEY ("artist_id") REFERENCES "artists" ("id")
+ON UPDATE CASCADE ON DELETE CASCADE;
 
 CREATE INDEX ON "users" ("id");
 
