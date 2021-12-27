@@ -45,7 +45,7 @@ type Event {
         subcategory: Int!
         sponsors : [Sponsor]
         hostID: Int!
-        ticket : Ticket
+        ticket : [Ticket]
         status: Int!
         images: [Image]
         videos: [Video]
@@ -140,6 +140,22 @@ input NewEvent {
         images: [NewImage]
         vidoes: [NewVideo]        
 }
+
+input UpdateEvent {
+        id: Int!
+        title: String
+        description: String
+        banner_image: String
+        startDate:   String
+        endDate:     String
+        venue: Int
+        type: Int
+        category: Int
+        status: Int
+        images: [NewImage]
+        vidoes: [NewVideo]        
+}
+
 input RefreshTokenInput{
         token: String!
 }
@@ -210,6 +226,7 @@ type Mutation {
         createVenue(input: NewVenue!): Venue!
         createUser(input: NewUser!): User!
         createEvent(input: NewEvent!):Event!
+        updateEvent(input: UpdateEvent!):Event!
         login(input: Login!): LoginResponse
         refreshToken(input: RefreshTokenInput!): String
         createTicket(input: NewTicket!): Ticket!

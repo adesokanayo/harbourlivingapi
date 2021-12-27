@@ -34,15 +34,15 @@ func LoadConfig(path string) (config *Config, err error) {
 }
 
 //ProcessDateTime process time input as string
-func ProcessDateTime(input string) (*time.Time, error) {
-	switch input {
-	case LayoutISODOB:
+func ProcessDateTime(layout, input string) (*time.Time, error) {
+	switch layout {
+	case "dob":
 		time, err := time.Parse(LayoutISODOB, input)
 		if err != nil {
 			return nil, err
 		}
 		return &time, nil
-	case Layout3:
+	case "rfc":
 		time, err := time.Parse(time.RFC3339, input)
 		if err != nil {
 			return nil, err

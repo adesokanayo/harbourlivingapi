@@ -109,3 +109,38 @@ func (q *Queries) GetTicket(ctx context.Context, id int32) (Ticket, error) {
 	)
 	return i, err
 }
+
+const getTicketsByEventID = `-- name: GetTicketsByEventID :many
+SELECT id, name, event_id, price, quantity, status FROM tickets
+where event_id = $1
+`
+
+func (q *Queries) GetTicketsByEventID(ctx context.Context, eventID int32) ([]Ticket, error) {
+	rows, err := q.db.QueryContext(ctx, getTicketsByEventID, eventID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []Ticket{}
+	for rows.Next() {
+		var i Ticket
+		if err := rows.Scan(
+			&i.ID,
+			&i.Name,
+			&i.EventID,
+			&i.Price,
+			&i.Quantity,
+			&i.Status,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}

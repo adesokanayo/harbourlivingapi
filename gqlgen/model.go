@@ -23,7 +23,7 @@ type Event struct {
 	Subcategory int        `json:"subcategory"`
 	Sponsors    []*Sponsor `json:"sponsors"`
 	HostID      int        `json:"hostID"`
-	Ticket      *Ticket    `json:"ticket"`
+	Ticket      []*Ticket  `json:"ticket"`
 	Status      int        `json:"status"`
 	Images      []*Image   `json:"images"`
 	Videos      []*Video   `json:"videos"`
@@ -165,6 +165,21 @@ type Ticket struct {
 	EventID  int    `json:"event_id"`
 	Quantity int    `json:"quantity"`
 	Status   int    `json:"status"`
+}
+
+type UpdateEvent struct {
+	ID          int         `json:"id"`
+	Title       *string     `json:"title"`
+	Description *string     `json:"description"`
+	BannerImage *string     `json:"banner_image"`
+	StartDate   *string     `json:"startDate"`
+	EndDate     *string     `json:"endDate"`
+	Venue       *int        `json:"venue"`
+	Type        *int        `json:"type"`
+	Category    *int        `json:"category"`
+	Status      *int        `json:"status"`
+	Images      []*NewImage `json:"images"`
+	Vidoes      []*NewVideo `json:"vidoes"`
 }
 
 type UpdateEventState struct {

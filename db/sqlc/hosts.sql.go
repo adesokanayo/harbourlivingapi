@@ -11,13 +11,20 @@ const createHost = `-- name: CreateHost :one
 INSERT INTO hosts (
 user_id
 ) VALUES
-    ($1) RETURNING id, user_id, created_at
+    ($1) RETURNING id, user_id, display_name, avatar_url, short_bio, created_at
 `
 
 func (q *Queries) CreateHost(ctx context.Context, userID int32) (Host, error) {
 	row := q.db.QueryRowContext(ctx, createHost, userID)
 	var i Host
-	err := row.Scan(&i.ID, &i.UserID, &i.CreatedAt)
+	err := row.Scan(
+		&i.ID,
+		&i.UserID,
+		&i.DisplayName,
+		&i.AvatarUrl,
+		&i.ShortBio,
+		&i.CreatedAt,
+	)
 	return i, err
 }
 
@@ -32,14 +39,21 @@ func (q *Queries) DeleteHost(ctx context.Context, id int32) error {
 }
 
 const getHost = `-- name: GetHost :one
-SELECT id, user_id, created_at from hosts
+SELECT id, user_id, display_name, avatar_url, short_bio, created_at from hosts
 WHERE id = $1
 `
 
 func (q *Queries) GetHost(ctx context.Context, id int32) (Host, error) {
 	row := q.db.QueryRowContext(ctx, getHost, id)
 	var i Host
-	err := row.Scan(&i.ID, &i.UserID, &i.CreatedAt)
+	err := row.Scan(
+		&i.ID,
+		&i.UserID,
+		&i.DisplayName,
+		&i.AvatarUrl,
+		&i.ShortBio,
+		&i.CreatedAt,
+	)
 	return i, err
 }
 

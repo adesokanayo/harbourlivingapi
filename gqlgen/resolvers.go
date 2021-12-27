@@ -150,13 +150,19 @@ func (r *mutationResolver) CreateVenue(ctx context.Context, input NewVenue) (*Ve
 
 func (r *mutationResolver) CreateUser(ctx context.Context, input NewUser) (*User, error) {
 
+	var phone sql.NullString
 	hashedPassword, err := util.HashPassword(input.Password)
 	if err != nil {
 		return nil, err
 	}
 
+	if input.Phone != nil {
+		phone.String = *input.Phone
+		phone.Valid = true
+	}
+
 	arg := db.CreateUserParams{
-		Phone:     sql.NullString{String: *input.Phone},
+		Phone:     phone,
 		FirstName: input.FirstName,
 		LastName:  input.LastName,
 		Email:     input.Email,
@@ -185,11 +191,11 @@ func (r *mutationResolver) CreateUser(ctx context.Context, input NewUser) (*User
 func (r *mutationResolver) CreateEvent(ctx context.Context, input NewEvent) (*Event, error) {
 
 	var result *Event
-	startdate, err := util.ProcessDateTime(input.StartDate)
+	startdate, err := util.ProcessDateTime("rfc",input.StartDate)
 	if err != nil {
 		return nil, err
 	}
-	enddate, err := util.ProcessDateTime(input.EndDate)
+	enddate, err := util.ProcessDateTime("rfc",input.EndDate)
 	if err != nil {
 		return nil, err
 	}
@@ -330,6 +336,180 @@ func (r *mutationResolver) CreateEvent(ctx context.Context, input NewEvent) (*Ev
 	return result, nil
 }
 
+func (r *mutationResolver) UpdateEvent(ctx context.Context, input UpdateEvent) (*Event, error) {
+
+	var result *Event
+	//fetch Event
+
+	arg := db.UpdateEventParams{}
+
+	event, err := store.GetEvent(ctx, int32(input.ID))
+	if err != nil {
+		return nil, err
+	}
+
+	if input.Title != nil {
+		arg.Title = *input.Title
+		arg.TitleToUpdate = true
+
+	}
+	if input.Description != nil {
+		arg.Description = *input.Description
+		arg.DescriptionToUpdate = true
+
+	}
+
+	if input.BannerImage != nil {
+		arg.BannerImageToUpdate = true
+		arg.BannerImage = *input.BannerImage
+	}
+
+	if input.StartDate != nil {
+		startdate, err := util.ProcessDateTime("rfc",*input.StartDate)
+		if err != nil {
+			return nil, err
+		}
+		arg.StartDateToUpdate = true
+		arg.StartDate = *startdate
+	}
+
+	if input.EndDate != nil {
+		enddate, err := util.ProcessDateTime("rfc",*input.EndDate)
+		if err != nil {
+			return nil, err
+		}
+		arg.EndDateToUpdate = true
+		arg.EndDate = *enddate
+	}
+
+	if input.Venue != nil {
+		arg.Venue = int32(*input.Venue)
+		arg.VenueToUpdate = true
+	}
+
+	if input.Type != nil {
+		arg.Type = int32(*input.Type)
+		arg.TypeToUpdate = true
+	}
+
+	if input.Category != nil {
+		arg.Category = int32(*input.Category)
+		arg.CategoryToUpdate = true
+	}
+
+	if input.Status != nil {
+		arg.Status = int32(*input.Status)
+		arg.StatusToUpdate = true
+	}
+
+	arg.ID = event.ID
+
+	//Use Transaction
+	err = store.ExecTx(ctx, func(q *db.Queries) error {
+
+		//update event
+		event, err := store.UpdateEvent(ctx, arg)
+		if err != nil {
+			return err
+		}
+
+		//create images
+		var images []*Image
+		if input.Images != nil {
+			for _, i := range input.Images {
+
+				arg := db.CreateImageParams{
+					Name: sql.NullString{
+						String: i.Name,
+						Valid:  true},
+					Url: *i.URL,
+				}
+
+				image, err := store.CreateImage(ctx, arg)
+				if err != nil {
+					return err
+				}
+
+				//link Image to Events
+				argImageLink := db.LinkImageToEventParams{
+					EventID: event.ID,
+					ImageID: image.ID,
+				}
+
+				errs := store.LinkImageToEvent(ctx, argImageLink)
+				if errs != nil {
+					return errs
+				}
+
+				images = append(images, &Image{
+					ID:      image.ID,
+					EventID: event.ID,
+					Name:    image.Name.String,
+					URL:     &image.Url,
+				})
+
+			}
+		}
+
+		//create vidoes and link to Event
+		var videos []*Video
+		if input.Vidoes != nil {
+			for _, i := range input.Vidoes {
+
+				arg := db.CreateVideoParams{
+					Name: sql.NullString{
+						String: i.Name,
+						Valid:  true},
+					Url: *i.URL,
+				}
+
+				video, err := store.CreateVideo(ctx, arg)
+				if err != nil {
+					return err
+				}
+
+				//link Video to Events
+				argVideoLink := db.LinkVideoToEventParams{
+					EventID: event.ID,
+					VideoID: video.ID,
+				}
+
+				errs := store.LinkVideoToEvent(ctx, argVideoLink)
+				if errs != nil {
+					return errs
+				}
+
+				videos = append(videos, &Video{
+					ID:      video.ID,
+					EventID: event.ID,
+					Name:    video.Name.String,
+					URL:     &video.Url,
+				})
+			}
+		}
+
+		result = &Event{
+			ID:          event.ID,
+			Title:       event.Title,
+			Description: event.Description,
+			StartDate:   event.StartDate.String(),
+			EndDate:     event.EndDate.String(),
+			BannerImage: event.BannerImage,
+			Subcategory: int(event.Subcategory),
+			Category:    int(event.Category),
+			Images:      images,
+			Videos:      videos,
+			Venue:       int(event.Venue),
+		}
+		return nil
+	})
+
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
+}
+
 func (r *mutationResolver) Login(ctx context.Context, input Login) (*LoginResponse, error) {
 
 	user, err := store.GetUsername(ctx, input.Username)
@@ -440,6 +620,8 @@ func (r *queryResolver) GetEvent(ctx context.Context, input int32) (*Event, erro
 	var sponsors []*Sponsor
 	var images []*Image
 	var videos []*Video
+	var tickets []*Ticket
+
 	event, err := store.GetEvent(ctx, input)
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -486,6 +668,23 @@ func (r *queryResolver) GetEvent(ctx context.Context, input int32) (*Event, erro
 		})
 	}
 
+	// fetch tickets
+	eventTickets, err := store.GetTicketsByEventID(ctx, event.ID)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, v := range eventTickets {
+		tickets = append(tickets, &Ticket{
+			ID:       v.ID,
+			Name:     v.Name,
+			Price:    int(v.Price),
+			EventID:  int(v.EventID),
+			Quantity: int(v.Quantity),
+			Status:   int(v.Status),
+		})
+	}
+
 	return &Event{
 		ID:          event.ID,
 		Title:       event.Title,
@@ -502,6 +701,7 @@ func (r *queryResolver) GetEvent(ctx context.Context, input int32) (*Event, erro
 		Status:      int(event.Status),
 		Images:      images,
 		Videos:      videos,
+		Ticket:      tickets,
 	}, nil
 }
 

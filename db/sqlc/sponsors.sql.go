@@ -11,13 +11,20 @@ const createSponsor = `-- name: CreateSponsor :one
 INSERT INTO sponsors (
 user_id
 ) VALUES
-    ($1) RETURNING id, user_id, created_at
+    ($1) RETURNING id, user_id, display_name, avatar_url, short_bio, created_at
 `
 
 func (q *Queries) CreateSponsor(ctx context.Context, userID int32) (Sponsor, error) {
 	row := q.db.QueryRowContext(ctx, createSponsor, userID)
 	var i Sponsor
-	err := row.Scan(&i.ID, &i.UserID, &i.CreatedAt)
+	err := row.Scan(
+		&i.ID,
+		&i.UserID,
+		&i.DisplayName,
+		&i.AvatarUrl,
+		&i.ShortBio,
+		&i.CreatedAt,
+	)
 	return i, err
 }
 
@@ -32,14 +39,21 @@ func (q *Queries) DeleteSponsor(ctx context.Context, id int32) error {
 }
 
 const getSponsor = `-- name: GetSponsor :one
-SELECT id, user_id, created_at from sponsors
+SELECT id, user_id, display_name, avatar_url, short_bio, created_at from sponsors
 WHERE id = $1
 `
 
 func (q *Queries) GetSponsor(ctx context.Context, id int32) (Sponsor, error) {
 	row := q.db.QueryRowContext(ctx, getSponsor, id)
 	var i Sponsor
-	err := row.Scan(&i.ID, &i.UserID, &i.CreatedAt)
+	err := row.Scan(
+		&i.ID,
+		&i.UserID,
+		&i.DisplayName,
+		&i.AvatarUrl,
+		&i.ShortBio,
+		&i.CreatedAt,
+	)
 	return i, err
 }
 

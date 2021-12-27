@@ -103,6 +103,7 @@ type ComplexityRoot struct {
 		CreateVenue           func(childComplexity int, input NewVenue) int
 		Login                 func(childComplexity int, input Login) int
 		RefreshToken          func(childComplexity int, input RefreshTokenInput) int
+		UpdateEvent           func(childComplexity int, input UpdateEvent) int
 		UpdateEventStatus     func(childComplexity int, input UpdateEventStatus) int
 	}
 
@@ -189,6 +190,7 @@ type MutationResolver interface {
 	CreateVenue(ctx context.Context, input NewVenue) (*Venue, error)
 	CreateUser(ctx context.Context, input NewUser) (*User, error)
 	CreateEvent(ctx context.Context, input NewEvent) (*Event, error)
+	UpdateEvent(ctx context.Context, input UpdateEvent) (*Event, error)
 	Login(ctx context.Context, input Login) (*LoginResponse, error)
 	RefreshToken(ctx context.Context, input RefreshTokenInput) (*string, error)
 	CreateTicket(ctx context.Context, input NewTicket) (*Ticket, error)
@@ -550,6 +552,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.RefreshToken(childComplexity, args["input"].(RefreshTokenInput)), true
+
+	case "Mutation.updateEvent":
+		if e.complexity.Mutation.UpdateEvent == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_updateEvent_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.UpdateEvent(childComplexity, args["input"].(UpdateEvent)), true
 
 	case "Mutation.updateEventStatus":
 		if e.complexity.Mutation.UpdateEventStatus == nil {
@@ -1066,7 +1080,7 @@ type Event {
         subcategory: Int!
         sponsors : [Sponsor]
         hostID: Int!
-        ticket : Ticket
+        ticket : [Ticket]
         status: Int!
         images: [Image]
         videos: [Video]
@@ -1161,6 +1175,22 @@ input NewEvent {
         images: [NewImage]
         vidoes: [NewVideo]        
 }
+
+input UpdateEvent {
+        id: Int!
+        title: String
+        description: String
+        banner_image: String
+        startDate:   String
+        endDate:     String
+        venue: Int
+        type: Int
+        category: Int
+        status: Int
+        images: [NewImage]
+        vidoes: [NewVideo]        
+}
+
 input RefreshTokenInput{
         token: String!
 }
@@ -1231,6 +1261,7 @@ type Mutation {
         createVenue(input: NewVenue!): Venue!
         createUser(input: NewUser!): User!
         createEvent(input: NewEvent!):Event!
+        updateEvent(input: UpdateEvent!):Event!
         login(input: Login!): LoginResponse
         refreshToken(input: RefreshTokenInput!): String
         createTicket(input: NewTicket!): Ticket!
@@ -1368,6 +1399,21 @@ func (ec *executionContext) field_Mutation_updateEventStatus_args(ctx context.Co
 	if tmp, ok := rawArgs["input"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
 		arg0, err = ec.unmarshalNUpdateEventStatus2githubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgqlgenᚐUpdateEventStatus(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["input"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_updateEvent_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 UpdateEvent
+	if tmp, ok := rawArgs["input"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+		arg0, err = ec.unmarshalNUpdateEvent2githubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgqlgenᚐUpdateEvent(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -2153,9 +2199,9 @@ func (ec *executionContext) _Event_ticket(ctx context.Context, field graphql.Col
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*Ticket)
+	res := resTmp.([]*Ticket)
 	fc.Result = res
-	return ec.marshalOTicket2ᚖgithubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgqlgenᚐTicket(ctx, field.Selections, res)
+	return ec.marshalOTicket2ᚕᚖgithubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgqlgenᚐTicket(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Event_status(ctx context.Context, field graphql.CollectedField, obj *Event) (ret graphql.Marshaler) {
@@ -2845,6 +2891,48 @@ func (ec *executionContext) _Mutation_createEvent(ctx context.Context, field gra
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Mutation().CreateEvent(rctx, args["input"].(NewEvent))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*Event)
+	fc.Result = res
+	return ec.marshalNEvent2ᚖgithubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgqlgenᚐEvent(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Mutation_updateEvent(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_updateEvent_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().UpdateEvent(rctx, args["input"].(UpdateEvent))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -6587,6 +6675,114 @@ func (ec *executionContext) unmarshalInputRefreshTokenInput(ctx context.Context,
 	return it, nil
 }
 
+func (ec *executionContext) unmarshalInputUpdateEvent(ctx context.Context, obj interface{}) (UpdateEvent, error) {
+	var it UpdateEvent
+	var asMap = obj.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "id":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
+			it.ID, err = ec.unmarshalNInt2int(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "title":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("title"))
+			it.Title, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "description":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("description"))
+			it.Description, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "banner_image":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("banner_image"))
+			it.BannerImage, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "startDate":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("startDate"))
+			it.StartDate, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "endDate":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("endDate"))
+			it.EndDate, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "venue":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("venue"))
+			it.Venue, err = ec.unmarshalOInt2ᚖint(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "type":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("type"))
+			it.Type, err = ec.unmarshalOInt2ᚖint(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "category":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("category"))
+			it.Category, err = ec.unmarshalOInt2ᚖint(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "status":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("status"))
+			it.Status, err = ec.unmarshalOInt2ᚖint(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "images":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("images"))
+			it.Images, err = ec.unmarshalONewImage2ᚕᚖgithubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgqlgenᚐNewImage(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "vidoes":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("vidoes"))
+			it.Vidoes, err = ec.unmarshalONewVideo2ᚕᚖgithubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgqlgenᚐNewVideo(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputUpdateEventStatus(ctx context.Context, obj interface{}) (UpdateEventStatus, error) {
 	var it UpdateEventStatus
 	var asMap = obj.(map[string]interface{})
@@ -6933,6 +7129,11 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			}
 		case "createEvent":
 			out.Values[i] = ec._Mutation_createEvent(ctx, field)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "updateEvent":
+			out.Values[i] = ec._Mutation_updateEvent(ctx, field)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
@@ -7926,6 +8127,11 @@ func (ec *executionContext) marshalNTicket2ᚖgithubᚗcomᚋBigListRyRyᚋharbo
 	return ec._Ticket(ctx, sel, v)
 }
 
+func (ec *executionContext) unmarshalNUpdateEvent2githubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgqlgenᚐUpdateEvent(ctx context.Context, v interface{}) (UpdateEvent, error) {
+	res, err := ec.unmarshalInputUpdateEvent(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
 func (ec *executionContext) marshalNUpdateEventState2githubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgqlgenᚐUpdateEventState(ctx context.Context, sel ast.SelectionSet, v UpdateEventState) graphql.Marshaler {
 	return ec._UpdateEventState(ctx, sel, &v)
 }
@@ -8530,6 +8736,46 @@ func (ec *executionContext) marshalOString2ᚖstring(ctx context.Context, sel as
 		return graphql.Null
 	}
 	return graphql.MarshalString(*v)
+}
+
+func (ec *executionContext) marshalOTicket2ᚕᚖgithubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgqlgenᚐTicket(ctx context.Context, sel ast.SelectionSet, v []*Ticket) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalOTicket2ᚖgithubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgqlgenᚐTicket(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+	return ret
 }
 
 func (ec *executionContext) marshalOTicket2ᚖgithubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgqlgenᚐTicket(ctx context.Context, sel ast.SelectionSet, v *Ticket) graphql.Marshaler {

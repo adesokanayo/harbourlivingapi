@@ -7,6 +7,15 @@ import (
 	"time"
 )
 
+type Artist struct {
+	ID          int32          `json:"id"`
+	UserID      int32          `json:"user_id"`
+	DisplayName sql.NullString `json:"display_name"`
+	AvatarUrl   sql.NullString `json:"avatar_url"`
+	ShortBio    sql.NullString `json:"short_bio"`
+	CreatedAt   time.Time      `json:"created_at"`
+}
+
 type Category struct {
 	ID     int32          `json:"id"`
 	Desc   string         `json:"desc"`
@@ -30,6 +39,13 @@ type Event struct {
 	Recurring   sql.NullBool  `json:"recurring"`
 	Status      int32         `json:"status"`
 	CreatedAt   sql.NullTime  `json:"created_at"`
+}
+
+type EventsArtist struct {
+	ID        int32     `json:"id"`
+	EventID   int32     `json:"event_id"`
+	ArtistID  int32     `json:"artist_id"`
+	CreatedAt time.Time `json:"created_at"`
 }
 
 type EventsHost struct {
@@ -73,9 +89,12 @@ type EventsVideo struct {
 }
 
 type Host struct {
-	ID        int32     `json:"id"`
-	UserID    int32     `json:"user_id"`
-	CreatedAt time.Time `json:"created_at"`
+	ID          int32          `json:"id"`
+	UserID      int32          `json:"user_id"`
+	DisplayName sql.NullString `json:"display_name"`
+	AvatarUrl   sql.NullString `json:"avatar_url"`
+	ShortBio    sql.NullString `json:"short_bio"`
+	CreatedAt   time.Time      `json:"created_at"`
 }
 
 type Image struct {
@@ -85,9 +104,12 @@ type Image struct {
 }
 
 type Sponsor struct {
-	ID        int32     `json:"id"`
-	UserID    int32     `json:"user_id"`
-	CreatedAt time.Time `json:"created_at"`
+	ID          int32          `json:"id"`
+	UserID      int32          `json:"user_id"`
+	DisplayName sql.NullString `json:"display_name"`
+	AvatarUrl   sql.NullString `json:"avatar_url"`
+	ShortBio    sql.NullString `json:"short_bio"`
+	CreatedAt   time.Time      `json:"created_at"`
 }
 
 type Subcategory struct {

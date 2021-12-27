@@ -56,8 +56,8 @@ CREATE TABLE "events" (
                           "title" varchar NOT NULL,
                           "description" varchar NOT NULL,
                           "banner_image" varchar NOT NULL,
-                          "start_date" timestamp NOT NULL,
-                          "end_date" timestamp NOT NULL,
+                          "start_date" timestamptz NOT NULL,
+                          "end_date" timestamptz NOT NULL,
                           "venue" int NOT NULL,
                           "type" int NOT NULL,
                           "user_id" int NOT NULL,
@@ -114,6 +114,9 @@ CREATE TABLE "users_tickets" (
 CREATE TABLE "sponsors" (
                            "id" SERIAL PRIMARY KEY,
                            "user_id" int NOT NULL,
+                           "display_name" varchar,
+                           "avatar_url" varchar,
+                           "short_bio" varchar,
                            "created_at" timestamp NOT NULL DEFAULT (now())
 );
 
@@ -140,6 +143,9 @@ CREATE TABLE "events_images" (
 CREATE TABLE "hosts" (
                         "id" SERIAL PRIMARY KEY,
                         "user_id" int NOT NULL,
+                        "display_name" varchar,
+                        "avatar_url" varchar,
+                        "short_bio" varchar,
                         "created_at" timestamp NOT NULL DEFAULT (now())
 );
 
@@ -156,11 +162,28 @@ CREATE TABLE "events_status" (
                                  "created_at" timestamp NOT NULL DEFAULT (now())
 );
 
+CREATE TABLE "artists" (
+                           "id" SERIAL PRIMARY KEY,
+                           "user_id" int NOT NULL,
+                           "display_name" varchar,
+                           "avatar_url" varchar,
+                           "short_bio" varchar,
+                           "created_at" timestamp NOT NULL DEFAULT (now())
+);
+
+CREATE TABLE "events_artists" (
+                                  "id" SERIAL PRIMARY KEY,
+                                  "event_id" int NOT NULL,
+                                  "artist_id" int NOT NULL,
+                                  "created_at" timestamp NOT NULL DEFAULT (now())
+);
+
 ALTER TABLE "users" ADD FOREIGN KEY ("usertype") REFERENCES "users_type" ("id");
 
 ALTER TABLE "subcategories" ADD FOREIGN KEY ("category_id") REFERENCES "categories" ("id");
 
-ALTER TABLE "events" ADD FOREIGN KEY ("venue") REFERENCES "venues" ("id");
+ALTER TABLE "events" ADD FOREIGN KEY ("venue") REFERENCES "venues" ("id")
+ON UPDATE CASCADE ON DELETE CASCADE;
 
 ALTER TABLE "events" ADD FOREIGN KEY ("type") REFERENCES "events_type" ("id");
 
@@ -185,7 +208,9 @@ ALTER TABLE "sponsors" ADD FOREIGN KEY ("user_id") REFERENCES "users" ("id");
 ALTER TABLE "events_sponsors" ADD FOREIGN KEY ("event_id") REFERENCES "events" ("id");
 
 ALTER TABLE "events_sponsors" ADD FOREIGN KEY ("sponsor_id") REFERENCES "sponsors" ("id");
-ALTER TABLE "events_images" ADD FOREIGN KEY ("image_id") REFERENCES "images" ("id");
+ALTER TABLE "events_images" ADD FOREIGN KEY ("image_id") REFERENCES "images" ("id")
+ON UPDATE CASCADE ON DELETE CASCADE;
+
 ALTER TABLE "events_images" ADD FOREIGN KEY ("event_id") REFERENCES "events" ("id");
 
 ALTER TABLE "events_videos" ADD FOREIGN KEY ("video_id") REFERENCES "videos" ("id");
@@ -196,6 +221,9 @@ ALTER TABLE "hosts" ADD FOREIGN KEY ("user_id") REFERENCES "users" ("id");
 ALTER TABLE "events_hosts" ADD FOREIGN KEY ("event_id") REFERENCES "events" ("id");
 
 ALTER TABLE "events_hosts" ADD FOREIGN KEY ("host_id") REFERENCES "hosts" ("id");
+
+ALTER TABLE "artists" ADD FOREIGN KEY ("user_id") REFERENCES "users" ("id");
+ALTER TABLE "events_artists" ADD FOREIGN KEY ("artist_id") REFERENCES "artists" ("id");
 
 CREATE INDEX ON "users" ("id");
 

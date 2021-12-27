@@ -91,7 +91,7 @@ func (s *Server) CreateUser(ctx *gin.Context) {
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return
 	}
-	dateOrTime, err := util.ProcessDateTime(req.DateOfBirth)
+	dateOrTime, err := util.ProcessDateTime("dob",req.DateOfBirth)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return

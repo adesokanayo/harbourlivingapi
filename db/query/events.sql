@@ -32,6 +32,30 @@ INSERT INTO events (
 ) VALUES
   ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) RETURNING *;
 
+-- name: UpdateEvent :one
+UPDATE events SET
+    title = CASE WHEN @title_to_update::boolean
+        THEN @title::text ELSE title END, 
+    description = CASE WHEN @description_to_update::boolean
+        THEN @description::text ELSE description END,
+    banner_image = CASE WHEN @banner_image_to_update::boolean
+        THEN @banner_image::text ELSE banner_image END,
+    start_date = CASE WHEN @start_date_to_update::boolean
+        THEN @start_date::timestamptz ELSE start_date END,
+    end_date =CASE WHEN @end_date_to_update::boolean
+        THEN @end_date::timestamptz ELSE end_date END,
+    venue = CASE WHEN @venue_to_update::boolean
+        THEN @venue::INTEGER ELSE venue END,
+    type = CASE WHEN @type_to_update::boolean
+        THEN @type::INTEGER ELSE type END,
+    user_id = CASE WHEN @user_id_to_update::boolean
+        THEN @user_id::INTEGER ELSE user_id END,
+    category = CASE WHEN @category_to_update::boolean
+        THEN @category::INTEGER ELSE category END,
+    status = CASE WHEN @status_to_update::boolean
+        THEN @status::INTEGER ELSE status END
+    WHERE id= @id RETURNING *;
+
 -- name: UpdateEventStatus :one
 UPDATE events
 set status = $1

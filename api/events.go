@@ -46,12 +46,12 @@ func (s *Server) CreateEvent(ctx *gin.Context) {
 		return
 	}
 
-	startDate, err := util.ProcessDateTime(req.StartDate)
+	startDate, err := util.ProcessDateTime("rfc",req.StartDate)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
 		return
 	}
-	endDate, err := util.ProcessDateTime(req.EndDate)
+	endDate, err := util.ProcessDateTime("rfc",req.EndDate)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
 		return

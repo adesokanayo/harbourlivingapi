@@ -315,6 +315,100 @@ func (q *Queries) GetEventsByLocation(ctx context.Context, arg GetEventsByLocati
 	return items, nil
 }
 
+const updateEvent = `-- name: UpdateEvent :one
+UPDATE events SET
+    title = CASE WHEN $1::boolean
+        THEN $2::text ELSE title END, 
+    description = CASE WHEN $3::boolean
+        THEN $4::text ELSE description END,
+    banner_image = CASE WHEN $5::boolean
+        THEN $6::text ELSE banner_image END,
+    start_date = CASE WHEN $7::boolean
+        THEN $8::timestamptz ELSE start_date END,
+    end_date =CASE WHEN $9::boolean
+        THEN $10::timestamptz ELSE end_date END,
+    venue = CASE WHEN $11::boolean
+        THEN $12::INTEGER ELSE venue END,
+    type = CASE WHEN $13::boolean
+        THEN $14::INTEGER ELSE type END,
+    user_id = CASE WHEN $15::boolean
+        THEN $16::INTEGER ELSE user_id END,
+    category = CASE WHEN $17::boolean
+        THEN $18::INTEGER ELSE category END,
+    status = CASE WHEN $19::boolean
+        THEN $20::INTEGER ELSE status END
+    WHERE id= $21 RETURNING id, title, description, banner_image, start_date, end_date, venue, type, user_id, category, subcategory, ticket_id, recurring, status, created_at
+`
+
+type UpdateEventParams struct {
+	TitleToUpdate       bool      `json:"title_to_update"`
+	Title               string    `json:"title"`
+	DescriptionToUpdate bool      `json:"description_to_update"`
+	Description         string    `json:"description"`
+	BannerImageToUpdate bool      `json:"banner_image_to_update"`
+	BannerImage         string    `json:"banner_image"`
+	StartDateToUpdate   bool      `json:"start_date_to_update"`
+	StartDate           time.Time `json:"start_date"`
+	EndDateToUpdate     bool      `json:"end_date_to_update"`
+	EndDate             time.Time `json:"end_date"`
+	VenueToUpdate       bool      `json:"venue_to_update"`
+	Venue               int32     `json:"venue"`
+	TypeToUpdate        bool      `json:"type_to_update"`
+	Type                int32     `json:"type"`
+	UserIDToUpdate      bool      `json:"user_id_to_update"`
+	UserID              int32     `json:"user_id"`
+	CategoryToUpdate    bool      `json:"category_to_update"`
+	Category            int32     `json:"category"`
+	StatusToUpdate      bool      `json:"status_to_update"`
+	Status              int32     `json:"status"`
+	ID                  int32     `json:"id"`
+}
+
+func (q *Queries) UpdateEvent(ctx context.Context, arg UpdateEventParams) (Event, error) {
+	row := q.db.QueryRowContext(ctx, updateEvent,
+		arg.TitleToUpdate,
+		arg.Title,
+		arg.DescriptionToUpdate,
+		arg.Description,
+		arg.BannerImageToUpdate,
+		arg.BannerImage,
+		arg.StartDateToUpdate,
+		arg.StartDate,
+		arg.EndDateToUpdate,
+		arg.EndDate,
+		arg.VenueToUpdate,
+		arg.Venue,
+		arg.TypeToUpdate,
+		arg.Type,
+		arg.UserIDToUpdate,
+		arg.UserID,
+		arg.CategoryToUpdate,
+		arg.Category,
+		arg.StatusToUpdate,
+		arg.Status,
+		arg.ID,
+	)
+	var i Event
+	err := row.Scan(
+		&i.ID,
+		&i.Title,
+		&i.Description,
+		&i.BannerImage,
+		&i.StartDate,
+		&i.EndDate,
+		&i.Venue,
+		&i.Type,
+		&i.UserID,
+		&i.Category,
+		&i.Subcategory,
+		&i.TicketID,
+		&i.Recurring,
+		&i.Status,
+		&i.CreatedAt,
+	)
+	return i, err
+}
+
 const updateEventStatus = `-- name: UpdateEventStatus :one
 UPDATE events
 set status = $1

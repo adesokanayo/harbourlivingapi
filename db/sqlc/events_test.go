@@ -3,9 +3,11 @@ package db
 import (
 	"context"
 	"database/sql"
+	"log"
+	"testing"
+
 	"github.com/BigListRyRy/harbourlivingapi/util"
 	"github.com/stretchr/testify/require"
-	"testing"
 )
 
 func createRandomEvent(t *testing.T) Event {
@@ -21,7 +23,7 @@ func createRandomEvent(t *testing.T) Event {
 		Type:        1,
 		Category:    1,
 		Subcategory: 1,
-		Status: 1,
+		Status:      1,
 	}
 
 	event, err := testQueries.CreateEvent(context.Background(), arg)
@@ -41,7 +43,7 @@ func createRandomEvent(t *testing.T) Event {
 	require.NotZero(t, event.StartDate)
 	require.NotZero(t, event.EndDate)
 	require.NotZero(t, event.CreatedAt)
-	require.Equal(t, arg.Status, event.Status,)
+	require.Equal(t, arg.Status, event.Status)
 
 	return event
 }
@@ -57,6 +59,50 @@ func TestGetEvent(t *testing.T) {
 	require.Equal(t, event1.Title, event2.Title)
 	require.Equal(t, event1.Description, event2.Description)
 	require.Equal(t, event1.BannerImage, event2.BannerImage)
+}
+
+func TestUpdateEvent(t *testing.T) {
+	event1 := createRandomEvent(t)
+
+	startdate, err := util.ProcessDateTime("rfc", "2015-09-15T14:00:12-00:00")
+	if err != nil {
+		log.Fatal(err)
+	}
+	enddate, err := util.ProcessDateTime("rfc", "2015-09-15T14:00:12-00:00")
+	arg := UpdateEventParams{
+		TitleToUpdate:       true,
+		Title:               "Updated Title",
+		DescriptionToUpdate: true,
+		Description:         "new description",
+		BannerImage:         "new banner image",
+		BannerImageToUpdate: true,
+		StartDate:           *startdate,
+		StartDateToUpdate:   true,
+		EndDate:             *enddate,
+		EndDateToUpdate:     true,
+		VenueToUpdate:       true,
+		Venue:               1,
+		CategoryToUpdate:    true,
+		Category:            1,
+		TypeToUpdate:        true,
+		Type:                1,
+		StatusToUpdate:      true,
+		Status:              1,
+		ID:                  event1.ID,
+	}
+	_, err = testQueries.UpdateEvent(context.Background(), arg)
+	updatedEvent1, err := testQueries.GetEvent(context.Background(), event1.ID)
+	require.NoError(t, err)
+	require.Equal(t, arg.Title, updatedEvent1.Title)
+	require.Equal(t, arg.Description, updatedEvent1.Description)
+	require.Equal(t, arg.BannerImage, updatedEvent1.BannerImage)
+
+	//require.Equal(t, arg.StartDate, updatedEvent1.StartDate)
+	//require.Equal(t, arg.EndDate, updatedEvent1.EndDate)
+	require.Equal(t, arg.Venue, updatedEvent1.Venue)
+	require.Equal(t, arg.Type, updatedEvent1.Type)
+	require.Equal(t, arg.Status, updatedEvent1.Status)
+
 }
 
 func TestGetAllEvents(t *testing.T) {

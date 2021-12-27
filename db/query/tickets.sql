@@ -12,6 +12,10 @@ INSERT INTO tickets (
 SELECT * FROM tickets
 WHERE id = $1 LIMIT 1;
 
+-- name: GetTicketsByEventID :many
+SELECT * FROM tickets
+where event_id = $1;
+
 -- name: GetAllTickets :many
 SELECT * FROM tickets
 ORDER  by id;
