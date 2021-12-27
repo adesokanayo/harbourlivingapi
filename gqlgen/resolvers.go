@@ -176,7 +176,7 @@ func (r *mutationResolver) CreateUser(ctx context.Context, input NewUser) (*User
 		Password:  hashedPassword,
 		Username:  input.Username,
 		Usertype:  int32(input.Usertype),
-		AvatarUrl: sql.NullString{String: *input.Avatar},
+		AvatarUrl: avatar,
 	}
 
 	user, err := store.CreateUser(context.Background(), arg)
@@ -192,6 +192,7 @@ func (r *mutationResolver) CreateUser(ctx context.Context, input NewUser) (*User
 		Username:  user.Username,
 		Password:  user.Password,
 		Usertype:  int(user.Usertype),
+		Avatar: user.AvatarUrl.String,
 	}, nil
 }
 
