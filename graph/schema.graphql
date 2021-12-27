@@ -170,7 +170,7 @@ input NewUser {
         username: String!
         password: String!
         usertype: Int!
-        avatar: String!
+        avatar: String
 }
 
 type Sponsor {

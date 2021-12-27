@@ -151,6 +151,8 @@ func (r *mutationResolver) CreateVenue(ctx context.Context, input NewVenue) (*Ve
 func (r *mutationResolver) CreateUser(ctx context.Context, input NewUser) (*User, error) {
 
 	var phone sql.NullString
+	var avatar sql.NullString
+
 	hashedPassword, err := util.HashPassword(input.Password)
 	if err != nil {
 		return nil, err
@@ -161,6 +163,11 @@ func (r *mutationResolver) CreateUser(ctx context.Context, input NewUser) (*User
 		phone.Valid = true
 	}
 
+	if input.Avatar != nil {
+		avatar.String = *input.Avatar
+		avatar.Valid = true
+	}
+
 	arg := db.CreateUserParams{
 		Phone:     phone,
 		FirstName: input.FirstName,
@@ -169,7 +176,7 @@ func (r *mutationResolver) CreateUser(ctx context.Context, input NewUser) (*User
 		Password:  hashedPassword,
 		Username:  input.Username,
 		Usertype:  int32(input.Usertype),
-		AvatarUrl: sql.NullString{String: input.Avatar},
+		AvatarUrl: sql.NullString{String: *input.Avatar},
 	}
 
 	user, err := store.CreateUser(context.Background(), arg)
@@ -191,11 +198,11 @@ func (r *mutationResolver) CreateUser(ctx context.Context, input NewUser) (*User
 func (r *mutationResolver) CreateEvent(ctx context.Context, input NewEvent) (*Event, error) {
 
 	var result *Event
-	startdate, err := util.ProcessDateTime("rfc",input.StartDate)
+	startdate, err := util.ProcessDateTime("rfc", input.StartDate)
 	if err != nil {
 		return nil, err
 	}
-	enddate, err := util.ProcessDateTime("rfc",input.EndDate)
+	enddate, err := util.ProcessDateTime("rfc", input.EndDate)
 	if err != nil {
 		return nil, err
 	}
@@ -365,7 +372,7 @@ func (r *mutationResolver) UpdateEvent(ctx context.Context, input UpdateEvent) (
 	}
 
 	if input.StartDate != nil {
-		startdate, err := util.ProcessDateTime("rfc",*input.StartDate)
+		startdate, err := util.ProcessDateTime("rfc", *input.StartDate)
 		if err != nil {
 			return nil, err
 		}
@@ -374,7 +381,7 @@ func (r *mutationResolver) UpdateEvent(ctx context.Context, input UpdateEvent) (
 	}
 
 	if input.EndDate != nil {
-		enddate, err := util.ProcessDateTime("rfc",*input.EndDate)
+		enddate, err := util.ProcessDateTime("rfc", *input.EndDate)
 		if err != nil {
 			return nil, err
 		}
