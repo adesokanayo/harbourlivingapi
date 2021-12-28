@@ -8,8 +8,45 @@ import (
 	"database/sql"
 )
 
+const createCategory = `-- name: CreateCategory :one
+INSERT INTO categories (
+    description,
+    image,
+    status
+) VALUES
+  ($1, $2, $3) RETURNING id, description, image, status
+`
+
+type CreateCategoryParams struct {
+	Description string         `json:"description"`
+	Image       sql.NullString `json:"image"`
+	Status      int32          `json:"status"`
+}
+
+func (q *Queries) CreateCategory(ctx context.Context, arg CreateCategoryParams) (Category, error) {
+	row := q.db.QueryRowContext(ctx, createCategory, arg.Description, arg.Image, arg.Status)
+	var i Category
+	err := row.Scan(
+		&i.ID,
+		&i.Description,
+		&i.Image,
+		&i.Status,
+	)
+	return i, err
+}
+
+const deleteCategory = `-- name: DeleteCategory :exec
+DELETE  from categories
+where id =$1
+`
+
+func (q *Queries) DeleteCategory(ctx context.Context, id int32) error {
+	_, err := q.db.ExecContext(ctx, deleteCategory, id)
+	return err
+}
+
 const getCategories = `-- name: GetCategories :many
-SELECT id, "desc", image, status FROM categories
+SELECT id, description, image, status FROM categories
 `
 
 func (q *Queries) GetCategories(ctx context.Context) ([]Category, error) {
@@ -23,7 +60,7 @@ func (q *Queries) GetCategories(ctx context.Context) ([]Category, error) {
 		var i Category
 		if err := rows.Scan(
 			&i.ID,
-			&i.Desc,
+			&i.Description,
 			&i.Image,
 			&i.Status,
 		); err != nil {
@@ -41,7 +78,7 @@ func (q *Queries) GetCategories(ctx context.Context) ([]Category, error) {
 }
 
 const getCategory = `-- name: GetCategory :one
-SELECT id, "desc", image, status FROM categories
+SELECT id, description, image, status FROM categories
 WHERE id = $1 LIMIT 1
 `
 
@@ -50,58 +87,8 @@ func (q *Queries) GetCategory(ctx context.Context, id int32) (Category, error) {
 	var i Category
 	err := row.Scan(
 		&i.ID,
-		&i.Desc,
+		&i.Description,
 		&i.Image,
-		&i.Status,
-	)
-	return i, err
-}
-
-const getSubCategories = `-- name: GetSubCategories :many
-SELECT id, category_id, "desc", status FROM subcategories
-WHERE category_id = $1
-`
-
-func (q *Queries) GetSubCategories(ctx context.Context, categoryID int32) ([]Subcategory, error) {
-	rows, err := q.db.QueryContext(ctx, getSubCategories, categoryID)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	items := []Subcategory{}
-	for rows.Next() {
-		var i Subcategory
-		if err := rows.Scan(
-			&i.ID,
-			&i.CategoryID,
-			&i.Desc,
-			&i.Status,
-		); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Close(); err != nil {
-		return nil, err
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
-}
-
-const getSubCategory = `-- name: GetSubCategory :one
-SELECT id, category_id, "desc", status FROM subcategories
-WHERE category_id = $1 LIMIT 1
-`
-
-func (q *Queries) GetSubCategory(ctx context.Context, categoryID int32) (Subcategory, error) {
-	row := q.db.QueryRowContext(ctx, getSubCategory, categoryID)
-	var i Subcategory
-	err := row.Scan(
-		&i.ID,
-		&i.CategoryID,
-		&i.Desc,
 		&i.Status,
 	)
 	return i, err
@@ -114,27 +101,11 @@ where id = $2
 `
 
 type UpdateCategoryStatusParams struct {
-	Status sql.NullInt32 `json:"status"`
-	ID     int32         `json:"id"`
+	Status int32 `json:"status"`
+	ID     int32 `json:"id"`
 }
 
 func (q *Queries) UpdateCategoryStatus(ctx context.Context, arg UpdateCategoryStatusParams) error {
 	_, err := q.db.ExecContext(ctx, updateCategoryStatus, arg.Status, arg.ID)
-	return err
-}
-
-const updateSubCategoryStatus = `-- name: UpdateSubCategoryStatus :exec
-UPDATE categories
-set status = $1
-where id = $2
-`
-
-type UpdateSubCategoryStatusParams struct {
-	Status sql.NullInt32 `json:"status"`
-	ID     int32         `json:"id"`
-}
-
-func (q *Queries) UpdateSubCategoryStatus(ctx context.Context, arg UpdateSubCategoryStatusParams) error {
-	_, err := q.db.ExecContext(ctx, updateSubCategoryStatus, arg.Status, arg.ID)
 	return err
 }

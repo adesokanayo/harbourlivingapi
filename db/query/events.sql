@@ -6,11 +6,10 @@ WHERE id = $1 LIMIT 1;
 SELECT * FROM events e
 inner join venues v on  e.venue = v.id
 WHERE category = $1
-and subcategory =$2
-and e.status =$3
+and e.status =$2
 ORDER BY e.id desc
-LIMIT $4
-OFFSET $5;
+LIMIT $3
+OFFSET $4;
 
 -- name: DeleteEvent :exec
 DELETE FROM events
@@ -27,10 +26,9 @@ INSERT INTO events (
     type,
     user_id,
     category,
-    subcategory,
     status
 ) VALUES
-  ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) RETURNING *;
+  ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING *;
 
 -- name: UpdateEvent :one
 UPDATE events SET

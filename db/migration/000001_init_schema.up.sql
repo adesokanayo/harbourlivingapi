@@ -15,28 +15,21 @@ CREATE TABLE "users" (
 
 CREATE TABLE "users_type" (
                             "id" SERIAL PRIMARY KEY,
-                            "desc" varchar NOT NULL,
-                            "status" int
+                            "description" varchar NOT NULL,
+                            "status" int NOT NULL
 );
 
 CREATE TABLE "events_type" (
                               "id" SERIAL PRIMARY KEY,
-                              "desc" varchar NOT NULL,
-                              "status" int
+                              "description" varchar NOT NULL,
+                              "status" int NOT NULL
 );
 
 CREATE TABLE "categories" (
                             "id" SERIAL PRIMARY KEY,
-                            "desc" varchar NOT NULL,
+                            "description" varchar NOT NULL,
                             "image" varchar,
-                            "status" int
-);
-
-CREATE TABLE "subcategories" (
-                               "id" SERIAL PRIMARY KEY,
-                               "category_id" int NOT NULL,
-                               "desc" varchar NOT NULL,
-                               "status" int
+                            "status" int NOT NULL
 );
 
 CREATE TABLE "images" (
@@ -62,7 +55,6 @@ CREATE TABLE "events" (
                           "type" int NOT NULL,
                           "user_id" int NOT NULL,
                           "category" int NOT NULL,
-                          "subcategory" int NOT NULL,
                           "ticket_id" int,
                           "recurring" boolean,
                           "status" int NOT NULL,
@@ -96,7 +88,7 @@ CREATE TABLE "tickets" (
 
 CREATE TABLE "tickets_status" (
                                  "id" SERIAL PRIMARY KEY,
-                                 "desc" varchar,
+                                 "description" varchar,
                                  "status" int NOT NULL
 );
 
@@ -159,7 +151,7 @@ CREATE TABLE "events_hosts" (
 
 CREATE TABLE "events_status" (
                                  "id" SERIAL PRIMARY KEY,
-                                 "desc" varchar,
+                                 "description" varchar,
                                  "created_at" timestamp NOT NULL DEFAULT (now())
 );
 
@@ -181,8 +173,6 @@ CREATE TABLE "events_artists" (
 
 ALTER TABLE "users" ADD FOREIGN KEY ("usertype") REFERENCES "users_type" ("id");
 
-ALTER TABLE "subcategories" ADD FOREIGN KEY ("category_id") REFERENCES "categories" ("id");
-
 ALTER TABLE "events" ADD FOREIGN KEY ("venue") REFERENCES "venues" ("id")
 ON UPDATE CASCADE ON DELETE CASCADE;
 
@@ -191,8 +181,6 @@ ALTER TABLE "events" ADD FOREIGN KEY ("type") REFERENCES "events_type" ("id");
 ALTER TABLE "events" ADD FOREIGN KEY ("user_id") REFERENCES "users" ("id");
 
 ALTER TABLE "events" ADD FOREIGN KEY ("category") REFERENCES "categories" ("id");
-
-ALTER TABLE "events" ADD FOREIGN KEY ("subcategory") REFERENCES "subcategories" ("id");
 
 ALTER TABLE "events" ADD FOREIGN KEY ("status") REFERENCES "events_status" ("id");
 
@@ -259,19 +247,19 @@ CREATE INDEX ON "events" ("type");
 
 
 
-INSERT  INTO users_type ( "desc", "status")
+INSERT  INTO users_type ( "description", "status")
 VALUES
     ('Attendee',1),
     ('Host',1),
     ('Sponsor',1);
 
-INSERT  INTO events_type ("desc", "status")
+INSERT  INTO events_type ("description", "status")
 VALUES
     ( 'Free',1),
     ( 'Paid',1),
     ( 'Special',1);
 
-INSERT  INTO categories ( "desc", "status")
+INSERT  INTO categories ( "description", "status")
 VALUES
     ('Education',1),
     ('Food ',1),
@@ -279,14 +267,6 @@ VALUES
     ('Music',1),
     ('Business',1);
 
-
-INSERT  INTO subcategories ( "desc","category_id", "status")
-VALUES
-    ( 'Sleeping',1,1),
-    ( 'Eating Habits ',2,1),
-    ( 'Marathon',3,1),
-    ( 'Running',3,1),
-    ( 'P&L',4,1);
 
 INSERT  INTO venues ("name", "address", "postal_code","city","province","country_code",virtual)
 VALUES
@@ -296,14 +276,14 @@ VALUES
     ('Eko Hotels','34 TempleBy Way 54532','T2A6YG','Calgary','AB','CAN',false),
     ('Eko Hotels','34 TempleBy Way,54532','T2A6YG','Calgary','AB','CAN',false);
 
-INSERT  INTO tickets_status ("desc", "status")
+INSERT  INTO tickets_status ("description", "status")
 VALUES
     ( 'Active',1),
     ( 'Cancelled',2),
     ( 'Renewed',3);
 
 
-INSERT  INTO events_status ("desc" )
+INSERT  INTO events_status ("description" )
 VALUES
     ( 'New'),
     ( 'Published'),

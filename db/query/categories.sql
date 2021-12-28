@@ -10,24 +10,14 @@ UPDATE categories
 set status = $1
 where id = $2;
 
---name: DeleteCategory :exec
+-- name: DeleteCategory :exec
 DELETE  from categories
 where id =$1 ;
 
--- name: GetSubCategory :one
-SELECT * FROM subcategories
-WHERE category_id = $1 LIMIT 1;
-
-
--- name: GetSubCategories :many
-SELECT * FROM subcategories
-WHERE category_id = $1;
-
--- name: UpdateSubCategoryStatus :exec
-UPDATE categories
-set status = $1
-where id = $2;
-
---name: DeleteSubCategory :exec
-DELETE  from Subcategories
-where id =$1;
+-- name: CreateCategory :one
+INSERT INTO categories (
+    description,
+    image,
+    status
+) VALUES
+  (@description, @image, @status) RETURNING *;

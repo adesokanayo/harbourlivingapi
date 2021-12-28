@@ -66,7 +66,6 @@ func (s *Server) CreateEvent(ctx *gin.Context) {
 		Type:        req.Type,
 		UserID:      req.UserID,
 		Category:    req.Category,
-		Subcategory: req.Subcategory,
 	}
 	event, err := s.store.CreateEvent(ctx, arg)
 	if err != nil {
@@ -87,7 +86,6 @@ func (s *Server) ListEvents(ctx *gin.Context) {
 
 	arg := db.GetEventsParams{
 		Category:    req.Category,
-		Subcategory: req.SubCategory,
 		Limit:       req.PageSize,
 		Offset:      (req.PageID - 1) * req.PageSize,
 	}
