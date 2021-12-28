@@ -113,18 +113,45 @@ func (q *Queries) LinkSponsorToEvent(ctx context.Context, arg LinkSponsorToEvent
 	return i, err
 }
 
-const updateSponsor = `-- name: UpdateSponsor :exec
-UPDATE events_sponsors
-set event_id= $1
-WHERE id=$2
+const updateSponsor = `-- name: UpdateSponsor :one
+UPDATE sponsors SET
+ display_name = CASE WHEN $1::boolean
+        THEN $2::text ELSE display_name END, 
+ avatar_url = CASE WHEN $3::boolean
+        THEN $4::text ELSE avatar_url END,
+ short_bio = CASE WHEN $5::boolean
+        THEN $6::text ELSE short_bio END
+WHERE id = $7 RETURNING id, user_id, display_name, avatar_url, short_bio, created_at
 `
 
 type UpdateSponsorParams struct {
-	EventID int32 `json:"event_id"`
-	ID      int32 `json:"id"`
+	DisplayNameToUpdate bool   `json:"display_name_to_update"`
+	DisplayName         string `json:"display_name"`
+	AvatarUrlToUpdate   bool   `json:"avatar_url_to_update"`
+	AvatarUrl           string `json:"avatar_url"`
+	ShortBioToUpdate    bool   `json:"short_bio_to_update"`
+	ShortBio            string `json:"short_bio"`
+	ID                  int32  `json:"id"`
 }
 
-func (q *Queries) UpdateSponsor(ctx context.Context, arg UpdateSponsorParams) error {
-	_, err := q.db.ExecContext(ctx, updateSponsor, arg.EventID, arg.ID)
-	return err
+func (q *Queries) UpdateSponsor(ctx context.Context, arg UpdateSponsorParams) (Sponsor, error) {
+	row := q.db.QueryRowContext(ctx, updateSponsor,
+		arg.DisplayNameToUpdate,
+		arg.DisplayName,
+		arg.AvatarUrlToUpdate,
+		arg.AvatarUrl,
+		arg.ShortBioToUpdate,
+		arg.ShortBio,
+		arg.ID,
+	)
+	var i Sponsor
+	err := row.Scan(
+		&i.ID,
+		&i.UserID,
+		&i.DisplayName,
+		&i.AvatarUrl,
+		&i.ShortBio,
+		&i.CreatedAt,
+	)
+	return i, err
 }
