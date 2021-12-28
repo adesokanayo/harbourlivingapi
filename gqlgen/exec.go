@@ -60,7 +60,6 @@ type ComplexityRoot struct {
 		Sponsors    func(childComplexity int) int
 		StartDate   func(childComplexity int) int
 		Status      func(childComplexity int) int
-		Subcategory func(childComplexity int) int
 		Ticket      func(childComplexity int) int
 		Title       func(childComplexity int) int
 		Type        func(childComplexity int) int
@@ -96,6 +95,7 @@ type ComplexityRoot struct {
 	}
 
 	Mutation struct {
+		CreateCategory        func(childComplexity int, input NewCategory) int
 		CreateEvent           func(childComplexity int, input NewEvent) int
 		CreateSponsorForEvent func(childComplexity int, input NewSponsor) int
 		CreateTicket          func(childComplexity int, input NewTicket) int
@@ -114,7 +114,6 @@ type ComplexityRoot struct {
 		GetEvent            func(childComplexity int, input int32) int
 		GetEvents           func(childComplexity int, input GetEvent) int
 		GetEventsByLocation func(childComplexity int, input GetEventByLocation) int
-		GetSubcategory      func(childComplexity int, input int32) int
 		GetUser             func(childComplexity int, input int32) int
 		GetUsers            func(childComplexity int) int
 		GetVenue            func(childComplexity int, input int32) int
@@ -189,6 +188,7 @@ type ComplexityRoot struct {
 }
 
 type MutationResolver interface {
+	CreateCategory(ctx context.Context, input NewCategory) (*Category, error)
 	CreateVenue(ctx context.Context, input NewVenue) (*Venue, error)
 	CreateUser(ctx context.Context, input NewUser) (*User, error)
 	CreateEvent(ctx context.Context, input NewEvent) (*Event, error)
@@ -208,7 +208,6 @@ type QueryResolver interface {
 	GetEvents(ctx context.Context, input GetEvent) ([]Event, error)
 	GetEventsByLocation(ctx context.Context, input GetEventByLocation) ([]Event, error)
 	GetCategory(ctx context.Context, input int32) (*Category, error)
-	GetSubcategory(ctx context.Context, input int32) (*Subcategory, error)
 	GetCategories(ctx context.Context) ([]Category, error)
 }
 
@@ -324,13 +323,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Event.Status(childComplexity), true
-
-	case "Event.subcategory":
-		if e.complexity.Event.Subcategory == nil {
-			break
-		}
-
-		return e.complexity.Event.Subcategory(childComplexity), true
 
 	case "Event.ticket":
 		if e.complexity.Event.Ticket == nil {
@@ -471,6 +463,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.LoginResponse.User(childComplexity), true
+
+	case "Mutation.createCategory":
+		if e.complexity.Mutation.CreateCategory == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_createCategory_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.CreateCategory(childComplexity, args["input"].(NewCategory)), true
 
 	case "Mutation.createEvent":
 		if e.complexity.Mutation.CreateEvent == nil {
@@ -646,18 +650,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.GetEventsByLocation(childComplexity, args["input"].(GetEventByLocation)), true
-
-	case "Query.getSubcategory":
-		if e.complexity.Query.GetSubcategory == nil {
-			break
-		}
-
-		args, err := ec.field_Query_getSubcategory_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Query.GetSubcategory(childComplexity, args["input"].(int32)), true
 
 	case "Query.getUser":
 		if e.complexity.Query.GetUser == nil {
@@ -1083,6 +1075,13 @@ type Category {
         image: String!
         status: Int!
         }
+
+input NewCategory {
+        desc: String!
+        image: String
+        status: Int!
+}
+
 type Subcategory {
         id: ID!
         desc: String!
@@ -1099,7 +1098,6 @@ type Event {
         type: Int!
         user_id: ID!
         category: Int!
-        subcategory: Int!
         sponsors : [Sponsor]
         hostID: Int!
         ticket : [Ticket]
@@ -1171,7 +1169,6 @@ input NewVenue {
 
 input GetEvent{
         category: Int!
-        subcategory: Int!,
         pageSize: Int!
         offset: Int!
         status: Int!
@@ -1192,7 +1189,6 @@ input NewEvent {
         type: Int!
         user_id: ID!
         category: Int!
-        subcategory: Int!
         status: Int!
         images: [NewImage]
         vidoes: [NewVideo]        
@@ -1282,6 +1278,7 @@ input UpdateEventStatus{
 
 
 type Mutation {
+        createCategory(input : NewCategory!): Category!
         createVenue(input: NewVenue!): Venue!
         createUser(input: NewUser!): User!
         createEvent(input: NewEvent!):Event!
@@ -1292,9 +1289,10 @@ type Mutation {
         createTicket(input: NewTicket!): Ticket!
         createSponsorForEvent(input: NewSponsor!): Sponsor!
         updateEventStatus(input: UpdateEventStatus!): UpdateEventState!
+
 }
 
-type Query{
+type Query {
         getUser(input: ID!): User
         getEvent(input: ID!): Event
         getVenue(input: ID!): Venue
@@ -1302,7 +1300,6 @@ type Query{
         getEvents(input: GetEvent!): [Event!]
         getEventsByLocation(input: GetEventByLocation!): [Event!]
         getCategory( input: ID!): Category!
-        getSubcategory( input: ID!): Subcategory!
         getCategories: [Category!]
 }`, BuiltIn: false},
 }
@@ -1311,6 +1308,21 @@ var parsedSchema = gqlparser.MustLoadSchema(sources...)
 // endregion ************************** generated!.gotpl **************************
 
 // region    ***************************** args.gotpl *****************************
+
+func (ec *executionContext) field_Mutation_createCategory_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 NewCategory
+	if tmp, ok := rawArgs["input"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+		arg0, err = ec.unmarshalNNewCategory2githubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgqlgenᚐNewCategory(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["input"] = arg0
+	return args, nil
+}
 
 func (ec *executionContext) field_Mutation_createEvent_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
@@ -1529,21 +1541,6 @@ func (ec *executionContext) field_Query_getEvents_args(ctx context.Context, rawA
 	if tmp, ok := rawArgs["input"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
 		arg0, err = ec.unmarshalNGetEvent2githubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgqlgenᚐGetEvent(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["input"] = arg0
-	return args, nil
-}
-
-func (ec *executionContext) field_Query_getSubcategory_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	var arg0 int32
-	if tmp, ok := rawArgs["input"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-		arg0, err = ec.unmarshalNID2int32(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -2094,41 +2091,6 @@ func (ec *executionContext) _Event_category(ctx context.Context, field graphql.C
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Category, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(int)
-	fc.Result = res
-	return ec.marshalNInt2int(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _Event_subcategory(ctx context.Context, field graphql.CollectedField, obj *Event) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "Event",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   false,
-		IsResolver: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Subcategory, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -2821,6 +2783,48 @@ func (ec *executionContext) _LoginResponse_message(ctx context.Context, field gr
 	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _Mutation_createCategory(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_createCategory_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().CreateCategory(rctx, args["input"].(NewCategory))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*Category)
+	fc.Result = res
+	return ec.marshalNCategory2ᚖgithubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgqlgenᚐCategory(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _Mutation_createVenue(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -3502,48 +3506,6 @@ func (ec *executionContext) _Query_getCategory(ctx context.Context, field graphq
 	res := resTmp.(*Category)
 	fc.Result = res
 	return ec.marshalNCategory2ᚖgithubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgqlgenᚐCategory(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _Query_getSubcategory(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "Query",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   true,
-		IsResolver: true,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := ec.field_Query_getSubcategory_args(ctx, rawArgs)
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	fc.Args = args
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().GetSubcategory(rctx, args["input"].(int32))
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(*Subcategory)
-	fc.Result = res
-	return ec.marshalNSubcategory2ᚖgithubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgqlgenᚐSubcategory(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query_getCategories(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -6222,14 +6184,6 @@ func (ec *executionContext) unmarshalInputGetEvent(ctx context.Context, obj inte
 			if err != nil {
 				return it, err
 			}
-		case "subcategory":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("subcategory"))
-			it.Subcategory, err = ec.unmarshalNInt2int(ctx, v)
-			if err != nil {
-				return it, err
-			}
 		case "pageSize":
 			var err error
 
@@ -6324,6 +6278,42 @@ func (ec *executionContext) unmarshalInputLogin(ctx context.Context, obj interfa
 	return it, nil
 }
 
+func (ec *executionContext) unmarshalInputNewCategory(ctx context.Context, obj interface{}) (NewCategory, error) {
+	var it NewCategory
+	var asMap = obj.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "desc":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("desc"))
+			it.Desc, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "image":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("image"))
+			it.Image, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "status":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("status"))
+			it.Status, err = ec.unmarshalNInt2int(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputNewEvent(ctx context.Context, obj interface{}) (NewEvent, error) {
 	var it NewEvent
 	var asMap = obj.(map[string]interface{})
@@ -6399,14 +6389,6 @@ func (ec *executionContext) unmarshalInputNewEvent(ctx context.Context, obj inte
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("category"))
 			it.Category, err = ec.unmarshalNInt2int(ctx, v)
-			if err != nil {
-				return it, err
-			}
-		case "subcategory":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("subcategory"))
-			it.Subcategory, err = ec.unmarshalNInt2int(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -7047,11 +7029,6 @@ func (ec *executionContext) _Event(ctx context.Context, sel ast.SelectionSet, ob
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
-		case "subcategory":
-			out.Values[i] = ec._Event_subcategory(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
 		case "sponsors":
 			out.Values[i] = ec._Event_sponsors(ctx, field, obj)
 		case "hostID":
@@ -7242,6 +7219,11 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Mutation")
+		case "createCategory":
+			out.Values[i] = ec._Mutation_createCategory(ctx, field)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		case "createVenue":
 			out.Values[i] = ec._Mutation_createVenue(ctx, field)
 			if out.Values[i] == graphql.Null {
@@ -7387,20 +7369,6 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_getCategory(ctx, field)
-				if res == graphql.Null {
-					atomic.AddUint32(&invalids, 1)
-				}
-				return res
-			})
-		case "getSubcategory":
-			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Query_getSubcategory(ctx, field)
 				if res == graphql.Null {
 					atomic.AddUint32(&invalids, 1)
 				}
@@ -8175,6 +8143,11 @@ func (ec *executionContext) unmarshalNLogin2githubᚗcomᚋBigListRyRyᚋharbour
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
+func (ec *executionContext) unmarshalNNewCategory2githubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgqlgenᚐNewCategory(ctx context.Context, v interface{}) (NewCategory, error) {
+	res, err := ec.unmarshalInputNewCategory(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
 func (ec *executionContext) unmarshalNNewEvent2githubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgqlgenᚐNewEvent(ctx context.Context, v interface{}) (NewEvent, error) {
 	res, err := ec.unmarshalInputNewEvent(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -8232,20 +8205,6 @@ func (ec *executionContext) marshalNString2string(ctx context.Context, sel ast.S
 		}
 	}
 	return res
-}
-
-func (ec *executionContext) marshalNSubcategory2githubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgqlgenᚐSubcategory(ctx context.Context, sel ast.SelectionSet, v Subcategory) graphql.Marshaler {
-	return ec._Subcategory(ctx, sel, &v)
-}
-
-func (ec *executionContext) marshalNSubcategory2ᚖgithubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgqlgenᚐSubcategory(ctx context.Context, sel ast.SelectionSet, v *Subcategory) graphql.Marshaler {
-	if v == nil {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	return ec._Subcategory(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalNTicket2githubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgqlgenᚐTicket(ctx context.Context, sel ast.SelectionSet, v Ticket) graphql.Marshaler {

@@ -196,6 +196,28 @@ func (r *mutationResolver) CreateUser(ctx context.Context, input NewUser) (*User
 	}, nil
 }
 
+func (r *mutationResolver) CreateCategory(ctx context.Context, input NewCategory) (*Category, error) {
+
+	arg := db.CreateCategoryParams{}
+
+	if input.Image != nil {
+		arg.Image = sql.NullString{String: *input.Image, Valid: true}
+	}
+	arg.Description = input.Desc
+	arg.Status = int32(input.Status)
+	category, err := store.CreateCategory(ctx, arg)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &Category{
+		ID:     category.ID,
+		Image:  category.Image.String,
+		Status: int(category.Status),
+	}, nil
+}
+
 func (r *mutationResolver) CreateEvent(ctx context.Context, input NewEvent) (*Event, error) {
 
 	var result *Event
@@ -217,7 +239,6 @@ func (r *mutationResolver) CreateEvent(ctx context.Context, input NewEvent) (*Ev
 		Type:        int32(input.Type),
 		UserID:      int32(input.UserID),
 		Category:    int32(input.Category),
-		Subcategory: int32(input.Subcategory),
 		Status:      int32(input.Status),
 	}
 
@@ -329,7 +350,6 @@ func (r *mutationResolver) CreateEvent(ctx context.Context, input NewEvent) (*Ev
 			StartDate:   event.StartDate.String(),
 			EndDate:     event.EndDate.String(),
 			BannerImage: event.BannerImage,
-			Subcategory: int(event.Subcategory),
 			Category:    int(event.Category),
 			HostID:      int(linkedEventHost.HostID),
 			Images:      images,
@@ -503,7 +523,6 @@ func (r *mutationResolver) UpdateEvent(ctx context.Context, input UpdateEvent) (
 			StartDate:   event.StartDate.String(),
 			EndDate:     event.EndDate.String(),
 			BannerImage: event.BannerImage,
-			Subcategory: int(event.Subcategory),
 			Category:    int(event.Category),
 			Images:      images,
 			Videos:      videos,
@@ -719,7 +738,6 @@ func (r *queryResolver) GetEvent(ctx context.Context, input int32) (*Event, erro
 		Type:        int(event.Type),
 		UserID:      event.UserID,
 		Category:    int(event.Category),
-		Subcategory: int(event.Subcategory),
 		Sponsors:    sponsors,
 		Status:      int(event.Status),
 		Images:      images,
@@ -736,11 +754,10 @@ func (r *queryResolver) GetEvents(ctx context.Context, input GetEvent) ([]Event,
 	var eventSponsors []*Sponsor
 
 	arg := db.GetEventsParams{
-		Category:    int32(input.Category),
-		Subcategory: int32(input.Subcategory),
-		Status:      int32(input.Status),
-		Limit:       int32(input.PageSize),
-		Offset:      int32(input.Offset),
+		Category: int32(input.Category),
+		Status:   int32(input.Status),
+		Limit:    int32(input.PageSize),
+		Offset:   int32(input.Offset),
 	}
 	events, err := store.GetEvents(ctx, arg)
 	if err != nil {
@@ -795,7 +812,6 @@ func (r *queryResolver) GetEvents(ctx context.Context, input GetEvent) ([]Event,
 			StartDate:   event.StartDate.String(),
 			EndDate:     event.EndDate.String(),
 			Category:    int(event.Category),
-			Subcategory: int(event.Subcategory),
 			Type:        int(event.Type),
 			UserID:      event.UserID,
 			Venue:       int(event.Venue),
@@ -845,7 +861,6 @@ func (r *queryResolver) GetEventsByLocation(ctx context.Context, input GetEventB
 			StartDate:   event.StartDate.String(),
 			EndDate:     event.EndDate.String(),
 			Category:    int(event.Category),
-			Subcategory: int(event.Subcategory),
 			Type:        int(event.Type),
 			UserID:      event.UserID,
 			Venue:       int(event.Venue),
@@ -964,8 +979,8 @@ func (q *queryResolver) GetCategory(ctx context.Context, id int32) (*Category, e
 	}
 	return &Category{
 		ID:     category.ID,
-		Desc:   category.Desc,
-		Status: int(category.Status.Int32),
+		Desc:   category.Description,
+		Status: int(category.Status),
 	}, nil
 }
 func (q *queryResolver) GetCategories(ctx context.Context) ([]Category, error) {
@@ -980,25 +995,13 @@ func (q *queryResolver) GetCategories(ctx context.Context) ([]Category, error) {
 	for _, v := range categories {
 		result = append(result, Category{
 			v.ID,
-			v.Desc,
+			v.Description,
 			v.Image.String,
-			int(v.Status.Int32),
+			int(v.Status),
 		})
 	}
 
 	return result, nil
-}
-
-func (q *queryResolver) GetSubcategory(ctx context.Context, id int32) (*Subcategory, error) {
-	subcategory, err := store.GetSubCategory(ctx, id)
-	if err != nil {
-		return nil, err
-	}
-	return &Subcategory{
-		ID:     subcategory.ID,
-		Desc:   subcategory.Desc,
-		Status: int(subcategory.Status.Int32),
-	}, nil
 }
 
 // Mutation returns MutationResolver implementation.

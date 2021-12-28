@@ -26,6 +26,13 @@ type Category {
         image: String!
         status: Int!
         }
+
+input NewCategory {
+        desc: String!
+        image: String
+        status: Int!
+}
+
 type Subcategory {
         id: ID!
         desc: String!
@@ -42,7 +49,6 @@ type Event {
         type: Int!
         user_id: ID!
         category: Int!
-        subcategory: Int!
         sponsors : [Sponsor]
         hostID: Int!
         ticket : [Ticket]
@@ -114,7 +120,6 @@ input NewVenue {
 
 input GetEvent{
         category: Int!
-        subcategory: Int!,
         pageSize: Int!
         offset: Int!
         status: Int!
@@ -135,7 +140,6 @@ input NewEvent {
         type: Int!
         user_id: ID!
         category: Int!
-        subcategory: Int!
         status: Int!
         images: [NewImage]
         vidoes: [NewVideo]        
@@ -225,6 +229,7 @@ input UpdateEventStatus{
 
 
 type Mutation {
+        createCategory(input : NewCategory!): Category!
         createVenue(input: NewVenue!): Venue!
         createUser(input: NewUser!): User!
         createEvent(input: NewEvent!):Event!
@@ -235,9 +240,10 @@ type Mutation {
         createTicket(input: NewTicket!): Ticket!
         createSponsorForEvent(input: NewSponsor!): Sponsor!
         updateEventStatus(input: UpdateEventStatus!): UpdateEventState!
+
 }
 
-type Query{
+type Query {
         getUser(input: ID!): User
         getEvent(input: ID!): Event
         getVenue(input: ID!): Venue
@@ -245,6 +251,5 @@ type Query{
         getEvents(input: GetEvent!): [Event!]
         getEventsByLocation(input: GetEventByLocation!): [Event!]
         getCategory( input: ID!): Category!
-        getSubcategory( input: ID!): Subcategory!
         getCategories: [Category!]
 }

@@ -22,7 +22,6 @@ func createRandomEvent(t *testing.T) Event {
 		UserID:      user.ID,
 		Type:        1,
 		Category:    1,
-		Subcategory: 1,
 		Status:      1,
 	}
 
@@ -38,7 +37,6 @@ func createRandomEvent(t *testing.T) Event {
 	require.Equal(t, arg.Type, event.Type)
 	require.Equal(t, arg.UserID, event.UserID)
 	require.Equal(t, arg.Category, event.Category)
-	require.Equal(t, arg.Subcategory, event.Subcategory)
 	require.NotZero(t, event.ID)
 	require.NotZero(t, event.StartDate)
 	require.NotZero(t, event.EndDate)
@@ -115,7 +113,6 @@ func TestGetAllEvents(t *testing.T) {
 		Limit:       1,
 		Offset:      1,
 		Category:    1,
-		Subcategory: 1,
 	}
 	events, err := testQueries.GetEvents(context.Background(), arg)
 	require.NoError(t, err)

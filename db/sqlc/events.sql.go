@@ -20,10 +20,9 @@ INSERT INTO events (
     type,
     user_id,
     category,
-    subcategory,
     status
 ) VALUES
-  ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) RETURNING id, title, description, banner_image, start_date, end_date, venue, type, user_id, category, subcategory, ticket_id, recurring, status, created_at
+  ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING id, title, description, banner_image, start_date, end_date, venue, type, user_id, category, ticket_id, recurring, status, created_at
 `
 
 type CreateEventParams struct {
@@ -36,7 +35,6 @@ type CreateEventParams struct {
 	Type        int32     `json:"type"`
 	UserID      int32     `json:"user_id"`
 	Category    int32     `json:"category"`
-	Subcategory int32     `json:"subcategory"`
 	Status      int32     `json:"status"`
 }
 
@@ -51,7 +49,6 @@ func (q *Queries) CreateEvent(ctx context.Context, arg CreateEventParams) (Event
 		arg.Type,
 		arg.UserID,
 		arg.Category,
-		arg.Subcategory,
 		arg.Status,
 	)
 	var i Event
@@ -66,7 +63,6 @@ func (q *Queries) CreateEvent(ctx context.Context, arg CreateEventParams) (Event
 		&i.Type,
 		&i.UserID,
 		&i.Category,
-		&i.Subcategory,
 		&i.TicketID,
 		&i.Recurring,
 		&i.Status,
@@ -86,7 +82,7 @@ func (q *Queries) DeleteEvent(ctx context.Context, id int32) error {
 }
 
 const getEvent = `-- name: GetEvent :one
-SELECT id, title, description, banner_image, start_date, end_date, venue, type, user_id, category, subcategory, ticket_id, recurring, status, created_at FROM events
+SELECT id, title, description, banner_image, start_date, end_date, venue, type, user_id, category, ticket_id, recurring, status, created_at FROM events
 WHERE id = $1 LIMIT 1
 `
 
@@ -104,7 +100,6 @@ func (q *Queries) GetEvent(ctx context.Context, id int32) (Event, error) {
 		&i.Type,
 		&i.UserID,
 		&i.Category,
-		&i.Subcategory,
 		&i.TicketID,
 		&i.Recurring,
 		&i.Status,
@@ -114,22 +109,20 @@ func (q *Queries) GetEvent(ctx context.Context, id int32) (Event, error) {
 }
 
 const getEvents = `-- name: GetEvents :many
-SELECT e.id, title, description, banner_image, start_date, end_date, venue, type, user_id, category, subcategory, ticket_id, recurring, status, created_at, v.id, name, address, postal_code, city, province, country_code, url, virtual, rating, longitude, latitude FROM events e
+SELECT e.id, title, description, banner_image, start_date, end_date, venue, type, user_id, category, ticket_id, recurring, status, created_at, v.id, name, address, postal_code, city, province, country_code, url, virtual, rating, longitude, latitude FROM events e
 inner join venues v on  e.venue = v.id
 WHERE category = $1
-and subcategory =$2
-and e.status =$3
+and e.status =$2
 ORDER BY e.id desc
-LIMIT $4
-OFFSET $5
+LIMIT $3
+OFFSET $4
 `
 
 type GetEventsParams struct {
-	Category    int32 `json:"category"`
-	Subcategory int32 `json:"subcategory"`
-	Status      int32 `json:"status"`
-	Limit       int32 `json:"limit"`
-	Offset      int32 `json:"offset"`
+	Category int32 `json:"category"`
+	Status   int32 `json:"status"`
+	Limit    int32 `json:"limit"`
+	Offset   int32 `json:"offset"`
 }
 
 type GetEventsRow struct {
@@ -143,7 +136,6 @@ type GetEventsRow struct {
 	Type        int32           `json:"type"`
 	UserID      int32           `json:"user_id"`
 	Category    int32           `json:"category"`
-	Subcategory int32           `json:"subcategory"`
 	TicketID    sql.NullInt32   `json:"ticket_id"`
 	Recurring   sql.NullBool    `json:"recurring"`
 	Status      int32           `json:"status"`
@@ -165,7 +157,6 @@ type GetEventsRow struct {
 func (q *Queries) GetEvents(ctx context.Context, arg GetEventsParams) ([]GetEventsRow, error) {
 	rows, err := q.db.QueryContext(ctx, getEvents,
 		arg.Category,
-		arg.Subcategory,
 		arg.Status,
 		arg.Limit,
 		arg.Offset,
@@ -188,7 +179,6 @@ func (q *Queries) GetEvents(ctx context.Context, arg GetEventsParams) ([]GetEven
 			&i.Type,
 			&i.UserID,
 			&i.Category,
-			&i.Subcategory,
 			&i.TicketID,
 			&i.Recurring,
 			&i.Status,
@@ -220,7 +210,7 @@ func (q *Queries) GetEvents(ctx context.Context, arg GetEventsParams) ([]GetEven
 }
 
 const getEventsByLocation = `-- name: GetEventsByLocation :many
-SELECT v.id, name, address, postal_code, city, province, country_code, url, virtual, rating, longitude, latitude, e.id, title, description, banner_image, start_date, end_date, venue, type, user_id, category, subcategory, ticket_id, recurring, status, created_at, point($1,$2) <@>  (point(v.longitude, v.latitude)::point) as distance
+SELECT v.id, name, address, postal_code, city, province, country_code, url, virtual, rating, longitude, latitude, e.id, title, description, banner_image, start_date, end_date, venue, type, user_id, category, ticket_id, recurring, status, created_at, point($1,$2) <@>  (point(v.longitude, v.latitude)::point) as distance
 FROM venues v, events e
 WHERE (point($1,$2) <@> point(longitude, latitude)) < $3  
 ORDER BY distance desc
@@ -255,7 +245,6 @@ type GetEventsByLocationRow struct {
 	Type        int32           `json:"type"`
 	UserID      int32           `json:"user_id"`
 	Category    int32           `json:"category"`
-	Subcategory int32           `json:"subcategory"`
 	TicketID    sql.NullInt32   `json:"ticket_id"`
 	Recurring   sql.NullBool    `json:"recurring"`
 	Status      int32           `json:"status"`
@@ -295,7 +284,6 @@ func (q *Queries) GetEventsByLocation(ctx context.Context, arg GetEventsByLocati
 			&i.Type,
 			&i.UserID,
 			&i.Category,
-			&i.Subcategory,
 			&i.TicketID,
 			&i.Recurring,
 			&i.Status,
@@ -337,7 +325,7 @@ UPDATE events SET
         THEN $18::INTEGER ELSE category END,
     status = CASE WHEN $19::boolean
         THEN $20::INTEGER ELSE status END
-    WHERE id= $21 RETURNING id, title, description, banner_image, start_date, end_date, venue, type, user_id, category, subcategory, ticket_id, recurring, status, created_at
+    WHERE id= $21 RETURNING id, title, description, banner_image, start_date, end_date, venue, type, user_id, category, ticket_id, recurring, status, created_at
 `
 
 type UpdateEventParams struct {
@@ -400,7 +388,6 @@ func (q *Queries) UpdateEvent(ctx context.Context, arg UpdateEventParams) (Event
 		&i.Type,
 		&i.UserID,
 		&i.Category,
-		&i.Subcategory,
 		&i.TicketID,
 		&i.Recurring,
 		&i.Status,

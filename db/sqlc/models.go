@@ -17,10 +17,10 @@ type Artist struct {
 }
 
 type Category struct {
-	ID     int32          `json:"id"`
-	Desc   string         `json:"desc"`
-	Image  sql.NullString `json:"image"`
-	Status sql.NullInt32  `json:"status"`
+	ID          int32          `json:"id"`
+	Description string         `json:"description"`
+	Image       sql.NullString `json:"image"`
+	Status      int32          `json:"status"`
 }
 
 type Event struct {
@@ -34,7 +34,6 @@ type Event struct {
 	Type        int32         `json:"type"`
 	UserID      int32         `json:"user_id"`
 	Category    int32         `json:"category"`
-	Subcategory int32         `json:"subcategory"`
 	TicketID    sql.NullInt32 `json:"ticket_id"`
 	Recurring   sql.NullBool  `json:"recurring"`
 	Status      int32         `json:"status"`
@@ -70,15 +69,15 @@ type EventsSponsor struct {
 }
 
 type EventsStatus struct {
-	ID        int32          `json:"id"`
-	Desc      sql.NullString `json:"desc"`
-	CreatedAt time.Time      `json:"created_at"`
+	ID          int32          `json:"id"`
+	Description sql.NullString `json:"description"`
+	CreatedAt   time.Time      `json:"created_at"`
 }
 
 type EventsType struct {
-	ID     int32         `json:"id"`
-	Desc   string        `json:"desc"`
-	Status sql.NullInt32 `json:"status"`
+	ID          int32  `json:"id"`
+	Description string `json:"description"`
+	Status      int32  `json:"status"`
 }
 
 type EventsVideo struct {
@@ -112,13 +111,6 @@ type Sponsor struct {
 	CreatedAt   time.Time      `json:"created_at"`
 }
 
-type Subcategory struct {
-	ID         int32         `json:"id"`
-	CategoryID int32         `json:"category_id"`
-	Desc       string        `json:"desc"`
-	Status     sql.NullInt32 `json:"status"`
-}
-
 type Ticket struct {
 	ID       int32   `json:"id"`
 	Name     string  `json:"name"`
@@ -130,9 +122,9 @@ type Ticket struct {
 }
 
 type TicketsStatus struct {
-	ID     int32          `json:"id"`
-	Desc   sql.NullString `json:"desc"`
-	Status int32          `json:"status"`
+	ID          int32          `json:"id"`
+	Description sql.NullString `json:"description"`
+	Status      int32          `json:"status"`
 }
 
 type User struct {
@@ -163,9 +155,9 @@ type UsersTicket struct {
 }
 
 type UsersType struct {
-	ID     int32         `json:"id"`
-	Desc   string        `json:"desc"`
-	Status sql.NullInt32 `json:"status"`
+	ID          int32  `json:"id"`
+	Description string `json:"description"`
+	Status      int32  `json:"status"`
 }
 
 type Venue struct {
