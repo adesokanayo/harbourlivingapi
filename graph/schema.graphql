@@ -12,32 +12,27 @@ type User {
 
 type Usertype {
         id: ID!
-        desc: String!
+        description: String!
         status: Int
         }
 type EventType {
         id: ID!
-        desc: String!
+        description: String!
         status: Int!
         }
 type Category {
         id: ID!
-        desc: String!
+        description: String!
         image: String!
         status: Int!
         }
 
 input NewCategory {
-        desc: String!
+        description: String!
         image: String
         status: Int!
 }
 
-type Subcategory {
-        id: ID!
-        desc: String!
-        status: Int!
-        }
 type Event {
         id: ID!
         title: String!
@@ -180,6 +175,9 @@ input NewUser {
 type Sponsor {
         id: ID!
         user_id: Int!
+        display_name: String
+        avatar: String
+        short_bio: String
         events: [Event]!
 }
 
@@ -190,10 +188,27 @@ input NewSponsor {
 type Host {
         id: ID!
         user_id: Int!
+        display_name: String
+        avatar: String
+        short_bio: String
         events: [Event]!
 }
 
 input NewHost {
+        user_id : Int!
+        event_id: Int!
+}
+
+type Artist {
+        id: ID!
+        user_id: Int!
+        display_name: String
+        avatar: String
+        short_bio: String
+        events: [Event]!
+}
+
+input NewArtist {
         user_id : Int!
         event_id: Int!
 }
@@ -227,19 +242,50 @@ input UpdateEventStatus{
     event_status: Int!
 }
 
+input UpdateHost{
+    id: Int!
+    avatar: String
+    display_name: String
+    short_bio: String
+}
+
+input UpdateArtist{
+    id: Int!
+    avatar: String
+    display_name: String
+    short_bio: String
+}
+
+input UpdateSponsor{
+    id: Int!
+    avatar: String
+    display_name: String
+    short_bio: String
+}
 
 type Mutation {
         createCategory(input : NewCategory!): Category!
         createVenue(input: NewVenue!): Venue!
         createUser(input: NewUser!): User!
         createEvent(input: NewEvent!):Event!
-        updateEvent(input: UpdateEvent!):Event!
-        deleteEvent(input: ID!): Boolean!
-        login(input: Login!): LoginResponse
-        refreshToken(input: RefreshTokenInput!): String
         createTicket(input: NewTicket!): Ticket!
         createSponsorForEvent(input: NewSponsor!): Sponsor!
+
+        """ update """ 
+        updateEvent(input: UpdateEvent!):Event!
         updateEventStatus(input: UpdateEventStatus!): UpdateEventState!
+        updateArtist(input:UpdateArtist! ): Artist!
+        updateHost(input:UpdateHost! ): Host!
+        updateSponsor(input:UpdateSponsor! ): Sponsor!
+
+        """ delete """ 
+        deleteEvent(input: ID!): Boolean!
+
+        """ operations """ 
+        login(input: Login!): LoginResponse
+        refreshToken(input: RefreshTokenInput!): String
+       
+        
 
 }
 

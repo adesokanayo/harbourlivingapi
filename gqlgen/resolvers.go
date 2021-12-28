@@ -44,7 +44,6 @@ type Resolver struct {
 }
 
 func (r *mutationResolver) CreateVenue(ctx context.Context, input NewVenue) (*Venue, error) {
-
 	if input.Virtual {
 		createVirtual := db.CreateVirtualVenueParams{
 			Name: input.Name,
@@ -203,7 +202,7 @@ func (r *mutationResolver) CreateCategory(ctx context.Context, input NewCategory
 	if input.Image != nil {
 		arg.Image = sql.NullString{String: *input.Image, Valid: true}
 	}
-	arg.Description = input.Desc
+	arg.Description = input.Description
 	arg.Status = int32(input.Status)
 	category, err := store.CreateCategory(ctx, arg)
 
@@ -970,6 +969,105 @@ func (r *mutationResolver) UpdateEventStatus(ctx context.Context, input UpdateEv
 	}, nil
 }
 
+func (r *mutationResolver) UpdateHost(ctx context.Context, input UpdateHost) (*Host, error) {
+
+	arg := db.UpdateHostParams{}
+	arg.ID = int32(input.ID)
+	if input.Avatar != nil {
+		arg.AvatarUrlToUpdate = true
+		arg.AvatarUrl = *input.Avatar
+	}
+
+	if input.DisplayName != nil {
+		arg.DisplayNameToUpdate = true
+		arg.DisplayName = *input.DisplayName
+	}
+
+	if input.ShortBio != nil {
+		arg.ShortBioToUpdate = true
+		arg.ShortBio = *input.ShortBio
+	}
+
+	host, err := store.UpdateHost(ctx, arg)
+	if err != nil {
+		return nil, err
+	}
+
+	return &Host{
+		ID:          host.ID,
+		UserID:      int(host.UserID),
+		DisplayName: &host.DisplayName.String,
+		Avatar:      &host.AvatarUrl.String,
+		ShortBio:    &host.ShortBio.String,
+	}, nil
+}
+
+func (r *mutationResolver) UpdateArtist(ctx context.Context, input UpdateArtist) (*Artist, error) {
+
+	arg := db.UpdateArtistParams{}
+	arg.ID = int32(input.ID)
+	if input.Avatar != nil {
+		arg.AvatarUrlToUpdate = true
+		arg.AvatarUrl = *input.Avatar
+	}
+
+	if input.DisplayName != nil {
+		arg.DisplayNameToUpdate = true
+		arg.DisplayName = *input.DisplayName
+	}
+
+	if input.ShortBio != nil {
+		arg.ShortBioToUpdate = true
+		arg.ShortBio = *input.ShortBio
+	}
+
+	artist, err := store.UpdateArtist(ctx, arg)
+	if err != nil {
+		return nil, err
+	}
+
+	return &Artist{
+		ID:          artist.ID,
+		UserID:      int(artist.UserID),
+		DisplayName: &artist.DisplayName.String,
+		Avatar:      &artist.AvatarUrl.String,
+		ShortBio:    &artist.ShortBio.String,
+	}, nil
+}
+
+func (r *mutationResolver) UpdateSponsor(ctx context.Context, input UpdateSponsor) (*Sponsor, error) {
+
+	arg := db.UpdateSponsorParams{}
+	arg.ID = int32(input.ID)
+	if input.Avatar != nil {
+		arg.AvatarUrlToUpdate = true
+		arg.AvatarUrl = *input.Avatar
+	}
+
+	if input.DisplayName != nil {
+		arg.DisplayNameToUpdate = true
+		arg.DisplayName = *input.DisplayName
+	}
+
+	if input.ShortBio != nil {
+		arg.ShortBioToUpdate = true
+		arg.ShortBio = *input.ShortBio
+	}
+
+	sponsor, err := store.UpdateSponsor(ctx, arg)
+	if err != nil {
+		return nil, err
+	}
+
+	return &Sponsor{
+		ID:          sponsor.ID,
+		UserID:      int(sponsor.UserID),
+		DisplayName: &sponsor.DisplayName.String,
+		Avatar:      &sponsor.AvatarUrl.String,
+		ShortBio:    &sponsor.ShortBio.String,
+	}, nil
+}
+
 func (q *queryResolver) GetCategory(ctx context.Context, id int32) (*Category, error) {
 
 	category, err := store.GetCategory(ctx, id)
@@ -979,7 +1077,7 @@ func (q *queryResolver) GetCategory(ctx context.Context, id int32) (*Category, e
 	}
 	return &Category{
 		ID:     category.ID,
-		Desc:   category.Description,
+		Description:   category.Description,
 		Status: int(category.Status),
 	}, nil
 }

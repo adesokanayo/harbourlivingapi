@@ -2,11 +2,20 @@
 
 package gqlgen
 
+type Artist struct {
+	ID          int32    `json:"id"`
+	UserID      int      `json:"user_id"`
+	DisplayName *string  `json:"display_name"`
+	Avatar      *string  `json:"avatar"`
+	ShortBio    *string  `json:"short_bio"`
+	Events      []*Event `json:"events"`
+}
+
 type Category struct {
-	ID     int32  `json:"id"`
-	Desc   string `json:"desc"`
-	Image  string `json:"image"`
-	Status int    `json:"status"`
+	ID          int32  `json:"id"`
+	Description string `json:"description"`
+	Image       string `json:"image"`
+	Status      int    `json:"status"`
 }
 
 type Event struct {
@@ -29,9 +38,9 @@ type Event struct {
 }
 
 type EventType struct {
-	ID     int32  `json:"id"`
-	Desc   string `json:"desc"`
-	Status int    `json:"status"`
+	ID          int32  `json:"id"`
+	Description string `json:"description"`
+	Status      int    `json:"status"`
 }
 
 type GetEvent struct {
@@ -48,9 +57,12 @@ type GetEventByLocation struct {
 }
 
 type Host struct {
-	ID     int32    `json:"id"`
-	UserID int      `json:"user_id"`
-	Events []*Event `json:"events"`
+	ID          int32    `json:"id"`
+	UserID      int      `json:"user_id"`
+	DisplayName *string  `json:"display_name"`
+	Avatar      *string  `json:"avatar"`
+	ShortBio    *string  `json:"short_bio"`
+	Events      []*Event `json:"events"`
 }
 
 type Image struct {
@@ -72,10 +84,15 @@ type LoginResponse struct {
 	Message *string `json:"message"`
 }
 
+type NewArtist struct {
+	UserID  int `json:"user_id"`
+	EventID int `json:"event_id"`
+}
+
 type NewCategory struct {
-	Desc   string  `json:"desc"`
-	Image  *string `json:"image"`
-	Status int     `json:"status"`
+	Description string  `json:"description"`
+	Image       *string `json:"image"`
+	Status      int     `json:"status"`
 }
 
 type NewEvent struct {
@@ -151,15 +168,12 @@ type RefreshTokenInput struct {
 }
 
 type Sponsor struct {
-	ID     int32    `json:"id"`
-	UserID int      `json:"user_id"`
-	Events []*Event `json:"events"`
-}
-
-type Subcategory struct {
-	ID     int32  `json:"id"`
-	Desc   string `json:"desc"`
-	Status int    `json:"status"`
+	ID          int32    `json:"id"`
+	UserID      int      `json:"user_id"`
+	DisplayName *string  `json:"display_name"`
+	Avatar      *string  `json:"avatar"`
+	ShortBio    *string  `json:"short_bio"`
+	Events      []*Event `json:"events"`
 }
 
 type Ticket struct {
@@ -170,6 +184,13 @@ type Ticket struct {
 	Quantity int    `json:"quantity"`
 	Status   int    `json:"status"`
 	Currency string `json:"currency"`
+}
+
+type UpdateArtist struct {
+	ID          int     `json:"id"`
+	Avatar      *string `json:"avatar"`
+	DisplayName *string `json:"display_name"`
+	ShortBio    *string `json:"short_bio"`
 }
 
 type UpdateEvent struct {
@@ -197,6 +218,20 @@ type UpdateEventStatus struct {
 	EventStatus int `json:"event_status"`
 }
 
+type UpdateHost struct {
+	ID          int     `json:"id"`
+	Avatar      *string `json:"avatar"`
+	DisplayName *string `json:"display_name"`
+	ShortBio    *string `json:"short_bio"`
+}
+
+type UpdateSponsor struct {
+	ID          int     `json:"id"`
+	Avatar      *string `json:"avatar"`
+	DisplayName *string `json:"display_name"`
+	ShortBio    *string `json:"short_bio"`
+}
+
 type User struct {
 	ID        int32   `json:"id"`
 	Phone     *string `json:"phone"`
@@ -210,9 +245,9 @@ type User struct {
 }
 
 type Usertype struct {
-	ID     int32  `json:"id"`
-	Desc   string `json:"desc"`
-	Status *int   `json:"status"`
+	ID          int32  `json:"id"`
+	Description string `json:"description"`
+	Status      *int   `json:"status"`
 }
 
 type Venue struct {

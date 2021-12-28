@@ -113,18 +113,61 @@ func (q *Queries) LinkHostToEvent(ctx context.Context, arg LinkHostToEventParams
 	return i, err
 }
 
-const updateHost = `-- name: UpdateHost :exec
+const updateEventHost = `-- name: UpdateEventHost :exec
 UPDATE events_hosts
 set event_id= $1
 WHERE id=$2
 `
 
-type UpdateHostParams struct {
+type UpdateEventHostParams struct {
 	EventID int32 `json:"event_id"`
 	ID      int32 `json:"id"`
 }
 
-func (q *Queries) UpdateHost(ctx context.Context, arg UpdateHostParams) error {
-	_, err := q.db.ExecContext(ctx, updateHost, arg.EventID, arg.ID)
+func (q *Queries) UpdateEventHost(ctx context.Context, arg UpdateEventHostParams) error {
+	_, err := q.db.ExecContext(ctx, updateEventHost, arg.EventID, arg.ID)
 	return err
+}
+
+const updateHost = `-- name: UpdateHost :one
+UPDATE hosts SET
+ display_name = CASE WHEN $1::boolean
+        THEN $2::text ELSE display_name END, 
+ avatar_url = CASE WHEN $3::boolean
+        THEN $4::text ELSE avatar_url END,
+ short_bio = CASE WHEN $5::boolean
+        THEN $6::text ELSE short_bio END
+WHERE id = $7 RETURNING id, user_id, display_name, avatar_url, short_bio, created_at
+`
+
+type UpdateHostParams struct {
+	DisplayNameToUpdate bool   `json:"display_name_to_update"`
+	DisplayName         string `json:"display_name"`
+	AvatarUrlToUpdate   bool   `json:"avatar_url_to_update"`
+	AvatarUrl           string `json:"avatar_url"`
+	ShortBioToUpdate    bool   `json:"short_bio_to_update"`
+	ShortBio            string `json:"short_bio"`
+	ID                  int32  `json:"id"`
+}
+
+func (q *Queries) UpdateHost(ctx context.Context, arg UpdateHostParams) (Host, error) {
+	row := q.db.QueryRowContext(ctx, updateHost,
+		arg.DisplayNameToUpdate,
+		arg.DisplayName,
+		arg.AvatarUrlToUpdate,
+		arg.AvatarUrl,
+		arg.ShortBioToUpdate,
+		arg.ShortBio,
+		arg.ID,
+	)
+	var i Host
+	err := row.Scan(
+		&i.ID,
+		&i.UserID,
+		&i.DisplayName,
+		&i.AvatarUrl,
+		&i.ShortBio,
+		&i.CreatedAt,
+	)
+	return i, err
 }

@@ -94,9 +94,6 @@ func TestUpdateEvent(t *testing.T) {
 	require.Equal(t, arg.Title, updatedEvent1.Title)
 	require.Equal(t, arg.Description, updatedEvent1.Description)
 	require.Equal(t, arg.BannerImage, updatedEvent1.BannerImage)
-
-	//require.Equal(t, arg.StartDate, updatedEvent1.StartDate)
-	//require.Equal(t, arg.EndDate, updatedEvent1.EndDate)
 	require.Equal(t, arg.Venue, updatedEvent1.Venue)
 	require.Equal(t, arg.Type, updatedEvent1.Type)
 	require.Equal(t, arg.Status, updatedEvent1.Status)
@@ -110,9 +107,9 @@ func TestGetAllEvents(t *testing.T) {
 	}
 
 	arg := GetEventsParams{
-		Limit:       1,
-		Offset:      1,
-		Category:    1,
+		Limit:    1,
+		Offset:   1,
+		Category: 1,
 	}
 	events, err := testQueries.GetEvents(context.Background(), arg)
 	require.NoError(t, err)
