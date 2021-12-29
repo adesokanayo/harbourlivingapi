@@ -71,6 +71,31 @@ func (q *Queries) CreateEvent(ctx context.Context, arg CreateEventParams) (Event
 	return i, err
 }
 
+const createFavoriteEvent = `-- name: CreateFavoriteEvent :one
+INSERT INTO events_favorites (
+    event_id,
+    user_id
+) VALUES
+  ($1, $2) RETURNING id, event_id, user_id, created_at
+`
+
+type CreateFavoriteEventParams struct {
+	EventID int32 `json:"event_id"`
+	UserID  int32 `json:"user_id"`
+}
+
+func (q *Queries) CreateFavoriteEvent(ctx context.Context, arg CreateFavoriteEventParams) (EventsFavorite, error) {
+	row := q.db.QueryRowContext(ctx, createFavoriteEvent, arg.EventID, arg.UserID)
+	var i EventsFavorite
+	err := row.Scan(
+		&i.ID,
+		&i.EventID,
+		&i.UserID,
+		&i.CreatedAt,
+	)
+	return i, err
+}
+
 const deleteEvent = `-- name: DeleteEvent :exec
 DELETE FROM events
 WHERE id = $1
@@ -109,7 +134,7 @@ func (q *Queries) GetEvent(ctx context.Context, id int32) (Event, error) {
 }
 
 const getEvents = `-- name: GetEvents :many
-SELECT e.id, title, description, banner_image, start_date, end_date, venue, type, user_id, category, ticket_id, recurring, status, created_at, v.id, name, address, postal_code, city, province, country_code, url, virtual, rating, longitude, latitude FROM events e
+SELECT e.id, title, description, banner_image, start_date, end_date, venue, type, user_id, category, ticket_id, recurring, e.status, e.created_at, v.id, name, address, postal_code, city, province, country_code, url, virtual, rating, longitude, latitude, v.status, v.created_at FROM events e
 inner join venues v on  e.venue = v.id
 WHERE category = $1
 and e.status =$2
@@ -152,6 +177,8 @@ type GetEventsRow struct {
 	Rating      sql.NullFloat64 `json:"rating"`
 	Longitude   sql.NullFloat64 `json:"longitude"`
 	Latitude    sql.NullFloat64 `json:"latitude"`
+	Status_2    int32           `json:"status_2"`
+	CreatedAt_2 sql.NullTime    `json:"created_at_2"`
 }
 
 func (q *Queries) GetEvents(ctx context.Context, arg GetEventsParams) ([]GetEventsRow, error) {
@@ -195,6 +222,8 @@ func (q *Queries) GetEvents(ctx context.Context, arg GetEventsParams) ([]GetEven
 			&i.Rating,
 			&i.Longitude,
 			&i.Latitude,
+			&i.Status_2,
+			&i.CreatedAt_2,
 		); err != nil {
 			return nil, err
 		}
@@ -210,7 +239,7 @@ func (q *Queries) GetEvents(ctx context.Context, arg GetEventsParams) ([]GetEven
 }
 
 const getEventsByLocation = `-- name: GetEventsByLocation :many
-SELECT v.id, name, address, postal_code, city, province, country_code, url, virtual, rating, longitude, latitude, e.id, title, description, banner_image, start_date, end_date, venue, type, user_id, category, ticket_id, recurring, status, created_at, point($1,$2) <@>  (point(v.longitude, v.latitude)::point) as distance
+SELECT v.id, name, address, postal_code, city, province, country_code, url, virtual, rating, longitude, latitude, v.status, v.created_at, e.id, title, description, banner_image, start_date, end_date, venue, type, user_id, category, ticket_id, recurring, e.status, e.created_at, point($1,$2) <@>  (point(v.longitude, v.latitude)::point) as distance
 FROM venues v, events e
 WHERE (point($1,$2) <@> point(longitude, latitude)) < $3  
 ORDER BY distance desc
@@ -235,6 +264,8 @@ type GetEventsByLocationRow struct {
 	Rating      sql.NullFloat64 `json:"rating"`
 	Longitude   sql.NullFloat64 `json:"longitude"`
 	Latitude    sql.NullFloat64 `json:"latitude"`
+	Status      int32           `json:"status"`
+	CreatedAt   sql.NullTime    `json:"created_at"`
 	ID_2        int32           `json:"id_2"`
 	Title       string          `json:"title"`
 	Description string          `json:"description"`
@@ -247,8 +278,8 @@ type GetEventsByLocationRow struct {
 	Category    int32           `json:"category"`
 	TicketID    sql.NullInt32   `json:"ticket_id"`
 	Recurring   sql.NullBool    `json:"recurring"`
-	Status      int32           `json:"status"`
-	CreatedAt   sql.NullTime    `json:"created_at"`
+	Status_2    int32           `json:"status_2"`
+	CreatedAt_2 sql.NullTime    `json:"created_at_2"`
 	Distance    interface{}     `json:"distance"`
 }
 
@@ -274,6 +305,8 @@ func (q *Queries) GetEventsByLocation(ctx context.Context, arg GetEventsByLocati
 			&i.Rating,
 			&i.Longitude,
 			&i.Latitude,
+			&i.Status,
+			&i.CreatedAt,
 			&i.ID_2,
 			&i.Title,
 			&i.Description,
@@ -286,9 +319,43 @@ func (q *Queries) GetEventsByLocation(ctx context.Context, arg GetEventsByLocati
 			&i.Category,
 			&i.TicketID,
 			&i.Recurring,
-			&i.Status,
-			&i.CreatedAt,
+			&i.Status_2,
+			&i.CreatedAt_2,
 			&i.Distance,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getFavoriteEvents = `-- name: GetFavoriteEvents :many
+SELECT id, event_id, user_id, created_at FROM events_favorites 
+where user_id = $1
+ORDER BY id desc
+`
+
+func (q *Queries) GetFavoriteEvents(ctx context.Context, userID int32) ([]EventsFavorite, error) {
+	rows, err := q.db.QueryContext(ctx, getFavoriteEvents, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []EventsFavorite{}
+	for rows.Next() {
+		var i EventsFavorite
+		if err := rows.Scan(
+			&i.ID,
+			&i.EventID,
+			&i.UserID,
+			&i.CreatedAt,
 		); err != nil {
 			return nil, err
 		}

@@ -1,6 +1,7 @@
 package gqlgen
 
 // THIS CODE IS A STARTING POINT ONLY. IT WILL NOT BE UPDATED WITH SCHEMA CHANGES.
+//go:generate go run github.com/99designs/gqlgen
 
 import (
 	"context"
@@ -134,9 +135,7 @@ func (r *mutationResolver) CreateVenue(ctx context.Context, input NewVenue) (*Ve
 	if venue.Address.Valid {
 		result.Address = &venue.Address.String
 	}
-	if venue.Rating.Valid {
-		result.Rating = venue.Rating.Float64
-	}
+	
 	if venue.Longitude.Valid {
 		result.Longitude = &venue.Longitude.Float64
 	}
@@ -599,7 +598,8 @@ func (r *mutationResolver) RefreshToken(ctx context.Context, input RefreshTokenI
 }
 
 func (r *queryResolver) GetUser(ctx context.Context, input int32) (*User, error) {
-
+	var events []*Event
+	var venues []*Venue
 	user, err := store.GetUser(ctx, input)
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -609,15 +609,43 @@ func (r *queryResolver) GetUser(ctx context.Context, input int32) (*User, error)
 		return nil, errors.New("an error occured")
 	}
 
+	favEvents, err := store.GetFavoriteEvents(ctx, user.ID)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, v := range favEvents {
+		f, err := GetEventHelper(ctx, v.EventID)
+		if err != nil {
+			return nil, err
+		}
+		events = append(events, f)
+	}
+
+	favVenues, err := store.GetFavoriteVenues(ctx, user.ID)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, v := range favVenues {
+		f, err := GetVenueHelper(ctx, v.VenueID)
+		if err != nil {
+			return nil, err
+		}
+		venues = append(venues, f)
+	}
+
 	return &User{
-		ID:        user.ID,
-		Phone:     &user.Phone.String,
-		FirstName: user.FirstName,
-		LastName:  user.LastName,
-		Email:     user.Email,
-		Username:  user.Username,
-		Password:  user.Password,
-		Usertype:  int(user.Usertype),
+		ID:              user.ID,
+		Phone:           &user.Phone.String,
+		FirstName:       user.FirstName,
+		LastName:        user.LastName,
+		Email:           user.Email,
+		Username:        user.Username,
+		Password:        user.Password,
+		Usertype:        int(user.Usertype),
+		FavoritesEvents: events,
+		FavoritesVenues: venues,
 	}, nil
 }
 
@@ -1076,9 +1104,9 @@ func (q *queryResolver) GetCategory(ctx context.Context, id int32) (*Category, e
 		return nil, err
 	}
 	return &Category{
-		ID:     category.ID,
-		Description:   category.Description,
-		Status: int(category.Status),
+		ID:          category.ID,
+		Description: category.Description,
+		Status:      int(category.Status),
 	}, nil
 }
 func (q *queryResolver) GetCategories(ctx context.Context) ([]Category, error) {
@@ -1102,11 +1130,248 @@ func (q *queryResolver) GetCategories(ctx context.Context) ([]Category, error) {
 	return result, nil
 }
 
+func (r *mutationResolver) CreateEventFavorite(ctx context.Context, input NewEventFavorite) (*EventFavorite, error) {
+
+	arg := db.CreateFavoriteEventParams{
+		EventID: int32(input.EventID),
+		UserID:  int32(input.UserID),
+	}
+
+	eventFavorite, err := store.CreateFavoriteEvent(ctx, arg)
+	if err != nil {
+		return nil, err
+	}
+
+	return &EventFavorite{
+		ID:      eventFavorite.ID,
+		EventID: int(eventFavorite.EventID),
+		UserID:  int(eventFavorite.UserID),
+	}, nil
+}
+
+func (r *mutationResolver) CreateVenueFavorite(ctx context.Context, input NewVenueFavorite) (*VenueFavorite, error) {
+
+	arg := db.CreateVenueFavoriteParams{
+		VenueID: int32(input.VenueID),
+		UserID:  int32(input.UserID),
+	}
+
+	venueFavorite, err := store.CreateVenueFavorite(ctx, arg)
+	if err != nil {
+		return nil, err
+	}
+
+	return &VenueFavorite{
+		ID:      venueFavorite.ID,
+		VenueID: int(venueFavorite.VenueID),
+		UserID:  int(venueFavorite.UserID),
+	}, nil
+}
+
+func GetEventHelper(ctx context.Context, input int32) (*Event, error) {
+
+	var sponsors []*Sponsor
+	var images []*Image
+	var videos []*Video
+	var tickets []*Ticket
+
+	event, err := store.GetEvent(ctx, input)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, errors.New("no record found")
+		}
+		return nil, err
+	}
+
+	//Fetch  Sponsors
+	eventSponsors, err := store.GetSponsorByEvent(ctx, input)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, s := range eventSponsors {
+		sponsors = append(sponsors, &Sponsor{ID: s.SponsorID})
+	}
+
+	// fetch images
+	eventImages, err := store.GetImagesByEvent(ctx, input)
+	if err != nil {
+		return nil, err
+	}
+	for _, i := range eventImages {
+		images = append(images, &Image{
+			ID:      i.ID,
+			EventID: i.EventID,
+			Name:    i.Name.String,
+			URL:     &i.Url,
+		})
+	}
+
+	// fetch videos
+	eventVideos, err := store.GetVideosByEvent(ctx, input)
+	if err != nil {
+		return nil, err
+	}
+	for _, i := range eventVideos {
+		videos = append(videos, &Video{
+			ID:      i.ID,
+			EventID: i.EventID,
+			Name:    i.Name.String,
+			URL:     &i.Url,
+		})
+	}
+
+	// fetch tickets
+	eventTickets, err := store.GetTicketsByEventID(ctx, event.ID)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, v := range eventTickets {
+		tickets = append(tickets, &Ticket{
+			ID:       v.ID,
+			Name:     v.Name,
+			Price:    int(v.Price),
+			EventID:  int(v.EventID),
+			Quantity: int(v.Quantity),
+			Status:   int(v.Status),
+			Currency: v.Currency,
+		})
+	}
+
+	return &Event{
+		ID:          event.ID,
+		Title:       event.Title,
+		Description: event.Description,
+		BannerImage: event.BannerImage,
+		StartDate:   event.StartDate.String(),
+		EndDate:     event.EndDate.String(),
+		Venue:       int(event.Venue),
+		Type:        int(event.Type),
+		UserID:      event.UserID,
+		Category:    int(event.Category),
+		Sponsors:    sponsors,
+		Status:      int(event.Status),
+		Images:      images,
+		Videos:      videos,
+		Ticket:      tickets,
+	}, nil
+}
+
+func GetVenueHelper(ctx context.Context, input int32) (*Venue, error) {
+
+	var result Venue
+	venue, err := store.GetVenue(ctx, input)
+	if err != nil {
+		return nil, err
+	}
+
+	result.ID = venue.ID
+	if venue.Province.Valid {
+		result.Province = &venue.Province.String
+	}
+	if venue.City.Valid {
+		result.City = &venue.City.String
+	}
+	if venue.PostalCode.Valid {
+		result.PostalCode = &venue.PostalCode.String
+	}
+	if venue.Address.Valid {
+		result.Address = &venue.Address.String
+	}
+	if venue.CountryCode.Valid {
+		result.CountryCode = &venue.CountryCode.String
+	}
+
+	if venue.Latitude.Valid {
+		result.Latitude = &venue.Latitude.Float64
+	}
+
+	if venue.Longitude.Valid {
+		result.Longitude = &venue.Longitude.Float64
+	}
+	return &result, nil
+}
+
+func (r *mutationResolver) UpdateVenue(ctx context.Context, input UpdateVenue) (*Venue, error) {
+	arg := db.UpdateVenueParams{
+		ID: int32(input.ID),
+	}
+	if input.Name != nil {
+		arg.Name = *input.Name
+		arg.NameToUpdate = true
+	}
+
+	if input.Address != nil {
+		arg.Address = *input.Address
+		arg.AddressToUpdate = true
+	}
+
+	if input.PostalCode != nil {
+		arg.PostalCode = *input.PostalCode
+		arg.PostalCodeToUpdate = true
+	}
+
+	if input.City != nil {
+		arg.City = *input.City
+		arg.CityToUpdate = true
+	}
+
+	if input.CountryCode != nil {
+		arg.CountryCode = *input.CountryCode
+		arg.CountryToUpdate = true
+	}
+
+	if input.URL != nil {
+		arg.Url = *input.URL
+		arg.UrlToUpdate = true
+	}
+
+	if input.Longitude != nil {
+		arg.Longitude = *input.Longitude
+		arg.LongitudeToUpdate = true
+	}
+
+	if input.Latitude != nil {
+		arg.Latitude = *input.Latitude
+		arg.LatitudeToUpdate = true
+	}
+
+	if input.Rating != nil {
+		arg.Rating = int32(*input.Rating)
+		arg.RatingToUpdate = true
+	}
+
+	if input.Status != nil {
+		arg.Status = int32(*input.Status)
+		arg.StatusToUpdate = true
+	}
+
+	venue, err := store.UpdateVenue(ctx, arg)
+	if err != nil {
+		return nil, err
+	}
+	return &Venue{
+		ID:          venue.ID,
+		Name:        venue.Name,
+		Address:     &venue.Address.String,
+		PostalCode:  &venue.PostalCode.String,
+		City:        &venue.City.String,
+		Province:    &venue.Province.String,
+		CountryCode: &venue.CountryCode.String,
+		URL:         &venue.Url.String,
+		Longitude:   &venue.Longitude.Float64,
+		Latitude:    &venue.Latitude.Float64,
+	}, nil
+}
+
 // Mutation returns MutationResolver implementation.
 func (r *Resolver) Mutation() MutationResolver { return &mutationResolver{r} }
 
 // Query returns QueryResolver implementation.
 func (r *Resolver) Query() QueryResolver { return &queryResolver{r} }
 
+
 type mutationResolver struct{ *Resolver }
 type queryResolver struct{ *Resolver }
+

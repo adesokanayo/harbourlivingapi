@@ -64,3 +64,15 @@ SELECT *, point($1,$2) <@>  (point(v.longitude, v.latitude)::point) as distance
 FROM venues v, events e
 WHERE (point($1,$2) <@> point(longitude, latitude)) < $3  
 ORDER BY distance desc;
+
+-- name: CreateFavoriteEvent :one
+INSERT INTO events_favorites (
+    event_id,
+    user_id
+) VALUES
+  (@event_id, @user_id) RETURNING *;
+
+-- name: GetFavoriteEvents :many
+SELECT * FROM events_favorites 
+where user_id = @user_id
+ORDER BY id desc;

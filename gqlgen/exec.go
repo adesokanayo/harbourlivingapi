@@ -77,6 +77,12 @@ type ComplexityRoot struct {
 		Videos      func(childComplexity int) int
 	}
 
+	EventFavorite struct {
+		EventID func(childComplexity int) int
+		ID      func(childComplexity int) int
+		UserID  func(childComplexity int) int
+	}
+
 	EventType struct {
 		Description func(childComplexity int) int
 		ID          func(childComplexity int) int
@@ -109,10 +115,12 @@ type ComplexityRoot struct {
 	Mutation struct {
 		CreateCategory        func(childComplexity int, input NewCategory) int
 		CreateEvent           func(childComplexity int, input NewEvent) int
+		CreateEventFavorite   func(childComplexity int, input NewEventFavorite) int
 		CreateSponsorForEvent func(childComplexity int, input NewSponsor) int
 		CreateTicket          func(childComplexity int, input NewTicket) int
 		CreateUser            func(childComplexity int, input NewUser) int
 		CreateVenue           func(childComplexity int, input NewVenue) int
+		CreateVenueFavorite   func(childComplexity int, input NewVenueFavorite) int
 		DeleteEvent           func(childComplexity int, input int32) int
 		Login                 func(childComplexity int, input Login) int
 		RefreshToken          func(childComplexity int, input RefreshTokenInput) int
@@ -159,15 +167,17 @@ type ComplexityRoot struct {
 	}
 
 	User struct {
-		Avatar    func(childComplexity int) int
-		Email     func(childComplexity int) int
-		FirstName func(childComplexity int) int
-		ID        func(childComplexity int) int
-		LastName  func(childComplexity int) int
-		Password  func(childComplexity int) int
-		Phone     func(childComplexity int) int
-		Username  func(childComplexity int) int
-		Usertype  func(childComplexity int) int
+		Avatar          func(childComplexity int) int
+		Email           func(childComplexity int) int
+		FavoritesEvents func(childComplexity int) int
+		FavoritesVenues func(childComplexity int) int
+		FirstName       func(childComplexity int) int
+		ID              func(childComplexity int) int
+		LastName        func(childComplexity int) int
+		Password        func(childComplexity int) int
+		Phone           func(childComplexity int) int
+		Username        func(childComplexity int) int
+		Usertype        func(childComplexity int) int
 	}
 
 	Usertype struct {
@@ -191,6 +201,12 @@ type ComplexityRoot struct {
 		Virtual     func(childComplexity int) int
 	}
 
+	VenueFavorite struct {
+		ID      func(childComplexity int) int
+		UserID  func(childComplexity int) int
+		VenueID func(childComplexity int) int
+	}
+
 	Video struct {
 		EventID func(childComplexity int) int
 		ID      func(childComplexity int) int
@@ -206,6 +222,8 @@ type MutationResolver interface {
 	CreateEvent(ctx context.Context, input NewEvent) (*Event, error)
 	CreateTicket(ctx context.Context, input NewTicket) (*Ticket, error)
 	CreateSponsorForEvent(ctx context.Context, input NewSponsor) (*Sponsor, error)
+	CreateEventFavorite(ctx context.Context, input NewEventFavorite) (*EventFavorite, error)
+	CreateVenueFavorite(ctx context.Context, input NewVenueFavorite) (*VenueFavorite, error)
 	UpdateEvent(ctx context.Context, input UpdateEvent) (*Event, error)
 	UpdateEventStatus(ctx context.Context, input UpdateEventStatus) (*UpdateEventState, error)
 	UpdateArtist(ctx context.Context, input UpdateArtist) (*Artist, error)
@@ -423,6 +441,27 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Event.Videos(childComplexity), true
 
+	case "EventFavorite.event_id":
+		if e.complexity.EventFavorite.EventID == nil {
+			break
+		}
+
+		return e.complexity.EventFavorite.EventID(childComplexity), true
+
+	case "EventFavorite.id":
+		if e.complexity.EventFavorite.ID == nil {
+			break
+		}
+
+		return e.complexity.EventFavorite.ID(childComplexity), true
+
+	case "EventFavorite.user_id":
+		if e.complexity.EventFavorite.UserID == nil {
+			break
+		}
+
+		return e.complexity.EventFavorite.UserID(childComplexity), true
+
 	case "EventType.description":
 		if e.complexity.EventType.Description == nil {
 			break
@@ -566,6 +605,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.CreateEvent(childComplexity, args["input"].(NewEvent)), true
 
+	case "Mutation.createEventFavorite":
+		if e.complexity.Mutation.CreateEventFavorite == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_createEventFavorite_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.CreateEventFavorite(childComplexity, args["input"].(NewEventFavorite)), true
+
 	case "Mutation.createSponsorForEvent":
 		if e.complexity.Mutation.CreateSponsorForEvent == nil {
 			break
@@ -613,6 +664,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.CreateVenue(childComplexity, args["input"].(NewVenue)), true
+
+	case "Mutation.createVenueFavorite":
+		if e.complexity.Mutation.CreateVenueFavorite == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_createVenueFavorite_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.CreateVenueFavorite(childComplexity, args["input"].(NewVenueFavorite)), true
 
 	case "Mutation.deleteEvent":
 		if e.complexity.Mutation.DeleteEvent == nil {
@@ -915,6 +978,20 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.User.Email(childComplexity), true
 
+	case "User.favorites_events":
+		if e.complexity.User.FavoritesEvents == nil {
+			break
+		}
+
+		return e.complexity.User.FavoritesEvents(childComplexity), true
+
+	case "User.favorites_venues":
+		if e.complexity.User.FavoritesVenues == nil {
+			break
+		}
+
+		return e.complexity.User.FavoritesVenues(childComplexity), true
+
 	case "User.first_name":
 		if e.complexity.User.FirstName == nil {
 			break
@@ -1069,6 +1146,27 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Venue.Virtual(childComplexity), true
 
+	case "VenueFavorite.id":
+		if e.complexity.VenueFavorite.ID == nil {
+			break
+		}
+
+		return e.complexity.VenueFavorite.ID(childComplexity), true
+
+	case "VenueFavorite.user_id":
+		if e.complexity.VenueFavorite.UserID == nil {
+			break
+		}
+
+		return e.complexity.VenueFavorite.UserID(childComplexity), true
+
+	case "VenueFavorite.venue_id":
+		if e.complexity.VenueFavorite.VenueID == nil {
+			break
+		}
+
+		return e.complexity.VenueFavorite.VenueID(childComplexity), true
+
 	case "Video.event_id":
 		if e.complexity.Video.EventID == nil {
 			break
@@ -1161,7 +1259,10 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 }
 
 var sources = []*ast.Source{
-	{Name: "graph/schema.graphql", Input: `type User {
+	{Name: "graph/schema.graphql", Input: `# build-in directive by Gqlgen
+directive @goField(forceResolver: Boolean, name: String) on FIELD_DEFINITION | INPUT_FIELD_DEFINITION
+
+type User {
         id: ID!
         phone: String
         first_name: String!
@@ -1171,18 +1272,22 @@ var sources = []*ast.Source{
         password: String!
         usertype: Int!
         avatar : String!
-        }
+        favorites_venues: [Venue] 
+        favorites_events: [Event]  
+}
 
 type Usertype {
         id: ID!
         description: String!
         status: Int
         }
+
 type EventType {
         id: ID!
         description: String!
         status: Int!
         }
+
 type Category {
         id: ID!
         description: String!
@@ -1214,6 +1319,7 @@ type Event {
         images: [Image]
         videos: [Video]
         }
+
 type Venue {
         id: ID!
         name: String!
@@ -1226,7 +1332,7 @@ type Venue {
         Latitude : Float
         url: String
         virtual: Boolean!
-        rating: Float!
+        rating: Int
         }
 
 input Login {
@@ -1263,6 +1369,7 @@ input NewVideo{
         name: String!
         url: String
 }
+
 input NewVenue {
         name: String!
         address: String
@@ -1274,6 +1381,8 @@ input NewVenue {
         virtual: Boolean!
         longitude: Float
         latitude: Float
+        rating : Int
+        status :Int!
 }
 
 input GetEvent{
@@ -1288,6 +1397,7 @@ input GetEventByLocation{
         longitude: Float!,
         miles: Int!
 }
+
 input NewEvent {
         title: String!
         description: String!
@@ -1318,10 +1428,24 @@ input UpdateEvent {
         vidoes: [NewVideo]        
 }
 
+input UpdateVenue {
+        id: Int!
+        name: String
+        address: String
+        postal_code:String
+        city: String
+        province: String
+        country_code: String
+        url: String
+        longitude: Float
+        latitude: Float 
+        rating: Int 
+        status: Int   
+}
+
 input RefreshTokenInput{
         token: String!
 }
-
 
 
 input NewUser {
@@ -1348,6 +1472,7 @@ input NewSponsor {
   user_id : Int!
   event_id: Int!
 }
+
 type Host {
         id: ID!
         user_id: Int!
@@ -1391,6 +1516,18 @@ type Ticket {
         currency: String!
 }
 
+type EventFavorite{
+  id : ID!
+  event_id : Int!
+  user_id: Int!
+}
+
+type VenueFavorite{
+  id : ID!
+  venue_id : Int!
+  user_id: Int!
+}
+
 input NewTicket {
         name: String!
         price: Int!
@@ -1426,6 +1563,17 @@ input UpdateSponsor{
     short_bio: String
 }
 
+input NewEventFavorite{
+    event_id: Int!
+    user_id: Int!
+}
+
+input NewVenueFavorite{
+    venue_id: Int!
+    user_id: Int!
+}
+
+
 type Mutation {
         createCategory(input : NewCategory!): Category!
         createVenue(input: NewVenue!): Venue!
@@ -1433,6 +1581,8 @@ type Mutation {
         createEvent(input: NewEvent!):Event!
         createTicket(input: NewTicket!): Ticket!
         createSponsorForEvent(input: NewSponsor!): Sponsor!
+        createEventFavorite(input : NewEventFavorite!): EventFavorite!
+        createVenueFavorite(input : NewVenueFavorite!): VenueFavorite!
 
         """ update """ 
         updateEvent(input: UpdateEvent!):Event!
@@ -1447,14 +1597,11 @@ type Mutation {
         """ operations """ 
         login(input: Login!): LoginResponse
         refreshToken(input: RefreshTokenInput!): String
-       
-        
-
 }
 
 type Query {
-        getUser(input: ID!): User
-        getEvent(input: ID!): Event
+        getUser(input: ID!): User  @goField(forceResolver: true)
+        getEvent(input: ID!): Event 
         getVenue(input: ID!): Venue
         getUsers : [User!]
         getEvents(input: GetEvent!): [Event!]
@@ -1476,6 +1623,21 @@ func (ec *executionContext) field_Mutation_createCategory_args(ctx context.Conte
 	if tmp, ok := rawArgs["input"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
 		arg0, err = ec.unmarshalNNewCategory2githubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgqlgenᚐNewCategory(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["input"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_createEventFavorite_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 NewEventFavorite
+	if tmp, ok := rawArgs["input"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+		arg0, err = ec.unmarshalNNewEventFavorite2githubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgqlgenᚐNewEventFavorite(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -1536,6 +1698,21 @@ func (ec *executionContext) field_Mutation_createUser_args(ctx context.Context, 
 	if tmp, ok := rawArgs["input"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
 		arg0, err = ec.unmarshalNNewUser2githubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgqlgenᚐNewUser(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["input"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_createVenueFavorite_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 NewVenueFavorite
+	if tmp, ok := rawArgs["input"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+		arg0, err = ec.unmarshalNNewVenueFavorite2githubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgqlgenᚐNewVenueFavorite(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -2711,6 +2888,111 @@ func (ec *executionContext) _Event_videos(ctx context.Context, field graphql.Col
 	return ec.marshalOVideo2ᚕᚖgithubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgqlgenᚐVideo(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _EventFavorite_id(ctx context.Context, field graphql.CollectedField, obj *EventFavorite) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "EventFavorite",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int32)
+	fc.Result = res
+	return ec.marshalNID2int32(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _EventFavorite_event_id(ctx context.Context, field graphql.CollectedField, obj *EventFavorite) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "EventFavorite",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.EventID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _EventFavorite_user_id(ctx context.Context, field graphql.CollectedField, obj *EventFavorite) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "EventFavorite",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.UserID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _EventType_id(ctx context.Context, field graphql.CollectedField, obj *EventType) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -3535,6 +3817,90 @@ func (ec *executionContext) _Mutation_createSponsorForEvent(ctx context.Context,
 	res := resTmp.(*Sponsor)
 	fc.Result = res
 	return ec.marshalNSponsor2ᚖgithubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgqlgenᚐSponsor(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Mutation_createEventFavorite(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_createEventFavorite_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().CreateEventFavorite(rctx, args["input"].(NewEventFavorite))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*EventFavorite)
+	fc.Result = res
+	return ec.marshalNEventFavorite2ᚖgithubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgqlgenᚐEventFavorite(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Mutation_createVenueFavorite(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_createVenueFavorite_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().CreateVenueFavorite(rctx, args["input"].(NewVenueFavorite))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*VenueFavorite)
+	fc.Result = res
+	return ec.marshalNVenueFavorite2ᚖgithubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgqlgenᚐVenueFavorite(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Mutation_updateEvent(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -5067,6 +5433,70 @@ func (ec *executionContext) _User_avatar(ctx context.Context, field graphql.Coll
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _User_favorites_venues(ctx context.Context, field graphql.CollectedField, obj *User) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "User",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.FavoritesVenues, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]*Venue)
+	fc.Result = res
+	return ec.marshalOVenue2ᚕᚖgithubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgqlgenᚐVenue(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _User_favorites_events(ctx context.Context, field graphql.CollectedField, obj *User) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "User",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.FavoritesEvents, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]*Event)
+	fc.Result = res
+	return ec.marshalOEvent2ᚕᚖgithubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgqlgenᚐEvent(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _Usertype_id(ctx context.Context, field graphql.CollectedField, obj *Usertype) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -5555,14 +5985,116 @@ func (ec *executionContext) _Venue_rating(ctx context.Context, field graphql.Col
 		return graphql.Null
 	}
 	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*int)
+	fc.Result = res
+	return ec.marshalOInt2ᚖint(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _VenueFavorite_id(ctx context.Context, field graphql.CollectedField, obj *VenueFavorite) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "VenueFavorite",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
 		if !graphql.HasFieldError(ctx, fc) {
 			ec.Errorf(ctx, "must not be null")
 		}
 		return graphql.Null
 	}
-	res := resTmp.(float64)
+	res := resTmp.(int32)
 	fc.Result = res
-	return ec.marshalNFloat2float64(ctx, field.Selections, res)
+	return ec.marshalNID2int32(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _VenueFavorite_venue_id(ctx context.Context, field graphql.CollectedField, obj *VenueFavorite) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "VenueFavorite",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.VenueID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _VenueFavorite_user_id(ctx context.Context, field graphql.CollectedField, obj *VenueFavorite) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "VenueFavorite",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.UserID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Video_id(ctx context.Context, field graphql.CollectedField, obj *Video) (ret graphql.Marshaler) {
@@ -7069,6 +7601,34 @@ func (ec *executionContext) unmarshalInputNewEvent(ctx context.Context, obj inte
 	return it, nil
 }
 
+func (ec *executionContext) unmarshalInputNewEventFavorite(ctx context.Context, obj interface{}) (NewEventFavorite, error) {
+	var it NewEventFavorite
+	var asMap = obj.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "event_id":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("event_id"))
+			it.EventID, err = ec.unmarshalNInt2int(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "user_id":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("user_id"))
+			it.UserID, err = ec.unmarshalNInt2int(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputNewHost(ctx context.Context, obj interface{}) (NewHost, error) {
 	var it NewHost
 	var asMap = obj.(map[string]interface{})
@@ -7372,6 +7932,50 @@ func (ec *executionContext) unmarshalInputNewVenue(ctx context.Context, obj inte
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("latitude"))
 			it.Latitude, err = ec.unmarshalOFloat2ᚖfloat64(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "rating":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("rating"))
+			it.Rating, err = ec.unmarshalOInt2ᚖint(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "status":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("status"))
+			it.Status, err = ec.unmarshalNInt2int(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputNewVenueFavorite(ctx context.Context, obj interface{}) (NewVenueFavorite, error) {
+	var it NewVenueFavorite
+	var asMap = obj.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "venue_id":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("venue_id"))
+			it.VenueID, err = ec.unmarshalNInt2int(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "user_id":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("user_id"))
+			it.UserID, err = ec.unmarshalNInt2int(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -7697,6 +8301,114 @@ func (ec *executionContext) unmarshalInputUpdateSponsor(ctx context.Context, obj
 	return it, nil
 }
 
+func (ec *executionContext) unmarshalInputUpdateVenue(ctx context.Context, obj interface{}) (UpdateVenue, error) {
+	var it UpdateVenue
+	var asMap = obj.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "id":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
+			it.ID, err = ec.unmarshalNInt2int(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "name":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("name"))
+			it.Name, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "address":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("address"))
+			it.Address, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "postal_code":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("postal_code"))
+			it.PostalCode, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "city":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("city"))
+			it.City, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "province":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("province"))
+			it.Province, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "country_code":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("country_code"))
+			it.CountryCode, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "url":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("url"))
+			it.URL, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "longitude":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("longitude"))
+			it.Longitude, err = ec.unmarshalOFloat2ᚖfloat64(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "latitude":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("latitude"))
+			it.Latitude, err = ec.unmarshalOFloat2ᚖfloat64(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "rating":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("rating"))
+			it.Rating, err = ec.unmarshalOInt2ᚖint(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "status":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("status"))
+			it.Status, err = ec.unmarshalOInt2ᚖint(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
 // endregion **************************** input.gotpl *****************************
 
 // region    ************************** interface.gotpl ***************************
@@ -7869,6 +8581,43 @@ func (ec *executionContext) _Event(ctx context.Context, sel ast.SelectionSet, ob
 			out.Values[i] = ec._Event_images(ctx, field, obj)
 		case "videos":
 			out.Values[i] = ec._Event_videos(ctx, field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var eventFavoriteImplementors = []string{"EventFavorite"}
+
+func (ec *executionContext) _EventFavorite(ctx context.Context, sel ast.SelectionSet, obj *EventFavorite) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, eventFavoriteImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("EventFavorite")
+		case "id":
+			out.Values[i] = ec._EventFavorite_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "event_id":
+			out.Values[i] = ec._EventFavorite_event_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "user_id":
+			out.Values[i] = ec._EventFavorite_user_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -8074,6 +8823,16 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			}
 		case "createSponsorForEvent":
 			out.Values[i] = ec._Mutation_createSponsorForEvent(ctx, field)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "createEventFavorite":
+			out.Values[i] = ec._Mutation_createEventFavorite(ctx, field)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "createVenueFavorite":
+			out.Values[i] = ec._Mutation_createVenueFavorite(ctx, field)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
@@ -8428,6 +9187,10 @@ func (ec *executionContext) _User(ctx context.Context, sel ast.SelectionSet, obj
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
+		case "favorites_venues":
+			out.Values[i] = ec._User_favorites_venues(ctx, field, obj)
+		case "favorites_events":
+			out.Values[i] = ec._User_favorites_events(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -8517,6 +9280,40 @@ func (ec *executionContext) _Venue(ctx context.Context, sel ast.SelectionSet, ob
 			}
 		case "rating":
 			out.Values[i] = ec._Venue_rating(ctx, field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var venueFavoriteImplementors = []string{"VenueFavorite"}
+
+func (ec *executionContext) _VenueFavorite(ctx context.Context, sel ast.SelectionSet, obj *VenueFavorite) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, venueFavoriteImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("VenueFavorite")
+		case "id":
+			out.Values[i] = ec._VenueFavorite_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "venue_id":
+			out.Values[i] = ec._VenueFavorite_venue_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "user_id":
+			out.Values[i] = ec._VenueFavorite_user_id(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
@@ -8909,6 +9706,20 @@ func (ec *executionContext) marshalNEvent2ᚖgithubᚗcomᚋBigListRyRyᚋharbou
 	return ec._Event(ctx, sel, v)
 }
 
+func (ec *executionContext) marshalNEventFavorite2githubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgqlgenᚐEventFavorite(ctx context.Context, sel ast.SelectionSet, v EventFavorite) graphql.Marshaler {
+	return ec._EventFavorite(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNEventFavorite2ᚖgithubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgqlgenᚐEventFavorite(ctx context.Context, sel ast.SelectionSet, v *EventFavorite) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._EventFavorite(ctx, sel, v)
+}
+
 func (ec *executionContext) unmarshalNFloat2float64(ctx context.Context, v interface{}) (float64, error) {
 	res, err := graphql.UnmarshalFloat(v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -8993,6 +9804,11 @@ func (ec *executionContext) unmarshalNNewEvent2githubᚗcomᚋBigListRyRyᚋharb
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
+func (ec *executionContext) unmarshalNNewEventFavorite2githubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgqlgenᚐNewEventFavorite(ctx context.Context, v interface{}) (NewEventFavorite, error) {
+	res, err := ec.unmarshalInputNewEventFavorite(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
 func (ec *executionContext) unmarshalNNewSponsor2githubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgqlgenᚐNewSponsor(ctx context.Context, v interface{}) (NewSponsor, error) {
 	res, err := ec.unmarshalInputNewSponsor(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -9010,6 +9826,11 @@ func (ec *executionContext) unmarshalNNewUser2githubᚗcomᚋBigListRyRyᚋharbo
 
 func (ec *executionContext) unmarshalNNewVenue2githubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgqlgenᚐNewVenue(ctx context.Context, v interface{}) (NewVenue, error) {
 	res, err := ec.unmarshalInputNewVenue(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalNNewVenueFavorite2githubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgqlgenᚐNewVenueFavorite(ctx context.Context, v interface{}) (NewVenueFavorite, error) {
+	res, err := ec.unmarshalInputNewVenueFavorite(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
@@ -9126,6 +9947,20 @@ func (ec *executionContext) marshalNVenue2ᚖgithubᚗcomᚋBigListRyRyᚋharbou
 		return graphql.Null
 	}
 	return ec._Venue(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalNVenueFavorite2githubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgqlgenᚐVenueFavorite(ctx context.Context, sel ast.SelectionSet, v VenueFavorite) graphql.Marshaler {
+	return ec._VenueFavorite(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNVenueFavorite2ᚖgithubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgqlgenᚐVenueFavorite(ctx context.Context, sel ast.SelectionSet, v *VenueFavorite) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._VenueFavorite(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalN__Directive2githubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐDirective(ctx context.Context, sel ast.SelectionSet, v introspection.Directive) graphql.Marshaler {
@@ -9461,6 +10296,46 @@ func (ec *executionContext) marshalOEvent2ᚕgithubᚗcomᚋBigListRyRyᚋharbou
 	return ret
 }
 
+func (ec *executionContext) marshalOEvent2ᚕᚖgithubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgqlgenᚐEvent(ctx context.Context, sel ast.SelectionSet, v []*Event) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalOEvent2ᚖgithubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgqlgenᚐEvent(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+	return ret
+}
+
 func (ec *executionContext) marshalOEvent2ᚖgithubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgqlgenᚐEvent(ctx context.Context, sel ast.SelectionSet, v *Event) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
@@ -9779,6 +10654,46 @@ func (ec *executionContext) marshalOUser2ᚖgithubᚗcomᚋBigListRyRyᚋharbour
 		return graphql.Null
 	}
 	return ec._User(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalOVenue2ᚕᚖgithubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgqlgenᚐVenue(ctx context.Context, sel ast.SelectionSet, v []*Venue) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalOVenue2ᚖgithubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgqlgenᚐVenue(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+	return ret
 }
 
 func (ec *executionContext) marshalOVenue2ᚖgithubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgqlgenᚐVenue(ctx context.Context, sel ast.SelectionSet, v *Venue) graphql.Marshaler {

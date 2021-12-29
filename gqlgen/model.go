@@ -37,6 +37,12 @@ type Event struct {
 	Videos      []*Video   `json:"videos"`
 }
 
+type EventFavorite struct {
+	ID      int32 `json:"id"`
+	EventID int   `json:"event_id"`
+	UserID  int   `json:"user_id"`
+}
+
 type EventType struct {
 	ID          int32  `json:"id"`
 	Description string `json:"description"`
@@ -110,6 +116,11 @@ type NewEvent struct {
 	Vidoes      []*NewVideo `json:"vidoes"`
 }
 
+type NewEventFavorite struct {
+	EventID int `json:"event_id"`
+	UserID  int `json:"user_id"`
+}
+
 type NewHost struct {
 	UserID  int `json:"user_id"`
 	EventID int `json:"event_id"`
@@ -156,6 +167,13 @@ type NewVenue struct {
 	Virtual     bool     `json:"virtual"`
 	Longitude   *float64 `json:"longitude"`
 	Latitude    *float64 `json:"latitude"`
+	Rating      *int     `json:"rating"`
+	Status      int      `json:"status"`
+}
+
+type NewVenueFavorite struct {
+	VenueID int `json:"venue_id"`
+	UserID  int `json:"user_id"`
 }
 
 type NewVideo struct {
@@ -232,16 +250,33 @@ type UpdateSponsor struct {
 	ShortBio    *string `json:"short_bio"`
 }
 
+type UpdateVenue struct {
+	ID          int      `json:"id"`
+	Name        *string  `json:"name"`
+	Address     *string  `json:"address"`
+	PostalCode  *string  `json:"postal_code"`
+	City        *string  `json:"city"`
+	Province    *string  `json:"province"`
+	CountryCode *string  `json:"country_code"`
+	URL         *string  `json:"url"`
+	Longitude   *float64 `json:"longitude"`
+	Latitude    *float64 `json:"latitude"`
+	Rating      *int     `json:"rating"`
+	Status      *int     `json:"status"`
+}
+
 type User struct {
-	ID        int32   `json:"id"`
-	Phone     *string `json:"phone"`
-	FirstName string  `json:"first_name"`
-	LastName  string  `json:"last_name"`
-	Email     string  `json:"email"`
-	Username  string  `json:"username"`
-	Password  string  `json:"password"`
-	Usertype  int     `json:"usertype"`
-	Avatar    string  `json:"avatar"`
+	ID              int32    `json:"id"`
+	Phone           *string  `json:"phone"`
+	FirstName       string   `json:"first_name"`
+	LastName        string   `json:"last_name"`
+	Email           string   `json:"email"`
+	Username        string   `json:"username"`
+	Password        string   `json:"password"`
+	Usertype        int      `json:"usertype"`
+	Avatar          string   `json:"avatar"`
+	FavoritesVenues []*Venue `json:"favorites_venues"`
+	FavoritesEvents []*Event `json:"favorites_events"`
 }
 
 type Usertype struct {
@@ -262,7 +297,13 @@ type Venue struct {
 	Latitude    *float64 `json:"Latitude"`
 	URL         *string  `json:"url"`
 	Virtual     bool     `json:"virtual"`
-	Rating      float64  `json:"rating"`
+	Rating      *int     `json:"rating"`
+}
+
+type VenueFavorite struct {
+	ID      int32 `json:"id"`
+	VenueID int   `json:"venue_id"`
+	UserID  int   `json:"user_id"`
 }
 
 type Video struct {

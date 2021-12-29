@@ -21,6 +21,7 @@ type Category struct {
 	Description string         `json:"description"`
 	Image       sql.NullString `json:"image"`
 	Status      int32          `json:"status"`
+	CreatedAt   sql.NullTime   `json:"created_at"`
 }
 
 type Event struct {
@@ -44,6 +45,13 @@ type EventsArtist struct {
 	ID        int32     `json:"id"`
 	EventID   int32     `json:"event_id"`
 	ArtistID  int32     `json:"artist_id"`
+	CreatedAt time.Time `json:"created_at"`
+}
+
+type EventsFavorite struct {
+	ID        int32     `json:"id"`
+	EventID   int32     `json:"event_id"`
+	UserID    int32     `json:"user_id"`
 	CreatedAt time.Time `json:"created_at"`
 }
 
@@ -173,6 +181,21 @@ type Venue struct {
 	Rating      sql.NullFloat64 `json:"rating"`
 	Longitude   sql.NullFloat64 `json:"longitude"`
 	Latitude    sql.NullFloat64 `json:"latitude"`
+	Status      int32           `json:"status"`
+	CreatedAt   sql.NullTime    `json:"created_at"`
+}
+
+type VenuesFavorite struct {
+	ID        int32     `json:"id"`
+	VenueID   int32     `json:"venue_id"`
+	UserID    int32     `json:"user_id"`
+	CreatedAt time.Time `json:"created_at"`
+}
+
+type VenuesStatus struct {
+	ID          int32          `json:"id"`
+	Description sql.NullString `json:"description"`
+	CreatedAt   time.Time      `json:"created_at"`
 }
 
 type Video struct {

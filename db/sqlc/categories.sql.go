@@ -14,7 +14,7 @@ INSERT INTO categories (
     image,
     status
 ) VALUES
-  ($1, $2, $3) RETURNING id, description, image, status
+  ($1, $2, $3) RETURNING id, description, image, status, created_at
 `
 
 type CreateCategoryParams struct {
@@ -31,6 +31,7 @@ func (q *Queries) CreateCategory(ctx context.Context, arg CreateCategoryParams) 
 		&i.Description,
 		&i.Image,
 		&i.Status,
+		&i.CreatedAt,
 	)
 	return i, err
 }
@@ -46,7 +47,7 @@ func (q *Queries) DeleteCategory(ctx context.Context, id int32) error {
 }
 
 const getCategories = `-- name: GetCategories :many
-SELECT id, description, image, status FROM categories
+SELECT id, description, image, status, created_at FROM categories
 `
 
 func (q *Queries) GetCategories(ctx context.Context) ([]Category, error) {
@@ -63,6 +64,7 @@ func (q *Queries) GetCategories(ctx context.Context) ([]Category, error) {
 			&i.Description,
 			&i.Image,
 			&i.Status,
+			&i.CreatedAt,
 		); err != nil {
 			return nil, err
 		}
@@ -78,7 +80,7 @@ func (q *Queries) GetCategories(ctx context.Context) ([]Category, error) {
 }
 
 const getCategory = `-- name: GetCategory :one
-SELECT id, description, image, status FROM categories
+SELECT id, description, image, status, created_at FROM categories
 WHERE id = $1 LIMIT 1
 `
 
@@ -90,6 +92,7 @@ func (q *Queries) GetCategory(ctx context.Context, id int32) (Category, error) {
 		&i.Description,
 		&i.Image,
 		&i.Status,
+		&i.CreatedAt,
 	)
 	return i, err
 }

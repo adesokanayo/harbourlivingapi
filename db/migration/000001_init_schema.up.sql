@@ -29,7 +29,8 @@ CREATE TABLE "categories" (
                             "id" SERIAL PRIMARY KEY,
                             "description" varchar NOT NULL,
                             "image" varchar,
-                            "status" int NOT NULL
+                            "status" int NOT NULL,
+                            "created_at" timestamp DEFAULT (now())
 );
 
 CREATE TABLE "images" (
@@ -73,7 +74,9 @@ CREATE TABLE "venues" (
                          "virtual" boolean NOT NULL,
                          "rating" float DEFAULT (0.00),
                          "longitude" float, 
-                         "latitude" float 
+                         "latitude" float, 
+                         "status" int NOT NULL,
+                         "created_at" timestamp DEFAULT (now())
 );
 
 CREATE TABLE "tickets" (
@@ -155,6 +158,12 @@ CREATE TABLE "events_status" (
                                  "created_at" timestamp NOT NULL DEFAULT (now())
 );
 
+CREATE TABLE "venues_status" (
+                                 "id" SERIAL PRIMARY KEY,
+                                 "description" varchar,
+                                 "created_at" timestamp NOT NULL DEFAULT (now())
+);
+
 CREATE TABLE "artists" (
                            "id" SERIAL PRIMARY KEY,
                            "user_id" int NOT NULL,
@@ -168,6 +177,20 @@ CREATE TABLE "events_artists" (
                                   "id" SERIAL PRIMARY KEY,
                                   "event_id" int NOT NULL,
                                   "artist_id" int NOT NULL,
+                                  "created_at" timestamp NOT NULL DEFAULT (now())
+);
+
+CREATE TABLE "events_favorites" (
+                                  "id" SERIAL PRIMARY KEY,
+                                  "event_id" int NOT NULL,
+                                  "user_id" int NOT NULL,
+                                  "created_at" timestamp NOT NULL DEFAULT (now())
+);
+
+CREATE TABLE "venues_favorites" (
+                                  "id" SERIAL PRIMARY KEY,
+                                  "venue_id" int NOT NULL,
+                                  "user_id" int NOT NULL,
                                   "created_at" timestamp NOT NULL DEFAULT (now())
 );
 
@@ -227,6 +250,21 @@ ALTER TABLE "artists" ADD FOREIGN KEY ("user_id") REFERENCES "users" ("id");
 ALTER TABLE "events_artists" ADD FOREIGN KEY ("artist_id") REFERENCES "artists" ("id")
 ON UPDATE CASCADE ON DELETE CASCADE;
 
+ALTER TABLE "events_favorites" ADD FOREIGN KEY ("event_id") REFERENCES "events" ("id")
+ON UPDATE CASCADE ON DELETE CASCADE;
+
+ALTER TABLE "events_favorites" ADD FOREIGN KEY ("user_id") REFERENCES "users" ("id")
+ON UPDATE CASCADE ON DELETE CASCADE;
+
+ALTER TABLE "venues_favorites" ADD FOREIGN KEY ("venue_id") REFERENCES "venues" ("id")
+ON UPDATE CASCADE ON DELETE CASCADE;
+
+ALTER TABLE "venues_favorites" ADD FOREIGN KEY ("user_id") REFERENCES "users" ("id")
+ON UPDATE CASCADE ON DELETE CASCADE;
+
+ALTER TABLE "venues" ADD FOREIGN KEY ("status") REFERENCES "venues_status" ("id")
+ON UPDATE CASCADE ON DELETE CASCADE;
+
 CREATE INDEX ON "users" ("id");
 
 CREATE INDEX ON "users" ("email");
@@ -267,14 +305,21 @@ VALUES
     ('Music',1),
     ('Business',1);
 
+INSERT  INTO venues_status ("description" )
+VALUES 
+    ( 'Draft'),
+    ( 'Published'),
+    ('Approved'),
+    ( 'Rejected'),
+    ( 'Deleted');
 
-INSERT  INTO venues ("name", "address", "postal_code","city","province","country_code",virtual)
+INSERT  INTO venues ("name", "address", "postal_code","city","province","country_code",virtual,"status")
 VALUES
-    ('Eko Hotels','34 TempleBy Way,54532 ','T2A6YG','Calgary','AB','CAN',false ),
-    ('Eko Hotels','34 TempleBy Way,54532 ','T2A6YG','Calgary','AB','CAN',false),
-    ('Eko Hotels','34 TempleBy Way,54532 ','T2A6YG','Calgary','AB','CAN',false),
-    ('Eko Hotels','34 TempleBy Way 54532','T2A6YG','Calgary','AB','CAN',false),
-    ('Eko Hotels','34 TempleBy Way,54532','T2A6YG','Calgary','AB','CAN',false);
+    ('Eko Hotels','34 TempleBy Way,54532 ','T2A6YG','Calgary','AB','CAN',false, 1 ),
+    ('Eko Hotels','34 TempleBy Way,54532 ','T2A6YG','Calgary','AB','CAN',false, 2 ),
+    ('Eko Hotels','34 TempleBy Way,54532 ','T2A6YG','Calgary','AB','CAN',false, 3),
+    ('Eko Hotels','34 TempleBy Way 54532','T2A6YG','Calgary','AB','CAN',false, 4),
+    ('Eko Hotels','34 TempleBy Way,54532','T2A6YG','Calgary','AB','CAN',false, 5);
 
 INSERT  INTO tickets_status ("description", "status")
 VALUES
@@ -284,12 +329,12 @@ VALUES
 
 
 INSERT  INTO events_status ("description" )
-VALUES
-    ( 'New'),
+VALUES 
+    ( 'Draft'),
     ( 'Published'),
+    ('Approved'),
     ( 'Rejected'),
-    ( 'Completed'),
-    ( 'Deleted');
+    ( 'Completed');
 
 
 

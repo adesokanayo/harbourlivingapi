@@ -1,3 +1,6 @@
+# build-in directive by Gqlgen
+directive @goField(forceResolver: Boolean, name: String) on FIELD_DEFINITION | INPUT_FIELD_DEFINITION
+
 type User {
         id: ID!
         phone: String
@@ -8,18 +11,22 @@ type User {
         password: String!
         usertype: Int!
         avatar : String!
-        }
+        favorites_venues: [Venue] 
+        favorites_events: [Event]  
+}
 
 type Usertype {
         id: ID!
         description: String!
         status: Int
         }
+
 type EventType {
         id: ID!
         description: String!
         status: Int!
         }
+
 type Category {
         id: ID!
         description: String!
@@ -51,6 +58,7 @@ type Event {
         images: [Image]
         videos: [Video]
         }
+
 type Venue {
         id: ID!
         name: String!
@@ -63,7 +71,7 @@ type Venue {
         Latitude : Float
         url: String
         virtual: Boolean!
-        rating: Float!
+        rating: Int
         }
 
 input Login {
@@ -100,6 +108,7 @@ input NewVideo{
         name: String!
         url: String
 }
+
 input NewVenue {
         name: String!
         address: String
@@ -111,6 +120,8 @@ input NewVenue {
         virtual: Boolean!
         longitude: Float
         latitude: Float
+        rating : Int
+        status :Int!
 }
 
 input GetEvent{
@@ -125,6 +136,7 @@ input GetEventByLocation{
         longitude: Float!,
         miles: Int!
 }
+
 input NewEvent {
         title: String!
         description: String!
@@ -155,10 +167,24 @@ input UpdateEvent {
         vidoes: [NewVideo]        
 }
 
+input UpdateVenue {
+        id: Int!
+        name: String
+        address: String
+        postal_code:String
+        city: String
+        province: String
+        country_code: String
+        url: String
+        longitude: Float
+        latitude: Float 
+        rating: Int 
+        status: Int   
+}
+
 input RefreshTokenInput{
         token: String!
 }
-
 
 
 input NewUser {
@@ -185,6 +211,7 @@ input NewSponsor {
   user_id : Int!
   event_id: Int!
 }
+
 type Host {
         id: ID!
         user_id: Int!
@@ -228,6 +255,18 @@ type Ticket {
         currency: String!
 }
 
+type EventFavorite{
+  id : ID!
+  event_id : Int!
+  user_id: Int!
+}
+
+type VenueFavorite{
+  id : ID!
+  venue_id : Int!
+  user_id: Int!
+}
+
 input NewTicket {
         name: String!
         price: Int!
@@ -263,6 +302,17 @@ input UpdateSponsor{
     short_bio: String
 }
 
+input NewEventFavorite{
+    event_id: Int!
+    user_id: Int!
+}
+
+input NewVenueFavorite{
+    venue_id: Int!
+    user_id: Int!
+}
+
+
 type Mutation {
         createCategory(input : NewCategory!): Category!
         createVenue(input: NewVenue!): Venue!
@@ -270,6 +320,8 @@ type Mutation {
         createEvent(input: NewEvent!):Event!
         createTicket(input: NewTicket!): Ticket!
         createSponsorForEvent(input: NewSponsor!): Sponsor!
+        createEventFavorite(input : NewEventFavorite!): EventFavorite!
+        createVenueFavorite(input : NewVenueFavorite!): VenueFavorite!
 
         """ update """ 
         updateEvent(input: UpdateEvent!):Event!
@@ -284,14 +336,11 @@ type Mutation {
         """ operations """ 
         login(input: Login!): LoginResponse
         refreshToken(input: RefreshTokenInput!): String
-       
-        
-
 }
 
 type Query {
-        getUser(input: ID!): User
-        getEvent(input: ID!): Event
+        getUser(input: ID!): User  @goField(forceResolver: true)
+        getEvent(input: ID!): Event 
         getVenue(input: ID!): Venue
         getUsers : [User!]
         getEvents(input: GetEvent!): [Event!]
