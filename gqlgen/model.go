@@ -298,6 +298,7 @@ type Venue struct {
 	URL         *string  `json:"url"`
 	Virtual     bool     `json:"virtual"`
 	Rating      *int     `json:"rating"`
+	Status      int      `json:"status"`
 }
 
 type VenueFavorite struct {

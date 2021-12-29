@@ -3,8 +3,9 @@ package db
 import (
 	"context"
 	"database/sql"
-	"github.com/stretchr/testify/require"
 	"testing"
+
+	"github.com/stretchr/testify/require"
 )
 
 func TestCreateVenue(t *testing.T) {
@@ -18,6 +19,7 @@ func TestCreateVenue(t *testing.T) {
 		City:        sql.NullString{String: "Calgary", Valid: true},
 		Province:    sql.NullString{String: "AB", Valid: true},
 		CountryCode: sql.NullString{String: "CAN", Valid: true},
+		Status: 1,
 	}
 	venue, err := testQueries.CreateVenue(context.Background(), arg)
 
@@ -39,6 +41,7 @@ func TestGetVenue(t *testing.T) {
 	require.Equal(t, venue.Address, randomVenue.Address)
 	require.Equal(t, venue.Province, randomVenue.Province)
 	require.Equal(t, venue.Name, randomVenue.Name)
+	require.Equal(t, venue.Status, randomVenue.Status)
 
 }
 
@@ -52,6 +55,7 @@ func CreateRandomVenue() Venue {
 		City:        sql.NullString{String: "Calgary", Valid: true},
 		Province:    sql.NullString{String: "AB", Valid: true},
 		CountryCode: sql.NullString{String: "CAN", Valid: true},
+		Status:      1,
 	}
 
 	venue, err := testQueries.CreateVenue(context.Background(), arg)

@@ -197,6 +197,7 @@ type ComplexityRoot struct {
 		PostalCode  func(childComplexity int) int
 		Province    func(childComplexity int) int
 		Rating      func(childComplexity int) int
+		Status      func(childComplexity int) int
 		URL         func(childComplexity int) int
 		Virtual     func(childComplexity int) int
 	}
@@ -1132,6 +1133,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Venue.Rating(childComplexity), true
 
+	case "Venue.status":
+		if e.complexity.Venue.Status == nil {
+			break
+		}
+
+		return e.complexity.Venue.Status(childComplexity), true
+
 	case "Venue.url":
 		if e.complexity.Venue.URL == nil {
 			break
@@ -1333,6 +1341,7 @@ type Venue {
         url: String
         virtual: Boolean!
         rating: Int
+        status: Int!
         }
 
 input Login {
@@ -5992,6 +6001,41 @@ func (ec *executionContext) _Venue_rating(ctx context.Context, field graphql.Col
 	return ec.marshalOInt2ᚖint(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _Venue_status(ctx context.Context, field graphql.CollectedField, obj *Venue) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Venue",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Status, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _VenueFavorite_id(ctx context.Context, field graphql.CollectedField, obj *VenueFavorite) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -9280,6 +9324,11 @@ func (ec *executionContext) _Venue(ctx context.Context, sel ast.SelectionSet, ob
 			}
 		case "rating":
 			out.Values[i] = ec._Venue_rating(ctx, field, obj)
+		case "status":
+			out.Values[i] = ec._Venue_status(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}

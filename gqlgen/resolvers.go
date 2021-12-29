@@ -112,6 +112,8 @@ func (r *mutationResolver) CreateVenue(ctx context.Context, input NewVenue) (*Ve
 			Valid:   true,
 		}
 	}
+	createVenueReq.Status = int32(input.Status)
+
 	venue, err := store.CreateVenue(ctx, createVenueReq)
 	if err != nil {
 		return nil, err
@@ -135,13 +137,15 @@ func (r *mutationResolver) CreateVenue(ctx context.Context, input NewVenue) (*Ve
 	if venue.Address.Valid {
 		result.Address = &venue.Address.String
 	}
-	
+
 	if venue.Longitude.Valid {
 		result.Longitude = &venue.Longitude.Float64
 	}
 	if venue.Latitude.Valid {
 		result.Latitude = &venue.Latitude.Float64
 	}
+
+	result.Status = int(venue.Status)
 
 	return &result, nil
 }
@@ -352,6 +356,7 @@ func (r *mutationResolver) CreateEvent(ctx context.Context, input NewEvent) (*Ev
 			HostID:      int(linkedEventHost.HostID),
 			Images:      images,
 			Videos:      videos,
+			Status:      int(event.Status),
 		}
 		return nil
 	})
@@ -1371,7 +1376,5 @@ func (r *Resolver) Mutation() MutationResolver { return &mutationResolver{r} }
 // Query returns QueryResolver implementation.
 func (r *Resolver) Query() QueryResolver { return &queryResolver{r} }
 
-
 type mutationResolver struct{ *Resolver }
 type queryResolver struct{ *Resolver }
-

@@ -262,8 +262,7 @@ ON UPDATE CASCADE ON DELETE CASCADE;
 ALTER TABLE "venues_favorites" ADD FOREIGN KEY ("user_id") REFERENCES "users" ("id")
 ON UPDATE CASCADE ON DELETE CASCADE;
 
-ALTER TABLE "venues" ADD FOREIGN KEY ("status") REFERENCES "venues_status" ("id")
-ON UPDATE CASCADE ON DELETE CASCADE;
+ALTER TABLE "venues" ADD FOREIGN KEY ("status") REFERENCES "venues_status" ("id");
 
 CREATE INDEX ON "users" ("id");
 
@@ -313,13 +312,13 @@ VALUES
     ( 'Rejected'),
     ( 'Deleted');
 
-INSERT  INTO venues ("name", "address", "postal_code","city","province","country_code",virtual,"status")
+INSERT  INTO venues ("name", "address", "postal_code","city","province","country_code","virtual","status")
 VALUES
     ('Eko Hotels','34 TempleBy Way,54532 ','T2A6YG','Calgary','AB','CAN',false, 1 ),
-    ('Eko Hotels','34 TempleBy Way,54532 ','T2A6YG','Calgary','AB','CAN',false, 2 ),
-    ('Eko Hotels','34 TempleBy Way,54532 ','T2A6YG','Calgary','AB','CAN',false, 3),
-    ('Eko Hotels','34 TempleBy Way 54532','T2A6YG','Calgary','AB','CAN',false, 4),
-    ('Eko Hotels','34 TempleBy Way,54532','T2A6YG','Calgary','AB','CAN',false, 5);
+    ('Eko Hotels','34 TempleBy Way,54532 ','T2A6YG','Calgary','AB','CAN',false, 1 ),
+    ('Eko Hotels','34 TempleBy Way,54532 ','T2A6YG','Calgary','AB','CAN',false, 2),
+    ('Eko Hotels','34 TempleBy Way 54532','T2A6YG','Calgary','AB','CAN',false, 2),
+    ('Eko Hotels','34 TempleBy Way,54532','T2A6YG','Calgary','AB','CAN',false, 2);
 
 INSERT  INTO tickets_status ("description", "status")
 VALUES
