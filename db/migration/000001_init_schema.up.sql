@@ -70,8 +70,8 @@ CREATE TABLE "venues" (
                          "city" varchar,
                          "province" varchar,
                          "country_code" varchar,
-                         "url" varchar,
-                         "virtual" boolean NOT NULL,
+                         "venue_owner" int NOT NULL,
+                         "banner_image" varchar,
                          "rating" float DEFAULT (0.00),
                          "longitude" float, 
                          "latitude" float, 
@@ -84,16 +84,10 @@ CREATE TABLE "tickets" (
                           "name" varchar NOT NULL,
                           "event_id" int NOT NULL,
                           "price" float NOT NULL DEFAULT (0.00),
-                          "quantity" int NOT NULL DEFAULT (0),
-                          "status" int NOT NULL,
-                          "currency" varchar NOT NULL
+                          "currency" varchar NOT NULL,
+                          "description" varchar
 );
 
-CREATE TABLE "tickets_status" (
-                                 "id" SERIAL PRIMARY KEY,
-                                 "description" varchar,
-                                 "status" int NOT NULL
-);
 
 CREATE TABLE "users_tickets" (
                                 "id" SERIAL PRIMARY KEY,
@@ -209,8 +203,6 @@ ALTER TABLE "events" ADD FOREIGN KEY ("status") REFERENCES "events_status" ("id"
 
 ALTER TABLE "tickets" ADD FOREIGN KEY ("event_id") REFERENCES "events" ("id");
 
-ALTER TABLE "tickets_status" ADD FOREIGN KEY ("status") REFERENCES "tickets_status" ("id");
-
 ALTER TABLE "users_tickets" ADD FOREIGN KEY ("user_id") REFERENCES "users" ("id")
 ON UPDATE CASCADE ON DELETE CASCADE;
 
@@ -308,23 +300,18 @@ INSERT  INTO venues_status ("description" )
 VALUES 
     ( 'Draft'),
     ( 'Published'),
-    ('Approved'),
+    ( 'Approved'),
     ( 'Rejected'),
     ( 'Deleted');
 
-INSERT  INTO venues ("name", "address", "postal_code","city","province","country_code","virtual","status")
+INSERT  INTO venues ("name", "address", "postal_code","city","province","country_code","venue_owner","status")
 VALUES
-    ('Eko Hotels','34 TempleBy Way,54532 ','T2A6YG','Calgary','AB','CAN',false, 1 ),
-    ('Eko Hotels','34 TempleBy Way,54532 ','T2A6YG','Calgary','AB','CAN',false, 1 ),
-    ('Eko Hotels','34 TempleBy Way,54532 ','T2A6YG','Calgary','AB','CAN',false, 2),
-    ('Eko Hotels','34 TempleBy Way 54532','T2A6YG','Calgary','AB','CAN',false, 2),
-    ('Eko Hotels','34 TempleBy Way,54532','T2A6YG','Calgary','AB','CAN',false, 2);
+    ('Eko Hotels','34 TempleBy Way,54532 ','T2A6YG','Calgary','AB','CAN',1,1 ),
+    ('Eko Hotels','34 TempleBy Way,54532 ','T2A6YG','Calgary','AB','CAN',1,1 ),
+    ('Eko Hotels','34 TempleBy Way,54532 ','T2A6YG','Calgary','AB','CAN',1,1),
+    ('Eko Hotels','34 TempleBy Way 54532','T2A6YG','Calgary','AB','CAN',1,1),
+    ('Eko Hotels','34 TempleBy Way,54532','T2A6YG','Calgary','AB','CAN',1,1);
 
-INSERT  INTO tickets_status ("description", "status")
-VALUES
-    ( 'Active',1),
-    ( 'Cancelled',2),
-    ( 'Renewed',3);
 
 
 INSERT  INTO events_status ("description" )

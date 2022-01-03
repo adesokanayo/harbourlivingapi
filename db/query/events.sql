@@ -5,8 +5,8 @@ WHERE id = $1 LIMIT 1;
 -- name: GetEvents :many
 SELECT * FROM events e
 inner join venues v on  e.venue = v.id
-WHERE category = $1
-and e.status =$2
+WHERE category = $1 AND 
+e.status = $2
 ORDER BY e.id desc
 LIMIT $3
 OFFSET $4;

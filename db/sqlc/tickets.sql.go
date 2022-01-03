@@ -5,37 +5,35 @@ package db
 
 import (
 	"context"
+	"database/sql"
 )
 
 const createTicket = `-- name: CreateTicket :one
 INSERT INTO tickets (
   name,
   event_id,
-  quantity, 
   price, 
-  status,
-  currency
+  currency,
+  description
 ) VALUES
-    ($1, $2, $3, $4, $5, $6) RETURNING id, name, event_id, price, quantity, status, currency
+    ($1, $2, $3, $4, $5) RETURNING id, name, event_id, price, currency, description
 `
 
 type CreateTicketParams struct {
-	Name     string  `json:"name"`
-	EventID  int32   `json:"event_id"`
-	Quantity int32   `json:"quantity"`
-	Price    float64 `json:"price"`
-	Status   int32   `json:"status"`
-	Currency string  `json:"currency"`
+	Name        string         `json:"name"`
+	EventID     int32          `json:"event_id"`
+	Price       float64        `json:"price"`
+	Currency    string         `json:"currency"`
+	Description sql.NullString `json:"description"`
 }
 
 func (q *Queries) CreateTicket(ctx context.Context, arg CreateTicketParams) (Ticket, error) {
 	row := q.db.QueryRowContext(ctx, createTicket,
 		arg.Name,
 		arg.EventID,
-		arg.Quantity,
 		arg.Price,
-		arg.Status,
 		arg.Currency,
+		arg.Description,
 	)
 	var i Ticket
 	err := row.Scan(
@@ -43,9 +41,8 @@ func (q *Queries) CreateTicket(ctx context.Context, arg CreateTicketParams) (Tic
 		&i.Name,
 		&i.EventID,
 		&i.Price,
-		&i.Quantity,
-		&i.Status,
 		&i.Currency,
+		&i.Description,
 	)
 	return i, err
 }
@@ -61,7 +58,7 @@ func (q *Queries) DeleteTicket(ctx context.Context, id int32) error {
 }
 
 const getAllTickets = `-- name: GetAllTickets :many
-SELECT id, name, event_id, price, quantity, status, currency FROM tickets
+SELECT id, name, event_id, price, currency, description FROM tickets
 ORDER  by id
 `
 
@@ -79,9 +76,8 @@ func (q *Queries) GetAllTickets(ctx context.Context) ([]Ticket, error) {
 			&i.Name,
 			&i.EventID,
 			&i.Price,
-			&i.Quantity,
-			&i.Status,
 			&i.Currency,
+			&i.Description,
 		); err != nil {
 			return nil, err
 		}
@@ -97,7 +93,7 @@ func (q *Queries) GetAllTickets(ctx context.Context) ([]Ticket, error) {
 }
 
 const getTicket = `-- name: GetTicket :one
-SELECT id, name, event_id, price, quantity, status, currency FROM tickets
+SELECT id, name, event_id, price, currency, description FROM tickets
 WHERE id = $1 LIMIT 1
 `
 
@@ -109,15 +105,14 @@ func (q *Queries) GetTicket(ctx context.Context, id int32) (Ticket, error) {
 		&i.Name,
 		&i.EventID,
 		&i.Price,
-		&i.Quantity,
-		&i.Status,
 		&i.Currency,
+		&i.Description,
 	)
 	return i, err
 }
 
 const getTicketsByEventID = `-- name: GetTicketsByEventID :many
-SELECT id, name, event_id, price, quantity, status, currency FROM tickets
+SELECT id, name, event_id, price, currency, description FROM tickets
 where event_id = $1
 `
 
@@ -135,9 +130,8 @@ func (q *Queries) GetTicketsByEventID(ctx context.Context, eventID int32) ([]Tic
 			&i.Name,
 			&i.EventID,
 			&i.Price,
-			&i.Quantity,
-			&i.Status,
 			&i.Currency,
+			&i.Description,
 		); err != nil {
 			return nil, err
 		}

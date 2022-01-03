@@ -120,19 +120,12 @@ type Sponsor struct {
 }
 
 type Ticket struct {
-	ID       int32   `json:"id"`
-	Name     string  `json:"name"`
-	EventID  int32   `json:"event_id"`
-	Price    float64 `json:"price"`
-	Quantity int32   `json:"quantity"`
-	Status   int32   `json:"status"`
-	Currency string  `json:"currency"`
-}
-
-type TicketsStatus struct {
 	ID          int32          `json:"id"`
+	Name        string         `json:"name"`
+	EventID     int32          `json:"event_id"`
+	Price       float64        `json:"price"`
+	Currency    string         `json:"currency"`
 	Description sql.NullString `json:"description"`
-	Status      int32          `json:"status"`
 }
 
 type User struct {
@@ -176,8 +169,8 @@ type Venue struct {
 	City        sql.NullString  `json:"city"`
 	Province    sql.NullString  `json:"province"`
 	CountryCode sql.NullString  `json:"country_code"`
-	Url         sql.NullString  `json:"url"`
-	Virtual     bool            `json:"virtual"`
+	VenueOwner  int32           `json:"venue_owner"`
+	BannerImage sql.NullString  `json:"banner_image"`
 	Rating      sql.NullFloat64 `json:"rating"`
 	Longitude   sql.NullFloat64 `json:"longitude"`
 	Latitude    sql.NullFloat64 `json:"latitude"`

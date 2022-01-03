@@ -1,6 +1,9 @@
 # build-in directive by Gqlgen
 directive @goField(forceResolver: Boolean, name: String) on FIELD_DEFINITION | INPUT_FIELD_DEFINITION
 
+scalar Time
+scalar DateTime
+
 type User {
         id: ID!
         phone: String
@@ -45,15 +48,15 @@ type Event {
         title: String!
         description: String!
         banner_image: String!
-        startDate:   String!
-        endDate:     String!
+        startDate:   DateTime!
+        endDate:     DateTime!
         venue: Int!
         type: Int!
         user_id: ID!
         category: Int!
         sponsors : [Sponsor]
         hostID: Int!
-        ticket : [Ticket]
+        tickets : [Ticket]
         status: Int!
         images: [Image]
         videos: [Video]
@@ -69,8 +72,8 @@ type Venue {
         country_code: String
         Longitude: Float
         Latitude : Float
-        url: String
-        virtual: Boolean!
+        banner_image: String
+        venue_owner: Int!
         rating: Int
         status: Int!
         }
@@ -90,24 +93,24 @@ type LoginResponse{
 type Image{
         id: ID!
         event_id: ID!
-        name: String!
-        url: String
+        name: String
+        url: String!
 }
 
 input NewImage{
-        name: String!
-        url: String
+        name: String
+        url: String!
 }
 type Video{
         id: ID!
         event_id: ID!
-        name: String!
-        url: String
+        name: String
+        url: String!
 }
 
 input NewVideo{
-        name: String!
-        url: String
+        name: String
+        url: String!
 }
 
 input NewVenue {
@@ -117,8 +120,8 @@ input NewVenue {
         city: String
         province: String
         country_code: String
-        url: String
-        virtual: Boolean!
+        venue_owner: Int!
+        banner_image: String
         longitude: Float
         latitude: Float
         rating : Int
@@ -142,15 +145,16 @@ input NewEvent {
         title: String!
         description: String!
         banner_image: String!
-        startDate:   String!
-        endDate:     String!
+        startDate:   DateTime!
+        endDate:     DateTime!
         venue: Int!
         type: Int!
         user_id: ID!
         category: Int!
         status: Int!
         images: [NewImage]
-        vidoes: [NewVideo]        
+        videos: [NewVideo]   
+        tickets : [NewTicket]     
 }
 
 input UpdateEvent {
@@ -158,14 +162,14 @@ input UpdateEvent {
         title: String
         description: String
         banner_image: String
-        startDate:   String
-        endDate:     String
+        startDate:   DateTime
+        endDate:     DateTime
         venue: Int
         type: Int
         category: Int
         status: Int
         images: [NewImage]
-        vidoes: [NewVideo]        
+        videos: [NewVideo]        
 }
 
 input UpdateVenue {
@@ -249,11 +253,10 @@ type UpdateEventState{
 type Ticket {
         id: ID!
         name: String!
-        price: Int!
+        price: Float!
         event_id: Int!
-        quantity: Int!
-        status: Int!
         currency: String!
+        description: String
 }
 
 type EventFavorite{
@@ -270,11 +273,10 @@ type VenueFavorite{
 
 input NewTicket {
         name: String!
-        price: Int!
+        price: Float!
         event_id: Int!
-        quantity: Int!
-        status: Int!
         currency: String!
+        description: String 
 }
 
 input UpdateEventStatus{

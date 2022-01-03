@@ -6,8 +6,8 @@ INSERT INTO venues (
     city,
     province,
     country_code,
-    url,
-    virtual,
+    venue_owner,
+    banner_image,
     longitude, 
     latitude,
     rating,
@@ -26,14 +26,6 @@ ORDER  by id;
 -- name: DeleteVenue :exec
 DELETE FROM venues
 WHERE id = $1;
-
--- name: CreateVirtualVenue :one
-INSERT INTO venues (
-    name,
-    url,
-    virtual
-) VALUES
-    ($1, $2, $3) RETURNING *;
 
 -- name: RateVenue :exec
 UPDATE venues SET rating = $1
@@ -65,10 +57,8 @@ UPDATE venues SET
         THEN @province::text ELSE province END,
     country_code = CASE WHEN @country_to_update::boolean
         THEN @country_code::text ELSE country_code END,
-    url = CASE WHEN @url_to_update::boolean
-        THEN @url::text ELSE url END,
-    virtual =CASE WHEN @virtual_to_update::boolean
-        THEN @virtual::boolean ELSE virtual END,
+    banner_image = CASE WHEN @banner_image_to_update::boolean
+        THEN @banner_image::text ELSE banner_image END,
     longitude = CASE WHEN @longitude_to_update::boolean
         THEN @longitude::float ELSE longitude END,
     latitude = CASE WHEN @latitude_to_update::boolean

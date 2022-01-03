@@ -31,7 +31,7 @@ type Event struct {
 	Category    int        `json:"category"`
 	Sponsors    []*Sponsor `json:"sponsors"`
 	HostID      int        `json:"hostID"`
-	Ticket      []*Ticket  `json:"ticket"`
+	Tickets     []*Ticket  `json:"tickets"`
 	Status      int        `json:"status"`
 	Images      []*Image   `json:"images"`
 	Videos      []*Video   `json:"videos"`
@@ -74,8 +74,8 @@ type Host struct {
 type Image struct {
 	ID      int32   `json:"id"`
 	EventID int32   `json:"event_id"`
-	Name    string  `json:"name"`
-	URL     *string `json:"url"`
+	Name    *string `json:"name"`
+	URL     string  `json:"url"`
 }
 
 type Login struct {
@@ -102,18 +102,19 @@ type NewCategory struct {
 }
 
 type NewEvent struct {
-	Title       string      `json:"title"`
-	Description string      `json:"description"`
-	BannerImage string      `json:"banner_image"`
-	StartDate   string      `json:"startDate"`
-	EndDate     string      `json:"endDate"`
-	Venue       int         `json:"venue"`
-	Type        int         `json:"type"`
-	UserID      int32       `json:"user_id"`
-	Category    int         `json:"category"`
-	Status      int         `json:"status"`
-	Images      []*NewImage `json:"images"`
-	Vidoes      []*NewVideo `json:"vidoes"`
+	Title       string       `json:"title"`
+	Description string       `json:"description"`
+	BannerImage string       `json:"banner_image"`
+	StartDate   string       `json:"startDate"`
+	EndDate     string       `json:"endDate"`
+	Venue       int          `json:"venue"`
+	Type        int          `json:"type"`
+	UserID      int32        `json:"user_id"`
+	Category    int          `json:"category"`
+	Status      int          `json:"status"`
+	Images      []*NewImage  `json:"images"`
+	Videos      []*NewVideo  `json:"videos"`
+	Tickets     []*NewTicket `json:"tickets"`
 }
 
 type NewEventFavorite struct {
@@ -127,8 +128,8 @@ type NewHost struct {
 }
 
 type NewImage struct {
-	Name string  `json:"name"`
-	URL  *string `json:"url"`
+	Name *string `json:"name"`
+	URL  string  `json:"url"`
 }
 
 type NewSponsor struct {
@@ -137,12 +138,11 @@ type NewSponsor struct {
 }
 
 type NewTicket struct {
-	Name     string `json:"name"`
-	Price    int    `json:"price"`
-	EventID  int    `json:"event_id"`
-	Quantity int    `json:"quantity"`
-	Status   int    `json:"status"`
-	Currency string `json:"currency"`
+	Name        string  `json:"name"`
+	Price       float64 `json:"price"`
+	EventID     int     `json:"event_id"`
+	Currency    string  `json:"currency"`
+	Description *string `json:"description"`
 }
 
 type NewUser struct {
@@ -163,8 +163,8 @@ type NewVenue struct {
 	City        *string  `json:"city"`
 	Province    *string  `json:"province"`
 	CountryCode *string  `json:"country_code"`
-	URL         *string  `json:"url"`
-	Virtual     bool     `json:"virtual"`
+	VenueOwner  int      `json:"venue_owner"`
+	BannerImage *string  `json:"banner_image"`
 	Longitude   *float64 `json:"longitude"`
 	Latitude    *float64 `json:"latitude"`
 	Rating      *int     `json:"rating"`
@@ -177,8 +177,8 @@ type NewVenueFavorite struct {
 }
 
 type NewVideo struct {
-	Name string  `json:"name"`
-	URL  *string `json:"url"`
+	Name *string `json:"name"`
+	URL  string  `json:"url"`
 }
 
 type RefreshTokenInput struct {
@@ -195,13 +195,12 @@ type Sponsor struct {
 }
 
 type Ticket struct {
-	ID       int32  `json:"id"`
-	Name     string `json:"name"`
-	Price    int    `json:"price"`
-	EventID  int    `json:"event_id"`
-	Quantity int    `json:"quantity"`
-	Status   int    `json:"status"`
-	Currency string `json:"currency"`
+	ID          int32   `json:"id"`
+	Name        string  `json:"name"`
+	Price       float64 `json:"price"`
+	EventID     int     `json:"event_id"`
+	Currency    string  `json:"currency"`
+	Description *string `json:"description"`
 }
 
 type UpdateArtist struct {
@@ -223,7 +222,7 @@ type UpdateEvent struct {
 	Category    *int        `json:"category"`
 	Status      *int        `json:"status"`
 	Images      []*NewImage `json:"images"`
-	Vidoes      []*NewVideo `json:"vidoes"`
+	Videos      []*NewVideo `json:"videos"`
 }
 
 type UpdateEventState struct {
@@ -295,8 +294,8 @@ type Venue struct {
 	CountryCode *string  `json:"country_code"`
 	Longitude   *float64 `json:"Longitude"`
 	Latitude    *float64 `json:"Latitude"`
-	URL         *string  `json:"url"`
-	Virtual     bool     `json:"virtual"`
+	BannerImage *string  `json:"banner_image"`
+	VenueOwner  int      `json:"venue_owner"`
 	Rating      *int     `json:"rating"`
 	Status      int      `json:"status"`
 }
@@ -310,6 +309,6 @@ type VenueFavorite struct {
 type Video struct {
 	ID      int32   `json:"id"`
 	EventID int32   `json:"event_id"`
-	Name    string  `json:"name"`
-	URL     *string `json:"url"`
+	Name    *string `json:"name"`
+	URL     string  `json:"url"`
 }

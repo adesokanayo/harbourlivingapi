@@ -16,14 +16,14 @@ INSERT INTO venues (
     city,
     province,
     country_code,
-    url,
-    virtual,
+    venue_owner,
+    banner_image,
     longitude, 
     latitude,
     rating,
     status
 ) VALUES
-    ($1, $2, $3, $4, $5, $6,$7, $8,$9,$10,$11,$12) RETURNING id, name, address, postal_code, city, province, country_code, url, virtual, rating, longitude, latitude, status, created_at
+    ($1, $2, $3, $4, $5, $6,$7, $8,$9,$10,$11,$12) RETURNING id, name, address, postal_code, city, province, country_code, venue_owner, banner_image, rating, longitude, latitude, status, created_at
 `
 
 type CreateVenueParams struct {
@@ -33,8 +33,8 @@ type CreateVenueParams struct {
 	City        sql.NullString  `json:"city"`
 	Province    sql.NullString  `json:"province"`
 	CountryCode sql.NullString  `json:"country_code"`
-	Url         sql.NullString  `json:"url"`
-	Virtual     bool            `json:"virtual"`
+	VenueOwner  int32           `json:"venue_owner"`
+	BannerImage sql.NullString  `json:"banner_image"`
 	Longitude   sql.NullFloat64 `json:"longitude"`
 	Latitude    sql.NullFloat64 `json:"latitude"`
 	Rating      sql.NullFloat64 `json:"rating"`
@@ -49,8 +49,8 @@ func (q *Queries) CreateVenue(ctx context.Context, arg CreateVenueParams) (Venue
 		arg.City,
 		arg.Province,
 		arg.CountryCode,
-		arg.Url,
-		arg.Virtual,
+		arg.VenueOwner,
+		arg.BannerImage,
 		arg.Longitude,
 		arg.Latitude,
 		arg.Rating,
@@ -65,8 +65,8 @@ func (q *Queries) CreateVenue(ctx context.Context, arg CreateVenueParams) (Venue
 		&i.City,
 		&i.Province,
 		&i.CountryCode,
-		&i.Url,
-		&i.Virtual,
+		&i.VenueOwner,
+		&i.BannerImage,
 		&i.Rating,
 		&i.Longitude,
 		&i.Latitude,
@@ -101,43 +101,6 @@ func (q *Queries) CreateVenueFavorite(ctx context.Context, arg CreateVenueFavori
 	return i, err
 }
 
-const createVirtualVenue = `-- name: CreateVirtualVenue :one
-INSERT INTO venues (
-    name,
-    url,
-    virtual
-) VALUES
-    ($1, $2, $3) RETURNING id, name, address, postal_code, city, province, country_code, url, virtual, rating, longitude, latitude, status, created_at
-`
-
-type CreateVirtualVenueParams struct {
-	Name    string         `json:"name"`
-	Url     sql.NullString `json:"url"`
-	Virtual bool           `json:"virtual"`
-}
-
-func (q *Queries) CreateVirtualVenue(ctx context.Context, arg CreateVirtualVenueParams) (Venue, error) {
-	row := q.db.QueryRowContext(ctx, createVirtualVenue, arg.Name, arg.Url, arg.Virtual)
-	var i Venue
-	err := row.Scan(
-		&i.ID,
-		&i.Name,
-		&i.Address,
-		&i.PostalCode,
-		&i.City,
-		&i.Province,
-		&i.CountryCode,
-		&i.Url,
-		&i.Virtual,
-		&i.Rating,
-		&i.Longitude,
-		&i.Latitude,
-		&i.Status,
-		&i.CreatedAt,
-	)
-	return i, err
-}
-
 const deleteVenue = `-- name: DeleteVenue :exec
 DELETE FROM venues
 WHERE id = $1
@@ -149,7 +112,7 @@ func (q *Queries) DeleteVenue(ctx context.Context, id int32) error {
 }
 
 const getAllVenues = `-- name: GetAllVenues :many
-SELECT id, name, address, postal_code, city, province, country_code, url, virtual, rating, longitude, latitude, status, created_at FROM venues
+SELECT id, name, address, postal_code, city, province, country_code, venue_owner, banner_image, rating, longitude, latitude, status, created_at FROM venues
 ORDER  by id
 `
 
@@ -170,8 +133,8 @@ func (q *Queries) GetAllVenues(ctx context.Context) ([]Venue, error) {
 			&i.City,
 			&i.Province,
 			&i.CountryCode,
-			&i.Url,
-			&i.Virtual,
+			&i.VenueOwner,
+			&i.BannerImage,
 			&i.Rating,
 			&i.Longitude,
 			&i.Latitude,
@@ -226,7 +189,7 @@ func (q *Queries) GetFavoriteVenues(ctx context.Context, userID int32) ([]Venues
 }
 
 const getVenue = `-- name: GetVenue :one
-SELECT id, name, address, postal_code, city, province, country_code, url, virtual, rating, longitude, latitude, status, created_at FROM venues
+SELECT id, name, address, postal_code, city, province, country_code, venue_owner, banner_image, rating, longitude, latitude, status, created_at FROM venues
 WHERE id = $1 LIMIT 1
 `
 
@@ -241,8 +204,8 @@ func (q *Queries) GetVenue(ctx context.Context, id int32) (Venue, error) {
 		&i.City,
 		&i.Province,
 		&i.CountryCode,
-		&i.Url,
-		&i.Virtual,
+		&i.VenueOwner,
+		&i.BannerImage,
 		&i.Rating,
 		&i.Longitude,
 		&i.Latitude,
@@ -281,47 +244,43 @@ UPDATE venues SET
         THEN $10::text ELSE province END,
     country_code = CASE WHEN $11::boolean
         THEN $12::text ELSE country_code END,
-    url = CASE WHEN $13::boolean
-        THEN $14::text ELSE url END,
-    virtual =CASE WHEN $15::boolean
-        THEN $16::boolean ELSE virtual END,
-    longitude = CASE WHEN $17::boolean
-        THEN $18::float ELSE longitude END,
-    latitude = CASE WHEN $19::boolean
-        THEN $20::float ELSE latitude END,
-    rating = CASE WHEN $21::boolean
-        THEN $22::int ELSE rating END,
-    status = CASE WHEN $23::boolean
-        THEN $24::INTEGER ELSE status END
-    WHERE id= $25 RETURNING id, name, address, postal_code, city, province, country_code, url, virtual, rating, longitude, latitude, status, created_at
+    banner_image = CASE WHEN $13::boolean
+        THEN $14::text ELSE banner_image END,
+    longitude = CASE WHEN $15::boolean
+        THEN $16::float ELSE longitude END,
+    latitude = CASE WHEN $17::boolean
+        THEN $18::float ELSE latitude END,
+    rating = CASE WHEN $19::boolean
+        THEN $20::int ELSE rating END,
+    status = CASE WHEN $21::boolean
+        THEN $22::INTEGER ELSE status END
+    WHERE id= $23 RETURNING id, name, address, postal_code, city, province, country_code, venue_owner, banner_image, rating, longitude, latitude, status, created_at
 `
 
 type UpdateVenueParams struct {
-	NameToUpdate       bool    `json:"name_to_update"`
-	Name               string  `json:"name"`
-	AddressToUpdate    bool    `json:"address_to_update"`
-	Address            string  `json:"address"`
-	PostalCodeToUpdate bool    `json:"postal_code_to_update"`
-	PostalCode         string  `json:"postal_code"`
-	CityToUpdate       bool    `json:"city_to_update"`
-	City               string  `json:"city"`
-	ProvinceToUpdate   bool    `json:"province_to_update"`
-	Province           string  `json:"province"`
-	CountryToUpdate    bool    `json:"country_to_update"`
-	CountryCode        string  `json:"country_code"`
-	UrlToUpdate        bool    `json:"url_to_update"`
-	Url                string  `json:"url"`
-	VirtualToUpdate    bool    `json:"virtual_to_update"`
-	Virtual            bool    `json:"virtual"`
-	LongitudeToUpdate  bool    `json:"longitude_to_update"`
-	Longitude          float64 `json:"longitude"`
-	LatitudeToUpdate   bool    `json:"latitude_to_update"`
-	Latitude           float64 `json:"latitude"`
-	RatingToUpdate     bool    `json:"rating_to_update"`
-	Rating             int32   `json:"rating"`
-	StatusToUpdate     bool    `json:"status_to_update"`
-	Status             int32   `json:"status"`
-	ID                 int32   `json:"id"`
+	NameToUpdate        bool    `json:"name_to_update"`
+	Name                string  `json:"name"`
+	AddressToUpdate     bool    `json:"address_to_update"`
+	Address             string  `json:"address"`
+	PostalCodeToUpdate  bool    `json:"postal_code_to_update"`
+	PostalCode          string  `json:"postal_code"`
+	CityToUpdate        bool    `json:"city_to_update"`
+	City                string  `json:"city"`
+	ProvinceToUpdate    bool    `json:"province_to_update"`
+	Province            string  `json:"province"`
+	CountryToUpdate     bool    `json:"country_to_update"`
+	CountryCode         string  `json:"country_code"`
+	BannerImageToUpdate bool    `json:"banner_image_to_update"`
+	BannerImage         string  `json:"banner_image"`
+	LongitudeToUpdate   bool    `json:"longitude_to_update"`
+	Longitude           float64 `json:"longitude"`
+	LatitudeToUpdate    bool    `json:"latitude_to_update"`
+	Latitude            float64 `json:"latitude"`
+	RatingToUpdate      bool    `json:"rating_to_update"`
+	Rating              int32   `json:"rating"`
+	StatusToUpdate      bool    `json:"status_to_update"`
+	Status              int32   `json:"status"`
+	ID                  int32   `json:"id"`
 }
 
 func (q *Queries) UpdateVenue(ctx context.Context, arg UpdateVenueParams) (Venue, error) {
@@ -338,10 +297,8 @@ func (q *Queries) UpdateVenue(ctx context.Context, arg UpdateVenueParams) (Venue
 		arg.Province,
 		arg.CountryToUpdate,
 		arg.CountryCode,
-		arg.UrlToUpdate,
-		arg.Url,
-		arg.VirtualToUpdate,
-		arg.Virtual,
+		arg.BannerImageToUpdate,
+		arg.BannerImage,
 		arg.LongitudeToUpdate,
 		arg.Longitude,
 		arg.LatitudeToUpdate,
@@ -361,8 +318,8 @@ func (q *Queries) UpdateVenue(ctx context.Context, arg UpdateVenueParams) (Venue
 		&i.City,
 		&i.Province,
 		&i.CountryCode,
-		&i.Url,
-		&i.Virtual,
+		&i.VenueOwner,
+		&i.BannerImage,
 		&i.Rating,
 		&i.Longitude,
 		&i.Latitude,

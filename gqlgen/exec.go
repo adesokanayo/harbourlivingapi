@@ -69,7 +69,7 @@ type ComplexityRoot struct {
 		Sponsors    func(childComplexity int) int
 		StartDate   func(childComplexity int) int
 		Status      func(childComplexity int) int
-		Ticket      func(childComplexity int) int
+		Tickets     func(childComplexity int) int
 		Title       func(childComplexity int) int
 		Type        func(childComplexity int) int
 		UserID      func(childComplexity int) int
@@ -152,13 +152,12 @@ type ComplexityRoot struct {
 	}
 
 	Ticket struct {
-		Currency func(childComplexity int) int
-		EventID  func(childComplexity int) int
-		ID       func(childComplexity int) int
-		Name     func(childComplexity int) int
-		Price    func(childComplexity int) int
-		Quantity func(childComplexity int) int
-		Status   func(childComplexity int) int
+		Currency    func(childComplexity int) int
+		Description func(childComplexity int) int
+		EventID     func(childComplexity int) int
+		ID          func(childComplexity int) int
+		Name        func(childComplexity int) int
+		Price       func(childComplexity int) int
 	}
 
 	UpdateEventState struct {
@@ -188,6 +187,7 @@ type ComplexityRoot struct {
 
 	Venue struct {
 		Address     func(childComplexity int) int
+		BannerImage func(childComplexity int) int
 		City        func(childComplexity int) int
 		CountryCode func(childComplexity int) int
 		ID          func(childComplexity int) int
@@ -198,8 +198,7 @@ type ComplexityRoot struct {
 		Province    func(childComplexity int) int
 		Rating      func(childComplexity int) int
 		Status      func(childComplexity int) int
-		URL         func(childComplexity int) int
-		Virtual     func(childComplexity int) int
+		VenueOwner  func(childComplexity int) int
 	}
 
 	VenueFavorite struct {
@@ -400,12 +399,12 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Event.Status(childComplexity), true
 
-	case "Event.ticket":
-		if e.complexity.Event.Ticket == nil {
+	case "Event.tickets":
+		if e.complexity.Event.Tickets == nil {
 			break
 		}
 
-		return e.complexity.Event.Ticket(childComplexity), true
+		return e.complexity.Event.Tickets(childComplexity), true
 
 	case "Event.title":
 		if e.complexity.Event.Title == nil {
@@ -909,6 +908,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Ticket.Currency(childComplexity), true
 
+	case "Ticket.description":
+		if e.complexity.Ticket.Description == nil {
+			break
+		}
+
+		return e.complexity.Ticket.Description(childComplexity), true
+
 	case "Ticket.event_id":
 		if e.complexity.Ticket.EventID == nil {
 			break
@@ -936,20 +942,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Ticket.Price(childComplexity), true
-
-	case "Ticket.quantity":
-		if e.complexity.Ticket.Quantity == nil {
-			break
-		}
-
-		return e.complexity.Ticket.Quantity(childComplexity), true
-
-	case "Ticket.status":
-		if e.complexity.Ticket.Status == nil {
-			break
-		}
-
-		return e.complexity.Ticket.Status(childComplexity), true
 
 	case "UpdateEventState.event_id":
 		if e.complexity.UpdateEventState.EventID == nil {
@@ -1070,6 +1062,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Venue.Address(childComplexity), true
 
+	case "Venue.banner_image":
+		if e.complexity.Venue.BannerImage == nil {
+			break
+		}
+
+		return e.complexity.Venue.BannerImage(childComplexity), true
+
 	case "Venue.city":
 		if e.complexity.Venue.City == nil {
 			break
@@ -1140,19 +1139,12 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Venue.Status(childComplexity), true
 
-	case "Venue.url":
-		if e.complexity.Venue.URL == nil {
+	case "Venue.venue_owner":
+		if e.complexity.Venue.VenueOwner == nil {
 			break
 		}
 
-		return e.complexity.Venue.URL(childComplexity), true
-
-	case "Venue.virtual":
-		if e.complexity.Venue.Virtual == nil {
-			break
-		}
-
-		return e.complexity.Venue.Virtual(childComplexity), true
+		return e.complexity.Venue.VenueOwner(childComplexity), true
 
 	case "VenueFavorite.id":
 		if e.complexity.VenueFavorite.ID == nil {
@@ -1270,6 +1262,9 @@ var sources = []*ast.Source{
 	{Name: "graph/schema.graphql", Input: `# build-in directive by Gqlgen
 directive @goField(forceResolver: Boolean, name: String) on FIELD_DEFINITION | INPUT_FIELD_DEFINITION
 
+scalar Time
+scalar DateTime
+
 type User {
         id: ID!
         phone: String
@@ -1314,15 +1309,15 @@ type Event {
         title: String!
         description: String!
         banner_image: String!
-        startDate:   String!
-        endDate:     String!
+        startDate:   DateTime!
+        endDate:     DateTime!
         venue: Int!
         type: Int!
         user_id: ID!
         category: Int!
         sponsors : [Sponsor]
         hostID: Int!
-        ticket : [Ticket]
+        tickets : [Ticket]
         status: Int!
         images: [Image]
         videos: [Video]
@@ -1338,8 +1333,8 @@ type Venue {
         country_code: String
         Longitude: Float
         Latitude : Float
-        url: String
-        virtual: Boolean!
+        banner_image: String
+        venue_owner: Int!
         rating: Int
         status: Int!
         }
@@ -1359,24 +1354,24 @@ type LoginResponse{
 type Image{
         id: ID!
         event_id: ID!
-        name: String!
-        url: String
+        name: String
+        url: String!
 }
 
 input NewImage{
-        name: String!
-        url: String
+        name: String
+        url: String!
 }
 type Video{
         id: ID!
         event_id: ID!
-        name: String!
-        url: String
+        name: String
+        url: String!
 }
 
 input NewVideo{
-        name: String!
-        url: String
+        name: String
+        url: String!
 }
 
 input NewVenue {
@@ -1386,8 +1381,8 @@ input NewVenue {
         city: String
         province: String
         country_code: String
-        url: String
-        virtual: Boolean!
+        venue_owner: Int!
+        banner_image: String
         longitude: Float
         latitude: Float
         rating : Int
@@ -1411,15 +1406,16 @@ input NewEvent {
         title: String!
         description: String!
         banner_image: String!
-        startDate:   String!
-        endDate:     String!
+        startDate:   DateTime!
+        endDate:     DateTime!
         venue: Int!
         type: Int!
         user_id: ID!
         category: Int!
         status: Int!
         images: [NewImage]
-        vidoes: [NewVideo]        
+        videos: [NewVideo]   
+        tickets : [NewTicket]     
 }
 
 input UpdateEvent {
@@ -1427,14 +1423,14 @@ input UpdateEvent {
         title: String
         description: String
         banner_image: String
-        startDate:   String
-        endDate:     String
+        startDate:   DateTime
+        endDate:     DateTime
         venue: Int
         type: Int
         category: Int
         status: Int
         images: [NewImage]
-        vidoes: [NewVideo]        
+        videos: [NewVideo]        
 }
 
 input UpdateVenue {
@@ -1518,11 +1514,10 @@ type UpdateEventState{
 type Ticket {
         id: ID!
         name: String!
-        price: Int!
+        price: Float!
         event_id: Int!
-        quantity: Int!
-        status: Int!
         currency: String!
+        description: String
 }
 
 type EventFavorite{
@@ -1539,11 +1534,10 @@ type VenueFavorite{
 
 input NewTicket {
         name: String!
-        price: Int!
+        price: Float!
         event_id: Int!
-        quantity: Int!
-        status: Int!
         currency: String!
+        description: String 
 }
 
 input UpdateEventStatus{
@@ -2521,7 +2515,7 @@ func (ec *executionContext) _Event_startDate(ctx context.Context, field graphql.
 	}
 	res := resTmp.(string)
 	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
+	return ec.marshalNDateTime2string(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Event_endDate(ctx context.Context, field graphql.CollectedField, obj *Event) (ret graphql.Marshaler) {
@@ -2556,7 +2550,7 @@ func (ec *executionContext) _Event_endDate(ctx context.Context, field graphql.Co
 	}
 	res := resTmp.(string)
 	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
+	return ec.marshalNDateTime2string(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Event_venue(ctx context.Context, field graphql.CollectedField, obj *Event) (ret graphql.Marshaler) {
@@ -2766,7 +2760,7 @@ func (ec *executionContext) _Event_hostID(ctx context.Context, field graphql.Col
 	return ec.marshalNInt2int(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Event_ticket(ctx context.Context, field graphql.CollectedField, obj *Event) (ret graphql.Marshaler) {
+func (ec *executionContext) _Event_tickets(ctx context.Context, field graphql.CollectedField, obj *Event) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -2784,7 +2778,7 @@ func (ec *executionContext) _Event_ticket(ctx context.Context, field graphql.Col
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Ticket, nil
+		return obj.Tickets, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -3403,14 +3397,11 @@ func (ec *executionContext) _Image_name(ctx context.Context, field graphql.Colle
 		return graphql.Null
 	}
 	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
 		return graphql.Null
 	}
-	res := resTmp.(string)
+	res := resTmp.(*string)
 	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Image_url(ctx context.Context, field graphql.CollectedField, obj *Image) (ret graphql.Marshaler) {
@@ -3438,11 +3429,14 @@ func (ec *executionContext) _Image_url(ctx context.Context, field graphql.Collec
 		return graphql.Null
 	}
 	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
 		return graphql.Null
 	}
-	res := resTmp.(*string)
+	res := resTmp.(string)
 	fc.Result = res
-	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _LoginResponse_token(ctx context.Context, field graphql.CollectedField, obj *LoginResponse) (ret graphql.Marshaler) {
@@ -4915,9 +4909,9 @@ func (ec *executionContext) _Ticket_price(ctx context.Context, field graphql.Col
 		}
 		return graphql.Null
 	}
-	res := resTmp.(int)
+	res := resTmp.(float64)
 	fc.Result = res
-	return ec.marshalNInt2int(ctx, field.Selections, res)
+	return ec.marshalNFloat2float64(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Ticket_event_id(ctx context.Context, field graphql.CollectedField, obj *Ticket) (ret graphql.Marshaler) {
@@ -4939,76 +4933,6 @@ func (ec *executionContext) _Ticket_event_id(ctx context.Context, field graphql.
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.EventID, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(int)
-	fc.Result = res
-	return ec.marshalNInt2int(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _Ticket_quantity(ctx context.Context, field graphql.CollectedField, obj *Ticket) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "Ticket",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   false,
-		IsResolver: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Quantity, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(int)
-	fc.Result = res
-	return ec.marshalNInt2int(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _Ticket_status(ctx context.Context, field graphql.CollectedField, obj *Ticket) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "Ticket",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   false,
-		IsResolver: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Status, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -5058,6 +4982,38 @@ func (ec *executionContext) _Ticket_currency(ctx context.Context, field graphql.
 	res := resTmp.(string)
 	fc.Result = res
 	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Ticket_description(ctx context.Context, field graphql.CollectedField, obj *Ticket) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Ticket",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Description, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _UpdateEventState_event_id(ctx context.Context, field graphql.CollectedField, obj *UpdateEventState) (ret graphql.Marshaler) {
@@ -5902,7 +5858,7 @@ func (ec *executionContext) _Venue_Latitude(ctx context.Context, field graphql.C
 	return ec.marshalOFloat2ᚖfloat64(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Venue_url(ctx context.Context, field graphql.CollectedField, obj *Venue) (ret graphql.Marshaler) {
+func (ec *executionContext) _Venue_banner_image(ctx context.Context, field graphql.CollectedField, obj *Venue) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -5920,7 +5876,7 @@ func (ec *executionContext) _Venue_url(ctx context.Context, field graphql.Collec
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.URL, nil
+		return obj.BannerImage, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -5934,7 +5890,7 @@ func (ec *executionContext) _Venue_url(ctx context.Context, field graphql.Collec
 	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Venue_virtual(ctx context.Context, field graphql.CollectedField, obj *Venue) (ret graphql.Marshaler) {
+func (ec *executionContext) _Venue_venue_owner(ctx context.Context, field graphql.CollectedField, obj *Venue) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -5952,7 +5908,7 @@ func (ec *executionContext) _Venue_virtual(ctx context.Context, field graphql.Co
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Virtual, nil
+		return obj.VenueOwner, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -5964,9 +5920,9 @@ func (ec *executionContext) _Venue_virtual(ctx context.Context, field graphql.Co
 		}
 		return graphql.Null
 	}
-	res := resTmp.(bool)
+	res := resTmp.(int)
 	fc.Result = res
-	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
+	return ec.marshalNInt2int(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Venue_rating(ctx context.Context, field graphql.CollectedField, obj *Venue) (ret graphql.Marshaler) {
@@ -6236,14 +6192,11 @@ func (ec *executionContext) _Video_name(ctx context.Context, field graphql.Colle
 		return graphql.Null
 	}
 	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
 		return graphql.Null
 	}
-	res := resTmp.(string)
+	res := resTmp.(*string)
 	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Video_url(ctx context.Context, field graphql.CollectedField, obj *Video) (ret graphql.Marshaler) {
@@ -6271,11 +6224,14 @@ func (ec *executionContext) _Video_url(ctx context.Context, field graphql.Collec
 		return graphql.Null
 	}
 	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
 		return graphql.Null
 	}
-	res := resTmp.(*string)
+	res := resTmp.(string)
 	fc.Result = res
-	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) ___Directive_name(ctx context.Context, field graphql.CollectedField, obj *introspection.Directive) (ret graphql.Marshaler) {
@@ -7571,7 +7527,7 @@ func (ec *executionContext) unmarshalInputNewEvent(ctx context.Context, obj inte
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("startDate"))
-			it.StartDate, err = ec.unmarshalNString2string(ctx, v)
+			it.StartDate, err = ec.unmarshalNDateTime2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -7579,7 +7535,7 @@ func (ec *executionContext) unmarshalInputNewEvent(ctx context.Context, obj inte
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("endDate"))
-			it.EndDate, err = ec.unmarshalNString2string(ctx, v)
+			it.EndDate, err = ec.unmarshalNDateTime2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -7631,11 +7587,19 @@ func (ec *executionContext) unmarshalInputNewEvent(ctx context.Context, obj inte
 			if err != nil {
 				return it, err
 			}
-		case "vidoes":
+		case "videos":
 			var err error
 
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("vidoes"))
-			it.Vidoes, err = ec.unmarshalONewVideo2ᚕᚖgithubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgqlgenᚐNewVideo(ctx, v)
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("videos"))
+			it.Videos, err = ec.unmarshalONewVideo2ᚕᚖgithubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgqlgenᚐNewVideo(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "tickets":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("tickets"))
+			it.Tickets, err = ec.unmarshalONewTicket2ᚕᚖgithubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgqlgenᚐNewTicket(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -7711,7 +7675,7 @@ func (ec *executionContext) unmarshalInputNewImage(ctx context.Context, obj inte
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("name"))
-			it.Name, err = ec.unmarshalNString2string(ctx, v)
+			it.Name, err = ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -7719,7 +7683,7 @@ func (ec *executionContext) unmarshalInputNewImage(ctx context.Context, obj inte
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("url"))
-			it.URL, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			it.URL, err = ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -7775,7 +7739,7 @@ func (ec *executionContext) unmarshalInputNewTicket(ctx context.Context, obj int
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("price"))
-			it.Price, err = ec.unmarshalNInt2int(ctx, v)
+			it.Price, err = ec.unmarshalNFloat2float64(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -7787,27 +7751,19 @@ func (ec *executionContext) unmarshalInputNewTicket(ctx context.Context, obj int
 			if err != nil {
 				return it, err
 			}
-		case "quantity":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("quantity"))
-			it.Quantity, err = ec.unmarshalNInt2int(ctx, v)
-			if err != nil {
-				return it, err
-			}
-		case "status":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("status"))
-			it.Status, err = ec.unmarshalNInt2int(ctx, v)
-			if err != nil {
-				return it, err
-			}
 		case "currency":
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("currency"))
 			it.Currency, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "description":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("description"))
+			it.Description, err = ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -7947,19 +7903,19 @@ func (ec *executionContext) unmarshalInputNewVenue(ctx context.Context, obj inte
 			if err != nil {
 				return it, err
 			}
-		case "url":
+		case "venue_owner":
 			var err error
 
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("url"))
-			it.URL, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("venue_owner"))
+			it.VenueOwner, err = ec.unmarshalNInt2int(ctx, v)
 			if err != nil {
 				return it, err
 			}
-		case "virtual":
+		case "banner_image":
 			var err error
 
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("virtual"))
-			it.Virtual, err = ec.unmarshalNBoolean2bool(ctx, v)
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("banner_image"))
+			it.BannerImage, err = ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -8039,7 +7995,7 @@ func (ec *executionContext) unmarshalInputNewVideo(ctx context.Context, obj inte
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("name"))
-			it.Name, err = ec.unmarshalNString2string(ctx, v)
+			it.Name, err = ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -8047,7 +8003,7 @@ func (ec *executionContext) unmarshalInputNewVideo(ctx context.Context, obj inte
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("url"))
-			it.URL, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			it.URL, err = ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -8163,7 +8119,7 @@ func (ec *executionContext) unmarshalInputUpdateEvent(ctx context.Context, obj i
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("startDate"))
-			it.StartDate, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			it.StartDate, err = ec.unmarshalODateTime2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -8171,7 +8127,7 @@ func (ec *executionContext) unmarshalInputUpdateEvent(ctx context.Context, obj i
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("endDate"))
-			it.EndDate, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			it.EndDate, err = ec.unmarshalODateTime2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -8215,11 +8171,11 @@ func (ec *executionContext) unmarshalInputUpdateEvent(ctx context.Context, obj i
 			if err != nil {
 				return it, err
 			}
-		case "vidoes":
+		case "videos":
 			var err error
 
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("vidoes"))
-			it.Vidoes, err = ec.unmarshalONewVideo2ᚕᚖgithubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgqlgenᚐNewVideo(ctx, v)
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("videos"))
+			it.Videos, err = ec.unmarshalONewVideo2ᚕᚖgithubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgqlgenᚐNewVideo(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -8614,8 +8570,8 @@ func (ec *executionContext) _Event(ctx context.Context, sel ast.SelectionSet, ob
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
-		case "ticket":
-			out.Values[i] = ec._Event_ticket(ctx, field, obj)
+		case "tickets":
+			out.Values[i] = ec._Event_tickets(ctx, field, obj)
 		case "status":
 			out.Values[i] = ec._Event_status(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
@@ -8776,11 +8732,11 @@ func (ec *executionContext) _Image(ctx context.Context, sel ast.SelectionSet, ob
 			}
 		case "name":
 			out.Values[i] = ec._Image_name(ctx, field, obj)
+		case "url":
+			out.Values[i] = ec._Image_url(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
-		case "url":
-			out.Values[i] = ec._Image_url(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -9120,21 +9076,13 @@ func (ec *executionContext) _Ticket(ctx context.Context, sel ast.SelectionSet, o
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
-		case "quantity":
-			out.Values[i] = ec._Ticket_quantity(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
-		case "status":
-			out.Values[i] = ec._Ticket_status(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
 		case "currency":
 			out.Values[i] = ec._Ticket_currency(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
+		case "description":
+			out.Values[i] = ec._Ticket_description(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -9315,10 +9263,10 @@ func (ec *executionContext) _Venue(ctx context.Context, sel ast.SelectionSet, ob
 			out.Values[i] = ec._Venue_Longitude(ctx, field, obj)
 		case "Latitude":
 			out.Values[i] = ec._Venue_Latitude(ctx, field, obj)
-		case "url":
-			out.Values[i] = ec._Venue_url(ctx, field, obj)
-		case "virtual":
-			out.Values[i] = ec._Venue_virtual(ctx, field, obj)
+		case "banner_image":
+			out.Values[i] = ec._Venue_banner_image(ctx, field, obj)
+		case "venue_owner":
+			out.Values[i] = ec._Venue_venue_owner(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
@@ -9400,11 +9348,11 @@ func (ec *executionContext) _Video(ctx context.Context, sel ast.SelectionSet, ob
 			}
 		case "name":
 			out.Values[i] = ec._Video_name(ctx, field, obj)
+		case "url":
+			out.Values[i] = ec._Video_url(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
-		case "url":
-			out.Values[i] = ec._Video_url(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -9702,6 +9650,21 @@ func (ec *executionContext) marshalNCategory2ᚖgithubᚗcomᚋBigListRyRyᚋhar
 		return graphql.Null
 	}
 	return ec._Category(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalNDateTime2string(ctx context.Context, v interface{}) (string, error) {
+	res, err := graphql.UnmarshalString(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNDateTime2string(ctx context.Context, sel ast.SelectionSet, v string) graphql.Marshaler {
+	res := graphql.MarshalString(v)
+	if res == graphql.Null {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+	}
+	return res
 }
 
 func (ec *executionContext) marshalNEvent2githubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgqlgenᚐEvent(ctx context.Context, sel ast.SelectionSet, v Event) graphql.Marshaler {
@@ -10305,6 +10268,21 @@ func (ec *executionContext) marshalOCategory2ᚕgithubᚗcomᚋBigListRyRyᚋhar
 	return ret
 }
 
+func (ec *executionContext) unmarshalODateTime2ᚖstring(ctx context.Context, v interface{}) (*string, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := graphql.UnmarshalString(v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalODateTime2ᚖstring(ctx context.Context, sel ast.SelectionSet, v *string) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return graphql.MarshalString(*v)
+}
+
 func (ec *executionContext) marshalOEvent2ᚕgithubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgqlgenᚐEventᚄ(ctx context.Context, sel ast.SelectionSet, v []Event) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
@@ -10505,6 +10483,38 @@ func (ec *executionContext) unmarshalONewImage2ᚖgithubᚗcomᚋBigListRyRyᚋh
 		return nil, nil
 	}
 	res, err := ec.unmarshalInputNewImage(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalONewTicket2ᚕᚖgithubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgqlgenᚐNewTicket(ctx context.Context, v interface{}) ([]*NewTicket, error) {
+	if v == nil {
+		return nil, nil
+	}
+	var vSlice []interface{}
+	if v != nil {
+		if tmp1, ok := v.([]interface{}); ok {
+			vSlice = tmp1
+		} else {
+			vSlice = []interface{}{v}
+		}
+	}
+	var err error
+	res := make([]*NewTicket, len(vSlice))
+	for i := range vSlice {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
+		res[i], err = ec.unmarshalONewTicket2ᚖgithubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgqlgenᚐNewTicket(ctx, vSlice[i])
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
+}
+
+func (ec *executionContext) unmarshalONewTicket2ᚖgithubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgqlgenᚐNewTicket(ctx context.Context, v interface{}) (*NewTicket, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalInputNewTicket(ctx, v)
 	return &res, graphql.ErrorOnPath(ctx, err)
 }
 

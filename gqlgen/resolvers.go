@@ -31,7 +31,7 @@ func init() {
 	if err != nil {
 		log.Fatalln("cannot connect to database, ", err)
 	}
-
+	
 	store = db.NewStore(conn)
 	tokenMaker, err = token.NewJWTMaker(config.TokenSymmetricKey)
 	if err != nil {
@@ -45,22 +45,6 @@ type Resolver struct {
 }
 
 func (r *mutationResolver) CreateVenue(ctx context.Context, input NewVenue) (*Venue, error) {
-	if input.Virtual {
-		createVirtual := db.CreateVirtualVenueParams{
-			Name: input.Name,
-			Url: sql.NullString{
-				Valid:  true,
-				String: *input.URL,
-			},
-			Virtual: false,
-		}
-
-		venue, err := store.CreateVirtualVenue(ctx, createVirtual)
-		if err != nil {
-			return nil, err
-		}
-		return &Venue{Name: venue.Name, ID: venue.ID}, nil
-	}
 
 	var result Venue
 	var createVenueReq db.CreateVenueParams
@@ -102,6 +86,13 @@ func (r *mutationResolver) CreateVenue(ctx context.Context, input NewVenue) (*Ve
 		}
 	}
 
+	if input.BannerImage != nil {
+		createVenueReq.BannerImage = sql.NullString{
+			String: *input.BannerImage,
+			Valid:  true,
+		}
+	}
+
 	if input.Longitude != nil && input.Latitude != nil {
 		createVenueReq.Longitude = sql.NullFloat64{
 			Float64: *input.Longitude,
@@ -113,6 +104,7 @@ func (r *mutationResolver) CreateVenue(ctx context.Context, input NewVenue) (*Ve
 		}
 	}
 	createVenueReq.Status = int32(input.Status)
+	createVenueReq.VenueOwner = int32(input.VenueOwner)
 
 	venue, err := store.CreateVenue(ctx, createVenueReq)
 	if err != nil {
@@ -121,6 +113,7 @@ func (r *mutationResolver) CreateVenue(ctx context.Context, input NewVenue) (*Ve
 
 	result.ID = venue.ID
 	result.Name = venue.Name
+	result.VenueOwner = int(venue.VenueOwner)
 
 	if venue.PostalCode.Valid {
 		result.PostalCode = &venue.PostalCode.String
@@ -138,6 +131,9 @@ func (r *mutationResolver) CreateVenue(ctx context.Context, input NewVenue) (*Ve
 		result.Address = &venue.Address.String
 	}
 
+	if venue.BannerImage.Valid {
+		result.Address = &venue.BannerImage.String
+	}
 	if venue.Longitude.Valid {
 		result.Longitude = &venue.Longitude.Float64
 	}
@@ -277,9 +273,9 @@ func (r *mutationResolver) CreateEvent(ctx context.Context, input NewEvent) (*Ev
 
 				arg := db.CreateImageParams{
 					Name: sql.NullString{
-						String: i.Name,
+						String: *i.Name,
 						Valid:  true},
-					Url: *i.URL,
+					Url: i.URL,
 				}
 
 				image, err := store.CreateImage(ctx, arg)
@@ -301,8 +297,8 @@ func (r *mutationResolver) CreateEvent(ctx context.Context, input NewEvent) (*Ev
 				images = append(images, &Image{
 					ID:      image.ID,
 					EventID: event.ID,
-					Name:    image.Name.String,
-					URL:     &image.Url,
+					Name:    &image.Name.String,
+					URL:     image.Url,
 				})
 
 			}
@@ -310,14 +306,14 @@ func (r *mutationResolver) CreateEvent(ctx context.Context, input NewEvent) (*Ev
 
 		//create vidoes and link to Event
 		var videos []*Video
-		if input.Vidoes != nil {
-			for _, i := range input.Vidoes {
+		if input.Videos != nil {
+			for _, i := range input.Videos {
 
 				arg := db.CreateVideoParams{
 					Name: sql.NullString{
-						String: i.Name,
+						String: *i.Name,
 						Valid:  true},
-					Url: *i.URL,
+					Url: i.URL,
 				}
 
 				video, err := store.CreateVideo(ctx, arg)
@@ -339,10 +335,43 @@ func (r *mutationResolver) CreateEvent(ctx context.Context, input NewEvent) (*Ev
 				videos = append(videos, &Video{
 					ID:      video.ID,
 					EventID: event.ID,
-					Name:    video.Name.String,
-					URL:     &video.Url,
+					Name:    &video.Name.String,
+					URL:     video.Url,
 				})
 			}
+		}
+
+		//create tickets and link to event
+		var tickets []*Ticket
+		if input.Tickets != nil {
+			for _, i := range input.Tickets {
+
+				arg := db.CreateTicketParams{
+					Name:     i.Name,
+					Currency: i.Currency,
+					EventID:  event.ID,
+					Price:    float64(i.Price),
+					Description: sql.NullString{
+						Valid:  true,
+						String: *i.Description,
+					},
+				}
+
+				ticket, err := store.CreateTicket(ctx, arg)
+				if err != nil {
+					return err
+				}
+
+				tickets = append(tickets, &Ticket{
+					ID:          ticket.ID,
+					EventID:     int(event.ID),
+					Name:        ticket.Name,
+					Currency:    i.Currency,
+					Price:       ticket.Price,
+					Description: &ticket.Description.String,
+				})
+			}
+
 		}
 
 		result = &Event{
@@ -357,6 +386,7 @@ func (r *mutationResolver) CreateEvent(ctx context.Context, input NewEvent) (*Ev
 			Images:      images,
 			Videos:      videos,
 			Status:      int(event.Status),
+			Tickets:     tickets,
 		}
 		return nil
 	})
@@ -451,9 +481,9 @@ func (r *mutationResolver) UpdateEvent(ctx context.Context, input UpdateEvent) (
 
 				arg := db.CreateImageParams{
 					Name: sql.NullString{
-						String: i.Name,
+						String: *i.Name,
 						Valid:  true},
-					Url: *i.URL,
+					Url: i.URL,
 				}
 
 				image, err := store.CreateImage(ctx, arg)
@@ -475,23 +505,23 @@ func (r *mutationResolver) UpdateEvent(ctx context.Context, input UpdateEvent) (
 				images = append(images, &Image{
 					ID:      image.ID,
 					EventID: event.ID,
-					Name:    image.Name.String,
-					URL:     &image.Url,
+					Name:    &image.Name.String,
+					URL:     image.Url,
 				})
 
 			}
 		}
 
-		//create vidoes and link to Event
+		//create videos and link to Event
 		var videos []*Video
-		if input.Vidoes != nil {
-			for _, i := range input.Vidoes {
+		if input.Videos != nil {
+			for _, i := range input.Videos {
 
 				arg := db.CreateVideoParams{
 					Name: sql.NullString{
-						String: i.Name,
+						String: *i.Name,
 						Valid:  true},
-					Url: *i.URL,
+					Url: i.URL,
 				}
 
 				video, err := store.CreateVideo(ctx, arg)
@@ -513,8 +543,8 @@ func (r *mutationResolver) UpdateEvent(ctx context.Context, input UpdateEvent) (
 				videos = append(videos, &Video{
 					ID:      video.ID,
 					EventID: event.ID,
-					Name:    video.Name.String,
-					URL:     &video.Url,
+					Name:    &video.Name.String,
+					URL:     video.Url,
 				})
 			}
 		}
@@ -722,8 +752,8 @@ func (r *queryResolver) GetEvent(ctx context.Context, input int32) (*Event, erro
 		images = append(images, &Image{
 			ID:      i.ID,
 			EventID: i.EventID,
-			Name:    i.Name.String,
-			URL:     &i.Url,
+			Name:    &i.Name.String,
+			URL:     i.Url,
 		})
 	}
 
@@ -736,8 +766,8 @@ func (r *queryResolver) GetEvent(ctx context.Context, input int32) (*Event, erro
 		videos = append(videos, &Video{
 			ID:      i.ID,
 			EventID: i.EventID,
-			Name:    i.Name.String,
-			URL:     &i.Url,
+			Name:    &i.Name.String,
+			URL:     i.Url,
 		})
 	}
 
@@ -751,10 +781,8 @@ func (r *queryResolver) GetEvent(ctx context.Context, input int32) (*Event, erro
 		tickets = append(tickets, &Ticket{
 			ID:       v.ID,
 			Name:     v.Name,
-			Price:    int(v.Price),
+			Price:    v.Price,
 			EventID:  int(v.EventID),
-			Quantity: int(v.Quantity),
-			Status:   int(v.Status),
 			Currency: v.Currency,
 		})
 	}
@@ -774,7 +802,7 @@ func (r *queryResolver) GetEvent(ctx context.Context, input int32) (*Event, erro
 		Status:      int(event.Status),
 		Images:      images,
 		Videos:      videos,
-		Ticket:      tickets,
+		Tickets:     tickets,
 	}, nil
 }
 
@@ -818,8 +846,8 @@ func (r *queryResolver) GetEvents(ctx context.Context, input GetEvent) ([]Event,
 			images = append(images, &Image{
 				ID:      i.ID,
 				EventID: i.EventID,
-				Name:    i.Name.String,
-				URL:     &i.Url,
+				Name:    &i.Name.String,
+				URL:     i.Url,
 			})
 		}
 
@@ -832,8 +860,8 @@ func (r *queryResolver) GetEvents(ctx context.Context, input GetEvent) ([]Event,
 			videos = append(videos, &Video{
 				ID:      i.ID,
 				EventID: i.EventID,
-				Name:    i.Name.String,
-				URL:     &i.Url,
+				Name:    &i.Name.String,
+				URL:     i.Url,
 			})
 		}
 
@@ -896,8 +924,8 @@ func (r *queryResolver) GetEventsByLocation(ctx context.Context, input GetEventB
 			Type:        int(event.Type),
 			UserID:      event.UserID,
 			Venue:       int(event.Venue),
-			BannerImage: event.BannerImage,
-			Sponsors:    eventSponsors,
+			//BannerImage: *event.BannerImage,
+			Sponsors: eventSponsors,
 		})
 	}
 
@@ -929,11 +957,13 @@ func (r *queryResolver) GetUsers(ctx context.Context) ([]User, error) {
 func (r *mutationResolver) CreateTicket(ctx context.Context, input NewTicket) (*Ticket, error) {
 	arg := db.CreateTicketParams{
 		EventID:  int32(input.EventID),
-		Quantity: int32(input.Quantity),
 		Price:    float64(input.Price),
-		Status:   int32(input.Status),
 		Name:     input.Name,
 		Currency: input.Currency,
+		Description: sql.NullString{
+			String: *input.Description,
+			Valid:  true,
+		},
 	}
 
 	ticket, err := store.CreateTicket(ctx, arg)
@@ -942,13 +972,12 @@ func (r *mutationResolver) CreateTicket(ctx context.Context, input NewTicket) (*
 	}
 
 	return &Ticket{
-		ID:       ticket.ID,
-		Name:     ticket.Name,
-		Price:    int(ticket.Price),
-		EventID:  int(ticket.EventID),
-		Quantity: int(ticket.Quantity),
-		Status:   int(ticket.Status),
-		Currency: ticket.Currency,
+		ID:          ticket.ID,
+		Name:        ticket.Name,
+		Price:       ticket.Price,
+		EventID:     int(ticket.EventID),
+		Currency:    ticket.Currency,
+		Description: &ticket.Description.String,
 	}, nil
 }
 
@@ -1207,8 +1236,8 @@ func GetEventHelper(ctx context.Context, input int32) (*Event, error) {
 		images = append(images, &Image{
 			ID:      i.ID,
 			EventID: i.EventID,
-			Name:    i.Name.String,
-			URL:     &i.Url,
+			Name:    &i.Name.String,
+			URL:     i.Url,
 		})
 	}
 
@@ -1221,8 +1250,8 @@ func GetEventHelper(ctx context.Context, input int32) (*Event, error) {
 		videos = append(videos, &Video{
 			ID:      i.ID,
 			EventID: i.EventID,
-			Name:    i.Name.String,
-			URL:     &i.Url,
+			Name:    &i.Name.String,
+			URL:     i.Url,
 		})
 	}
 
@@ -1236,10 +1265,8 @@ func GetEventHelper(ctx context.Context, input int32) (*Event, error) {
 		tickets = append(tickets, &Ticket{
 			ID:       v.ID,
 			Name:     v.Name,
-			Price:    int(v.Price),
+			Price:    v.Price,
 			EventID:  int(v.EventID),
-			Quantity: int(v.Quantity),
-			Status:   int(v.Status),
 			Currency: v.Currency,
 		})
 	}
@@ -1259,7 +1286,7 @@ func GetEventHelper(ctx context.Context, input int32) (*Event, error) {
 		Status:      int(event.Status),
 		Images:      images,
 		Videos:      videos,
-		Ticket:      tickets,
+		Tickets:     tickets,
 	}, nil
 }
 
@@ -1327,11 +1354,6 @@ func (r *mutationResolver) UpdateVenue(ctx context.Context, input UpdateVenue) (
 		arg.CountryToUpdate = true
 	}
 
-	if input.URL != nil {
-		arg.Url = *input.URL
-		arg.UrlToUpdate = true
-	}
-
 	if input.Longitude != nil {
 		arg.Longitude = *input.Longitude
 		arg.LongitudeToUpdate = true
@@ -1352,6 +1374,7 @@ func (r *mutationResolver) UpdateVenue(ctx context.Context, input UpdateVenue) (
 		arg.StatusToUpdate = true
 	}
 
+
 	venue, err := store.UpdateVenue(ctx, arg)
 	if err != nil {
 		return nil, err
@@ -1364,7 +1387,6 @@ func (r *mutationResolver) UpdateVenue(ctx context.Context, input UpdateVenue) (
 		City:        &venue.City.String,
 		Province:    &venue.Province.String,
 		CountryCode: &venue.CountryCode.String,
-		URL:         &venue.Url.String,
 		Longitude:   &venue.Longitude.Float64,
 		Latitude:    &venue.Latitude.Float64,
 	}, nil

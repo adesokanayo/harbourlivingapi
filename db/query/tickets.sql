@@ -2,12 +2,11 @@
 INSERT INTO tickets (
   name,
   event_id,
-  quantity, 
   price, 
-  status,
-  currency
+  currency,
+  description
 ) VALUES
-    ($1, $2, $3, $4, $5, $6) RETURNING *;
+    ($1, $2, $3, $4, $5) RETURNING *;
 
 -- name: GetTicket :one
 SELECT * FROM tickets
