@@ -137,7 +137,7 @@ const getEvents = `-- name: GetEvents :many
 SELECT e.id, title, description, e.banner_image, start_date, end_date, venue, type, user_id, category, ticket_id, recurring, e.status, e.created_at, v.id, name, address, postal_code, city, province, country_code, venue_owner, v.banner_image, rating, longitude, latitude, v.status, v.created_at FROM events e
 inner join venues v on  e.venue = v.id
 WHERE category = $1 AND 
-e.status = $2
+e.status = $2 AND e.end_date >= CURRENT_DATE
 ORDER BY e.id desc
 LIMIT $3
 OFFSET $4
