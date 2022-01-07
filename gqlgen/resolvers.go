@@ -1404,6 +1404,7 @@ func (r *mutationResolver) CreatePlan(ctx context.Context, input NewPlan) (*Plan
 		Name:        input.Name,
 		Description: input.Description,
 		Price:       input.Price,
+		NoOfDays:    int32(input.NoOfDays),
 	}
 
 	plan, err := store.CreatePlan(ctx, arg)
@@ -1415,6 +1416,7 @@ func (r *mutationResolver) CreatePlan(ctx context.Context, input NewPlan) (*Plan
 		Name:        plan.Name,
 		Description: plan.Description,
 		Price:       plan.Price,
+		NoOfDays:    int(plan.NoOfDays),
 	}, nil
 }
 
@@ -1461,6 +1463,10 @@ func (r *mutationResolver) UpdatePlan(ctx context.Context, input UpdatePlan) (*P
 		arg.Price = *input.Price
 		arg.PriceToUpdate = true
 	}
+	if input.NoOfDays != nil {
+		arg.NoOfDays = int32(*input.NoOfDays)
+		arg.NoOfDaysToUpdate = true
+	}
 
 	plan, err := store.UpdatePlan(ctx, arg)
 	if err != nil {
@@ -1471,6 +1477,7 @@ func (r *mutationResolver) UpdatePlan(ctx context.Context, input UpdatePlan) (*P
 		Name:        plan.Name,
 		Description: plan.Description,
 		Price:       plan.Price,
+		NoOfDays:    int(plan.NoOfDays),
 	}, nil
 }
 

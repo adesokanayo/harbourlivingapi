@@ -136,6 +136,7 @@ type NewPlan struct {
 	Name        string  `json:"name"`
 	Description string  `json:"description"`
 	Price       float64 `json:"price"`
+	NoOfDays    int     `json:"no_of_days"`
 }
 
 type NewPromotion struct {
@@ -200,6 +201,7 @@ type Plan struct {
 	Name        string  `json:"name"`
 	Description string  `json:"description"`
 	Price       float64 `json:"price"`
+	NoOfDays    int     `json:"no_of_days"`
 }
 
 type Promotion struct {
@@ -276,6 +278,7 @@ type UpdatePlan struct {
 	Name        *string  `json:"name"`
 	Description *string  `json:"description"`
 	Price       *float64 `json:"price"`
+	NoOfDays    *int     `json:"no_of_days"`
 }
 
 type UpdatePromotion struct {

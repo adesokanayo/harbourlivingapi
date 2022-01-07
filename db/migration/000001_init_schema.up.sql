@@ -203,6 +203,7 @@ CREATE TABLE "plans" (
                                   "name" varchar NOT NULL,
                                   "description" varchar NOT NULL,
                                   "price" float NOT NULL,
+                                  "no_of_days" int NOT NULL,
                                   "created_at" timestamp NOT NULL DEFAULT (now())
 );
 

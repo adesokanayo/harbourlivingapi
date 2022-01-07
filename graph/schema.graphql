@@ -276,6 +276,7 @@ type Plan {
         name: String!
         description: String!
         price: Float!
+        no_of_days: Int!
 }
 
 type Promotion {
@@ -334,6 +335,7 @@ input NewPlan {
         name: String!
         description: String!
         price: Float!
+        no_of_days: Int!
 }
 
 input NewPromotion {
@@ -349,6 +351,7 @@ input UpdatePlan {
         name: String
         description: String
         price: Float
+        no_of_days: Int
 }
 
 input UpdatePromotion {

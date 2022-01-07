@@ -115,6 +115,7 @@ type Plan struct {
 	Name        string    `json:"name"`
 	Description string    `json:"description"`
 	Price       float64   `json:"price"`
+	NoOfDays    int32     `json:"no_of_days"`
 	CreatedAt   time.Time `json:"created_at"`
 }
 

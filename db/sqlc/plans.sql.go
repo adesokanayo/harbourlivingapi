@@ -11,25 +11,33 @@ const createPlan = `-- name: CreatePlan :one
 INSERT INTO plans (
 name,
 description,
-price
+price,
+no_of_days
 ) VALUES
-($1, $2, $3) RETURNING id, name, description, price, created_at
+($1, $2, $3, $4) RETURNING id, name, description, price, no_of_days, created_at
 `
 
 type CreatePlanParams struct {
 	Name        string  `json:"name"`
 	Description string  `json:"description"`
 	Price       float64 `json:"price"`
+	NoOfDays    int32   `json:"no_of_days"`
 }
 
 func (q *Queries) CreatePlan(ctx context.Context, arg CreatePlanParams) (Plan, error) {
-	row := q.db.QueryRowContext(ctx, createPlan, arg.Name, arg.Description, arg.Price)
+	row := q.db.QueryRowContext(ctx, createPlan,
+		arg.Name,
+		arg.Description,
+		arg.Price,
+		arg.NoOfDays,
+	)
 	var i Plan
 	err := row.Scan(
 		&i.ID,
 		&i.Name,
 		&i.Description,
 		&i.Price,
+		&i.NoOfDays,
 		&i.CreatedAt,
 	)
 	return i, err
@@ -46,7 +54,7 @@ func (q *Queries) DeletePlan(ctx context.Context, id int32) error {
 }
 
 const getPlan = `-- name: GetPlan :one
-SELECT id, name, description, price, created_at from plans
+SELECT id, name, description, price, no_of_days, created_at from plans
 WHERE id = $1
 `
 
@@ -58,6 +66,7 @@ func (q *Queries) GetPlan(ctx context.Context, id int32) (Plan, error) {
 		&i.Name,
 		&i.Description,
 		&i.Price,
+		&i.NoOfDays,
 		&i.CreatedAt,
 	)
 	return i, err
@@ -70,8 +79,10 @@ UPDATE plans SET
  description = CASE WHEN $3::boolean
         THEN $4::text ELSE description END,
  price = CASE WHEN $5::boolean
-        THEN $6::float ELSE price END
-WHERE id = $7 RETURNING id, name, description, price, created_at
+        THEN $6::float ELSE price END,
+ no_of_days = CASE WHEN $7::boolean
+        THEN $8::int ELSE no_of_days END
+WHERE id = $9 RETURNING id, name, description, price, no_of_days, created_at
 `
 
 type UpdatePlanParams struct {
@@ -81,6 +92,8 @@ type UpdatePlanParams struct {
 	Description         string  `json:"description"`
 	PriceToUpdate       bool    `json:"price_to_update"`
 	Price               float64 `json:"price"`
+	NoOfDaysToUpdate    bool    `json:"no_of_days_to_update"`
+	NoOfDays            int32   `json:"no_of_days"`
 	ID                  int32   `json:"id"`
 }
 
@@ -92,6 +105,8 @@ func (q *Queries) UpdatePlan(ctx context.Context, arg UpdatePlanParams) (Plan, e
 		arg.Description,
 		arg.PriceToUpdate,
 		arg.Price,
+		arg.NoOfDaysToUpdate,
+		arg.NoOfDays,
 		arg.ID,
 	)
 	var i Plan
@@ -100,6 +115,7 @@ func (q *Queries) UpdatePlan(ctx context.Context, arg UpdatePlanParams) (Plan, e
 		&i.Name,
 		&i.Description,
 		&i.Price,
+		&i.NoOfDays,
 		&i.CreatedAt,
 	)
 	return i, err

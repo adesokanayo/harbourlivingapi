@@ -139,6 +139,7 @@ type ComplexityRoot struct {
 		Description func(childComplexity int) int
 		ID          func(childComplexity int) int
 		Name        func(childComplexity int) int
+		NoOfDays    func(childComplexity int) int
 		Price       func(childComplexity int) int
 	}
 
@@ -864,6 +865,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Plan.Name(childComplexity), true
+
+	case "Plan.no_of_days":
+		if e.complexity.Plan.NoOfDays == nil {
+			break
+		}
+
+		return e.complexity.Plan.NoOfDays(childComplexity), true
 
 	case "Plan.price":
 		if e.complexity.Plan.Price == nil {
@@ -1671,6 +1679,7 @@ type Plan {
         name: String!
         description: String!
         price: Float!
+        no_of_days: Int!
 }
 
 type Promotion {
@@ -1729,6 +1738,7 @@ input NewPlan {
         name: String!
         description: String!
         price: Float!
+        no_of_days: Int!
 }
 
 input NewPromotion {
@@ -1744,6 +1754,7 @@ input UpdatePlan {
         name: String
         description: String
         price: Float
+        no_of_days: Int
 }
 
 input UpdatePromotion {
@@ -4783,6 +4794,41 @@ func (ec *executionContext) _Plan_price(ctx context.Context, field graphql.Colle
 	res := resTmp.(float64)
 	fc.Result = res
 	return ec.marshalNFloat2float64(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Plan_no_of_days(ctx context.Context, field graphql.CollectedField, obj *Plan) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Plan",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.NoOfDays, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Promotion_id(ctx context.Context, field graphql.CollectedField, obj *Promotion) (ret graphql.Marshaler) {
@@ -8447,6 +8493,14 @@ func (ec *executionContext) unmarshalInputNewPlan(ctx context.Context, obj inter
 			if err != nil {
 				return it, err
 			}
+		case "no_of_days":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("no_of_days"))
+			it.NoOfDays, err = ec.unmarshalNInt2int(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		}
 	}
 
@@ -9104,6 +9158,14 @@ func (ec *executionContext) unmarshalInputUpdatePlan(ctx context.Context, obj in
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("price"))
 			it.Price, err = ec.unmarshalOFloat2ᚖfloat64(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "no_of_days":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("no_of_days"))
+			it.NoOfDays, err = ec.unmarshalOInt2ᚖint(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -9837,6 +9899,11 @@ func (ec *executionContext) _Plan(ctx context.Context, sel ast.SelectionSet, obj
 			}
 		case "price":
 			out.Values[i] = ec._Plan_price(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "no_of_days":
+			out.Values[i] = ec._Plan_no_of_days(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
