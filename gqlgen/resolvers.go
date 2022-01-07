@@ -1511,6 +1511,145 @@ func (r *mutationResolver) UpdatePromotion(ctx context.Context, input UpdateProm
 	}, nil
 }
 
+func (r *mutationResolver) CreateNews(ctx context.Context, input NewNews) (*News, error) {
+
+	d1, _ := GetDateHelper(input.PublishDate)
+
+	arg := db.CreateNewsParams{
+		Title:       input.Title,
+		Description: input.Description,
+		FeatureImage: sql.NullString{
+			String: input.FeatureImage,
+			Valid:  true,
+		},
+		Body:        input.Body,
+		PublishDate: *d1,
+		UserID:      input.UserID,
+		Tags: sql.NullString{
+			String: *input.Tags,
+			Valid:  true,
+		},
+	}
+
+	news, err := store.CreateNews(ctx, arg)
+	if err != nil {
+		return nil, err
+	}
+	return &News{
+		ID:           news.ID,
+		Title:        news.Title,
+		Description:  news.Description,
+		FeatureImage: news.FeatureImage.String,
+		Body:         news.Body,
+		PublishDate:  news.PublishDate.String(),
+		Tags:         &news.Tags.String,
+	}, nil
+}
+
+func (r *mutationResolver) UpdateNews(ctx context.Context, input UpdateNews) (*News, error) {
+	arg := db.UpdateNewsParams{
+		ID: input.ID,
+	}
+	d1, _ := GetDateHelper(*input.PublishDate)
+
+	if input.Title != nil {
+		arg.TitleIDToUpdate = true
+		arg.Title = *input.Title
+	}
+	if input.Description != nil {
+		arg.Description = *input.Description
+		arg.DescriptionToUpdate = true
+	}
+	if input.FeatureImage != nil {
+		arg.FeatureImage = *input.FeatureImage
+		arg.FeatureImageToUpdate = true
+	}
+	if input.Body != nil {
+		arg.Body = *input.Body
+		arg.BodyToUpdate = true
+	}
+
+	if input.PublishDate != nil {
+		arg.PublishDate = *d1
+		arg.PublishDateToUpdate = true
+	}
+
+	if input.Tags != nil {
+		arg.Tags = *input.Tags
+		arg.TagsDateToUpdate = true
+	}
+
+	news, err := store.UpdateNews(ctx, arg)
+	if err != nil {
+		return nil, err
+	}
+	return &News{
+		ID:           news.ID,
+		Title:        news.Title,
+		Description:  news.Description,
+		FeatureImage: news.FeatureImage.String,
+		Body:         news.Body,
+		PublishDate:  news.PublishDate.String(),
+		Tags:         &news.Tags.String,
+	}, nil
+}
+
+func (r *mutationResolver) DeleteNews(ctx context.Context, input int32) (bool, error) {
+
+	_, err := store.GetNews(ctx, input)
+	if err != nil {
+		return false, err
+	}
+
+	err = store.DeleteNews(ctx, input)
+	if err != nil {
+		return false, err
+	}
+	return true, nil
+}
+
+func (r *mutationResolver) DeletePlan(ctx context.Context, input int32) (bool, error) {
+
+	_, err := store.GetNews(ctx, input)
+	if err != nil {
+		return false, err
+	}
+
+	err = store.DeleteNews(ctx, input)
+	if err != nil {
+		return false, err
+	}
+	return true, nil
+}
+
+func (r *mutationResolver) DeletePromotion(ctx context.Context, input int32) (bool, error) {
+
+	_, err := store.GetPromotion(ctx, input)
+	if err != nil {
+		return false, err
+	}
+
+	err = store.DeletePromotion(ctx, input)
+	if err != nil {
+		return false, err
+	}
+	return true, nil
+}
+
+func (r *mutationResolver) DeleteTicket(ctx context.Context, input int32) (bool, error) {
+
+	_, err := store.GetTicket(ctx, input)
+	if err != nil {
+		return false, err
+	}
+
+	err = store.DeleteTicket(ctx, input)
+	if err != nil {
+		return false, err
+	}
+	return true, nil
+}
+
 // Mutation returns MutationResolver implementation.
 func (r *Resolver) Mutation() MutationResolver { return &mutationResolver{r} }
 

@@ -116,6 +116,7 @@ type ComplexityRoot struct {
 		CreateCategory        func(childComplexity int, input NewCategory) int
 		CreateEvent           func(childComplexity int, input NewEvent) int
 		CreateEventFavorite   func(childComplexity int, input NewEventFavorite) int
+		CreateNews            func(childComplexity int, input NewNews) int
 		CreatePlan            func(childComplexity int, input NewPlan) int
 		CreatePromotion       func(childComplexity int, input NewPromotion) int
 		CreateSponsorForEvent func(childComplexity int, input NewSponsor) int
@@ -124,6 +125,10 @@ type ComplexityRoot struct {
 		CreateVenue           func(childComplexity int, input NewVenue) int
 		CreateVenueFavorite   func(childComplexity int, input NewVenueFavorite) int
 		DeleteEvent           func(childComplexity int, input int32) int
+		DeleteNews            func(childComplexity int, input int32) int
+		DeletePlan            func(childComplexity int, input int32) int
+		DeletePromotion       func(childComplexity int, input int32) int
+		DeleteTicket          func(childComplexity int, input int32) int
 		Login                 func(childComplexity int, input Login) int
 		RefreshToken          func(childComplexity int, input RefreshTokenInput) int
 		UpdateArtist          func(childComplexity int, input UpdateArtist) int
@@ -133,6 +138,17 @@ type ComplexityRoot struct {
 		UpdatePlan            func(childComplexity int, input UpdatePlan) int
 		UpdatePromotion       func(childComplexity int, input UpdatePromotion) int
 		UpdateSponsor         func(childComplexity int, input UpdateSponsor) int
+	}
+
+	News struct {
+		Body         func(childComplexity int) int
+		Description  func(childComplexity int) int
+		FeatureImage func(childComplexity int) int
+		ID           func(childComplexity int) int
+		PublishDate  func(childComplexity int) int
+		Tags         func(childComplexity int) int
+		Title        func(childComplexity int) int
+		UserID       func(childComplexity int) int
 	}
 
 	Plan struct {
@@ -246,6 +262,7 @@ type MutationResolver interface {
 	CreateVenueFavorite(ctx context.Context, input NewVenueFavorite) (*VenueFavorite, error)
 	CreatePlan(ctx context.Context, input NewPlan) (*Plan, error)
 	CreatePromotion(ctx context.Context, input NewPromotion) (*Promotion, error)
+	CreateNews(ctx context.Context, input NewNews) (*News, error)
 	UpdateEvent(ctx context.Context, input UpdateEvent) (*Event, error)
 	UpdateEventStatus(ctx context.Context, input UpdateEventStatus) (*UpdateEventState, error)
 	UpdateArtist(ctx context.Context, input UpdateArtist) (*Artist, error)
@@ -254,6 +271,10 @@ type MutationResolver interface {
 	UpdatePlan(ctx context.Context, input UpdatePlan) (*Plan, error)
 	UpdatePromotion(ctx context.Context, input UpdatePromotion) (*Promotion, error)
 	DeleteEvent(ctx context.Context, input int32) (bool, error)
+	DeleteNews(ctx context.Context, input int32) (bool, error)
+	DeletePlan(ctx context.Context, input int32) (bool, error)
+	DeletePromotion(ctx context.Context, input int32) (bool, error)
+	DeleteTicket(ctx context.Context, input int32) (bool, error)
 	Login(ctx context.Context, input Login) (*LoginResponse, error)
 	RefreshToken(ctx context.Context, input RefreshTokenInput) (*string, error)
 }
@@ -641,6 +662,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.CreateEventFavorite(childComplexity, args["input"].(NewEventFavorite)), true
 
+	case "Mutation.createNews":
+		if e.complexity.Mutation.CreateNews == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_createNews_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.CreateNews(childComplexity, args["input"].(NewNews)), true
+
 	case "Mutation.createPlan":
 		if e.complexity.Mutation.CreatePlan == nil {
 			break
@@ -736,6 +769,54 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.DeleteEvent(childComplexity, args["input"].(int32)), true
+
+	case "Mutation.deleteNews":
+		if e.complexity.Mutation.DeleteNews == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_deleteNews_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.DeleteNews(childComplexity, args["input"].(int32)), true
+
+	case "Mutation.deletePlan":
+		if e.complexity.Mutation.DeletePlan == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_deletePlan_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.DeletePlan(childComplexity, args["input"].(int32)), true
+
+	case "Mutation.deletePromotion":
+		if e.complexity.Mutation.DeletePromotion == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_deletePromotion_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.DeletePromotion(childComplexity, args["input"].(int32)), true
+
+	case "Mutation.deleteTicket":
+		if e.complexity.Mutation.DeleteTicket == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_deleteTicket_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.DeleteTicket(childComplexity, args["input"].(int32)), true
 
 	case "Mutation.login":
 		if e.complexity.Mutation.Login == nil {
@@ -844,6 +925,62 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.UpdateSponsor(childComplexity, args["input"].(UpdateSponsor)), true
+
+	case "News.body":
+		if e.complexity.News.Body == nil {
+			break
+		}
+
+		return e.complexity.News.Body(childComplexity), true
+
+	case "News.description":
+		if e.complexity.News.Description == nil {
+			break
+		}
+
+		return e.complexity.News.Description(childComplexity), true
+
+	case "News.feature_image":
+		if e.complexity.News.FeatureImage == nil {
+			break
+		}
+
+		return e.complexity.News.FeatureImage(childComplexity), true
+
+	case "News.id":
+		if e.complexity.News.ID == nil {
+			break
+		}
+
+		return e.complexity.News.ID(childComplexity), true
+
+	case "News.publish_date":
+		if e.complexity.News.PublishDate == nil {
+			break
+		}
+
+		return e.complexity.News.PublishDate(childComplexity), true
+
+	case "News.tags":
+		if e.complexity.News.Tags == nil {
+			break
+		}
+
+		return e.complexity.News.Tags(childComplexity), true
+
+	case "News.title":
+		if e.complexity.News.Title == nil {
+			break
+		}
+
+		return e.complexity.News.Title(childComplexity), true
+
+	case "News.user_id":
+		if e.complexity.News.UserID == nil {
+			break
+		}
+
+		return e.complexity.News.UserID(childComplexity), true
 
 	case "Plan.description":
 		if e.complexity.Plan.Description == nil {
@@ -1690,6 +1827,17 @@ type Promotion {
         end_date: DateTime!
 }
 
+type News {
+        id: ID!
+        title: String!
+        description : String!
+        feature_image : String!
+        body : String!
+        user_id : ID!
+        publish_date: DateTime!
+        tags : String
+}
+
 input NewTicket {
         name: String!
         price: Float!
@@ -1765,6 +1913,26 @@ input UpdatePromotion {
         end_date: DateTime
 }
 
+input NewNews {
+        title: String!
+        description : String!
+        feature_image : String!
+        body : String!
+        user_id : ID!
+        publish_date: DateTime!
+        tags : String
+}
+
+input UpdateNews {
+        id: ID!
+        title: String
+        description : String
+        feature_image : String
+        body : String
+        publish_date: DateTime
+        tags : String
+}
+
 type Mutation {
         createCategory(input : NewCategory!): Category!
         createVenue(input: NewVenue!): Venue!
@@ -1776,6 +1944,7 @@ type Mutation {
         createVenueFavorite(input : NewVenueFavorite!): VenueFavorite!
         createPlan(input : NewPlan!): Plan!
         createPromotion(input : NewPromotion!): Promotion!
+        createNews(input :NewNews!): News!
 
         """ update """ 
         updateEvent(input: UpdateEvent!):Event!
@@ -1788,6 +1957,10 @@ type Mutation {
 
         """ delete """ 
         deleteEvent(input: ID!): Boolean!
+        deleteNews (input: ID!): Boolean!
+        deletePlan (input: ID!): Boolean!
+        deletePromotion (input: ID!): Boolean!
+        deleteTicket (input: ID!): Boolean!
 
         """ operations """ 
         login(input: Login!): LoginResponse
@@ -1848,6 +2021,21 @@ func (ec *executionContext) field_Mutation_createEvent_args(ctx context.Context,
 	if tmp, ok := rawArgs["input"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
 		arg0, err = ec.unmarshalNNewEvent2githubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgqlgenᚐNewEvent(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["input"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_createNews_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 NewNews
+	if tmp, ok := rawArgs["input"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+		arg0, err = ec.unmarshalNNewNews2githubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgqlgenᚐNewNews(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -1962,6 +2150,66 @@ func (ec *executionContext) field_Mutation_createVenue_args(ctx context.Context,
 }
 
 func (ec *executionContext) field_Mutation_deleteEvent_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 int32
+	if tmp, ok := rawArgs["input"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+		arg0, err = ec.unmarshalNID2int32(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["input"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_deleteNews_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 int32
+	if tmp, ok := rawArgs["input"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+		arg0, err = ec.unmarshalNID2int32(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["input"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_deletePlan_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 int32
+	if tmp, ok := rawArgs["input"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+		arg0, err = ec.unmarshalNID2int32(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["input"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_deletePromotion_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 int32
+	if tmp, ok := rawArgs["input"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+		arg0, err = ec.unmarshalNID2int32(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["input"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_deleteTicket_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
 	var arg0 int32
@@ -4242,6 +4490,48 @@ func (ec *executionContext) _Mutation_createPromotion(ctx context.Context, field
 	return ec.marshalNPromotion2ᚖgithubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgqlgenᚐPromotion(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _Mutation_createNews(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_createNews_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().CreateNews(rctx, args["input"].(NewNews))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*News)
+	fc.Result = res
+	return ec.marshalNNews2ᚖgithubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgqlgenᚐNews(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _Mutation_updateEvent(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -4578,6 +4868,174 @@ func (ec *executionContext) _Mutation_deleteEvent(ctx context.Context, field gra
 	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _Mutation_deleteNews(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_deleteNews_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().DeleteNews(rctx, args["input"].(int32))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(bool)
+	fc.Result = res
+	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Mutation_deletePlan(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_deletePlan_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().DeletePlan(rctx, args["input"].(int32))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(bool)
+	fc.Result = res
+	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Mutation_deletePromotion(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_deletePromotion_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().DeletePromotion(rctx, args["input"].(int32))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(bool)
+	fc.Result = res
+	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Mutation_deleteTicket(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_deleteTicket_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().DeleteTicket(rctx, args["input"].(int32))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(bool)
+	fc.Result = res
+	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _Mutation_login(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -4643,6 +5101,283 @@ func (ec *executionContext) _Mutation_refreshToken(ctx context.Context, field gr
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Mutation().RefreshToken(rctx, args["input"].(RefreshTokenInput))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _News_id(ctx context.Context, field graphql.CollectedField, obj *News) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "News",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int32)
+	fc.Result = res
+	return ec.marshalNID2int32(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _News_title(ctx context.Context, field graphql.CollectedField, obj *News) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "News",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Title, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _News_description(ctx context.Context, field graphql.CollectedField, obj *News) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "News",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Description, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _News_feature_image(ctx context.Context, field graphql.CollectedField, obj *News) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "News",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.FeatureImage, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _News_body(ctx context.Context, field graphql.CollectedField, obj *News) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "News",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Body, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _News_user_id(ctx context.Context, field graphql.CollectedField, obj *News) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "News",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.UserID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int32)
+	fc.Result = res
+	return ec.marshalNID2int32(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _News_publish_date(ctx context.Context, field graphql.CollectedField, obj *News) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "News",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.PublishDate, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNDateTime2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _News_tags(ctx context.Context, field graphql.CollectedField, obj *News) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "News",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Tags, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -8463,6 +9198,74 @@ func (ec *executionContext) unmarshalInputNewImage(ctx context.Context, obj inte
 	return it, nil
 }
 
+func (ec *executionContext) unmarshalInputNewNews(ctx context.Context, obj interface{}) (NewNews, error) {
+	var it NewNews
+	var asMap = obj.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "title":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("title"))
+			it.Title, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "description":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("description"))
+			it.Description, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "feature_image":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("feature_image"))
+			it.FeatureImage, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "body":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("body"))
+			it.Body, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "user_id":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("user_id"))
+			it.UserID, err = ec.unmarshalNID2int32(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "publish_date":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("publish_date"))
+			it.PublishDate, err = ec.unmarshalNDateTime2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "tags":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("tags"))
+			it.Tags, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputNewPlan(ctx context.Context, obj interface{}) (NewPlan, error) {
 	var it NewPlan
 	var asMap = obj.(map[string]interface{})
@@ -9114,6 +9917,74 @@ func (ec *executionContext) unmarshalInputUpdateHost(ctx context.Context, obj in
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("short_bio"))
 			it.ShortBio, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputUpdateNews(ctx context.Context, obj interface{}) (UpdateNews, error) {
+	var it UpdateNews
+	var asMap = obj.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "id":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
+			it.ID, err = ec.unmarshalNID2int32(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "title":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("title"))
+			it.Title, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "description":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("description"))
+			it.Description, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "feature_image":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("feature_image"))
+			it.FeatureImage, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "body":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("body"))
+			it.Body, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "publish_date":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("publish_date"))
+			it.PublishDate, err = ec.unmarshalODateTime2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "tags":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("tags"))
+			it.Tags, err = ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -9816,6 +10687,11 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
+		case "createNews":
+			out.Values[i] = ec._Mutation_createNews(ctx, field)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		case "updateEvent":
 			out.Values[i] = ec._Mutation_updateEvent(ctx, field)
 			if out.Values[i] == graphql.Null {
@@ -9856,10 +10732,89 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
+		case "deleteNews":
+			out.Values[i] = ec._Mutation_deleteNews(ctx, field)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "deletePlan":
+			out.Values[i] = ec._Mutation_deletePlan(ctx, field)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "deletePromotion":
+			out.Values[i] = ec._Mutation_deletePromotion(ctx, field)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "deleteTicket":
+			out.Values[i] = ec._Mutation_deleteTicket(ctx, field)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		case "login":
 			out.Values[i] = ec._Mutation_login(ctx, field)
 		case "refreshToken":
 			out.Values[i] = ec._Mutation_refreshToken(ctx, field)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var newsImplementors = []string{"News"}
+
+func (ec *executionContext) _News(ctx context.Context, sel ast.SelectionSet, obj *News) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, newsImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("News")
+		case "id":
+			out.Values[i] = ec._News_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "title":
+			out.Values[i] = ec._News_title(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "description":
+			out.Values[i] = ec._News_description(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "feature_image":
+			out.Values[i] = ec._News_feature_image(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "body":
+			out.Values[i] = ec._News_body(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "user_id":
+			out.Values[i] = ec._News_user_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "publish_date":
+			out.Values[i] = ec._News_publish_date(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "tags":
+			out.Values[i] = ec._News_tags(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -10905,6 +11860,11 @@ func (ec *executionContext) unmarshalNNewEventFavorite2githubᚗcomᚋBigListRyR
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
+func (ec *executionContext) unmarshalNNewNews2githubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgqlgenᚐNewNews(ctx context.Context, v interface{}) (NewNews, error) {
+	res, err := ec.unmarshalInputNewNews(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
 func (ec *executionContext) unmarshalNNewPlan2githubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgqlgenᚐNewPlan(ctx context.Context, v interface{}) (NewPlan, error) {
 	res, err := ec.unmarshalInputNewPlan(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -10938,6 +11898,20 @@ func (ec *executionContext) unmarshalNNewVenue2githubᚗcomᚋBigListRyRyᚋharb
 func (ec *executionContext) unmarshalNNewVenueFavorite2githubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgqlgenᚐNewVenueFavorite(ctx context.Context, v interface{}) (NewVenueFavorite, error) {
 	res, err := ec.unmarshalInputNewVenueFavorite(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNNews2githubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgqlgenᚐNews(ctx context.Context, sel ast.SelectionSet, v News) graphql.Marshaler {
+	return ec._News(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNNews2ᚖgithubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgqlgenᚐNews(ctx context.Context, sel ast.SelectionSet, v *News) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._News(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalNPlan2githubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgqlgenᚐPlan(ctx context.Context, sel ast.SelectionSet, v Plan) graphql.Marshaler {

@@ -207,6 +207,18 @@ CREATE TABLE "plans" (
                                   "created_at" timestamp NOT NULL DEFAULT (now())
 );
 
+CREATE TABLE "news" (
+                                  "id" SERIAL PRIMARY KEY,
+                                  "title" varchar NOT NULL,
+                                  "description" varchar NOT NULL,
+                                  "feature_image" varchar ,
+                                  "body" text NOT NULL,
+                                  "user_id" int NOT NULL,
+                                  "publish_date" timestamp NOT NULL,
+                                  "tags" text ,
+                                  "created_at" timestamp NOT NULL DEFAULT (now())
+);
+
 ALTER TABLE "users" ADD FOREIGN KEY ("usertype") REFERENCES "users_type" ("id");
 
 ALTER TABLE "events" ADD FOREIGN KEY ("venue") REFERENCES "venues" ("id")
@@ -280,6 +292,8 @@ ALTER TABLE "promotions" ADD FOREIGN KEY ("user_id") REFERENCES "users" ("id");
 ALTER TABLE "promotions" ADD FOREIGN KEY ("event_id") REFERENCES "events" ("id");
 
 ALTER TABLE "promotions" ADD FOREIGN KEY ("plan_id") REFERENCES "plans" ("id");
+
+ALTER TABLE "news" ADD FOREIGN KEY ("user_id") REFERENCES "users" ("id");
 
 
 CREATE INDEX ON "users" ("id");

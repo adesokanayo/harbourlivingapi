@@ -1,3 +1,7 @@
+-- name: GetPromotion :one
+SELECT * FROM promotions
+WHERE id = @id LIMIT 1;
+
 -- name: GetPromotionForEvent :one
 SELECT * FROM promotions
 WHERE event_id = @event_id LIMIT 1;

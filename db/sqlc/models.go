@@ -110,6 +110,18 @@ type Image struct {
 	Url  string         `json:"url"`
 }
 
+type News struct {
+	ID           int32          `json:"id"`
+	Title        string         `json:"title"`
+	Description  string         `json:"description"`
+	FeatureImage sql.NullString `json:"feature_image"`
+	Body         string         `json:"body"`
+	UserID       int32          `json:"user_id"`
+	PublishDate  time.Time      `json:"publish_date"`
+	Tags         sql.NullString `json:"tags"`
+	CreatedAt    time.Time      `json:"created_at"`
+}
+
 type Plan struct {
 	ID          int32     `json:"id"`
 	Name        string    `json:"name"`

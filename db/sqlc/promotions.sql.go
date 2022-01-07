@@ -58,6 +58,26 @@ func (q *Queries) DeletePromotion(ctx context.Context, id int32) error {
 	return err
 }
 
+const getPromotion = `-- name: GetPromotion :one
+SELECT id, event_id, user_id, plan_id, start_date, end_date, created_at FROM promotions
+WHERE id = $1 LIMIT 1
+`
+
+func (q *Queries) GetPromotion(ctx context.Context, id int32) (Promotion, error) {
+	row := q.db.QueryRowContext(ctx, getPromotion, id)
+	var i Promotion
+	err := row.Scan(
+		&i.ID,
+		&i.EventID,
+		&i.UserID,
+		&i.PlanID,
+		&i.StartDate,
+		&i.EndDate,
+		&i.CreatedAt,
+	)
+	return i, err
+}
+
 const getPromotionForEvent = `-- name: GetPromotionForEvent :one
 SELECT id, event_id, user_id, plan_id, start_date, end_date, created_at FROM promotions
 WHERE event_id = $1 LIMIT 1

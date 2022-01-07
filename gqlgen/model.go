@@ -132,6 +132,16 @@ type NewImage struct {
 	URL  string  `json:"url"`
 }
 
+type NewNews struct {
+	Title        string  `json:"title"`
+	Description  string  `json:"description"`
+	FeatureImage string  `json:"feature_image"`
+	Body         string  `json:"body"`
+	UserID       int32   `json:"user_id"`
+	PublishDate  string  `json:"publish_date"`
+	Tags         *string `json:"tags"`
+}
+
 type NewPlan struct {
 	Name        string  `json:"name"`
 	Description string  `json:"description"`
@@ -194,6 +204,17 @@ type NewVenueFavorite struct {
 type NewVideo struct {
 	Name *string `json:"name"`
 	URL  string  `json:"url"`
+}
+
+type News struct {
+	ID           int32   `json:"id"`
+	Title        string  `json:"title"`
+	Description  string  `json:"description"`
+	FeatureImage string  `json:"feature_image"`
+	Body         string  `json:"body"`
+	UserID       int32   `json:"user_id"`
+	PublishDate  string  `json:"publish_date"`
+	Tags         *string `json:"tags"`
 }
 
 type Plan struct {
@@ -271,6 +292,16 @@ type UpdateHost struct {
 	Avatar      *string `json:"avatar"`
 	DisplayName *string `json:"display_name"`
 	ShortBio    *string `json:"short_bio"`
+}
+
+type UpdateNews struct {
+	ID           int32   `json:"id"`
+	Title        *string `json:"title"`
+	Description  *string `json:"description"`
+	FeatureImage *string `json:"feature_image"`
+	Body         *string `json:"body"`
+	PublishDate  *string `json:"publish_date"`
+	Tags         *string `json:"tags"`
 }
 
 type UpdatePlan struct {

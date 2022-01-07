@@ -287,6 +287,17 @@ type Promotion {
         end_date: DateTime!
 }
 
+type News {
+        id: ID!
+        title: String!
+        description : String!
+        feature_image : String!
+        body : String!
+        user_id : ID!
+        publish_date: DateTime!
+        tags : String
+}
+
 input NewTicket {
         name: String!
         price: Float!
@@ -362,6 +373,26 @@ input UpdatePromotion {
         end_date: DateTime
 }
 
+input NewNews {
+        title: String!
+        description : String!
+        feature_image : String!
+        body : String!
+        user_id : ID!
+        publish_date: DateTime!
+        tags : String
+}
+
+input UpdateNews {
+        id: ID!
+        title: String
+        description : String
+        feature_image : String
+        body : String
+        publish_date: DateTime
+        tags : String
+}
+
 type Mutation {
         createCategory(input : NewCategory!): Category!
         createVenue(input: NewVenue!): Venue!
@@ -373,6 +404,7 @@ type Mutation {
         createVenueFavorite(input : NewVenueFavorite!): VenueFavorite!
         createPlan(input : NewPlan!): Plan!
         createPromotion(input : NewPromotion!): Promotion!
+        createNews(input :NewNews!): News!
 
         """ update """ 
         updateEvent(input: UpdateEvent!):Event!
@@ -385,6 +417,10 @@ type Mutation {
 
         """ delete """ 
         deleteEvent(input: ID!): Boolean!
+        deleteNews (input: ID!): Boolean!
+        deletePlan (input: ID!): Boolean!
+        deletePromotion (input: ID!): Boolean!
+        deleteTicket (input: ID!): Boolean!
 
         """ operations """ 
         login(input: Login!): LoginResponse
