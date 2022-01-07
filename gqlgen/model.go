@@ -132,6 +132,20 @@ type NewImage struct {
 	URL  string  `json:"url"`
 }
 
+type NewPlan struct {
+	Name        string  `json:"name"`
+	Description string  `json:"description"`
+	Price       float64 `json:"price"`
+}
+
+type NewPromotion struct {
+	UserID    int32  `json:"user_id"`
+	EventID   int32  `json:"event_id"`
+	PlanID    int32  `json:"plan_id"`
+	StartDate string `json:"start_date"`
+	EndDate   string `json:"end_date"`
+}
+
 type NewSponsor struct {
 	UserID  int `json:"user_id"`
 	EventID int `json:"event_id"`
@@ -179,6 +193,21 @@ type NewVenueFavorite struct {
 type NewVideo struct {
 	Name *string `json:"name"`
 	URL  string  `json:"url"`
+}
+
+type Plan struct {
+	ID          int32   `json:"id"`
+	Name        string  `json:"name"`
+	Description string  `json:"description"`
+	Price       float64 `json:"price"`
+}
+
+type Promotion struct {
+	ID        int32  `json:"id"`
+	UserID    int32  `json:"user_id"`
+	EventID   int32  `json:"event_id"`
+	StartDate string `json:"start_date"`
+	EndDate   string `json:"end_date"`
 }
 
 type RefreshTokenInput struct {
@@ -240,6 +269,21 @@ type UpdateHost struct {
 	Avatar      *string `json:"avatar"`
 	DisplayName *string `json:"display_name"`
 	ShortBio    *string `json:"short_bio"`
+}
+
+type UpdatePlan struct {
+	ID          int32    `json:"id"`
+	Name        *string  `json:"name"`
+	Description *string  `json:"description"`
+	Price       *float64 `json:"price"`
+}
+
+type UpdatePromotion struct {
+	ID        int32   `json:"id"`
+	UserID    *int32  `json:"user_id"`
+	EventID   *int32  `json:"event_id"`
+	StartDate *string `json:"start_date"`
+	EndDate   *string `json:"end_date"`
 }
 
 type UpdateSponsor struct {

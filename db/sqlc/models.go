@@ -110,6 +110,24 @@ type Image struct {
 	Url  string         `json:"url"`
 }
 
+type Plan struct {
+	ID          int32     `json:"id"`
+	Name        string    `json:"name"`
+	Description string    `json:"description"`
+	Price       float64   `json:"price"`
+	CreatedAt   time.Time `json:"created_at"`
+}
+
+type Promotion struct {
+	ID        int32     `json:"id"`
+	EventID   int32     `json:"event_id"`
+	UserID    int32     `json:"user_id"`
+	PlanID    int32     `json:"plan_id"`
+	StartDate time.Time `json:"start_date"`
+	EndDate   time.Time `json:"end_date"`
+	CreatedAt time.Time `json:"created_at"`
+}
+
 type Sponsor struct {
 	ID          int32          `json:"id"`
 	UserID      int32          `json:"user_id"`

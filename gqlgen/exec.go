@@ -116,6 +116,8 @@ type ComplexityRoot struct {
 		CreateCategory        func(childComplexity int, input NewCategory) int
 		CreateEvent           func(childComplexity int, input NewEvent) int
 		CreateEventFavorite   func(childComplexity int, input NewEventFavorite) int
+		CreatePlan            func(childComplexity int, input NewPlan) int
+		CreatePromotion       func(childComplexity int, input NewPromotion) int
 		CreateSponsorForEvent func(childComplexity int, input NewSponsor) int
 		CreateTicket          func(childComplexity int, input NewTicket) int
 		CreateUser            func(childComplexity int, input NewUser) int
@@ -128,7 +130,24 @@ type ComplexityRoot struct {
 		UpdateEvent           func(childComplexity int, input UpdateEvent) int
 		UpdateEventStatus     func(childComplexity int, input UpdateEventStatus) int
 		UpdateHost            func(childComplexity int, input UpdateHost) int
+		UpdatePlan            func(childComplexity int, input UpdatePlan) int
+		UpdatePromotion       func(childComplexity int, input UpdatePromotion) int
 		UpdateSponsor         func(childComplexity int, input UpdateSponsor) int
+	}
+
+	Plan struct {
+		Description func(childComplexity int) int
+		ID          func(childComplexity int) int
+		Name        func(childComplexity int) int
+		Price       func(childComplexity int) int
+	}
+
+	Promotion struct {
+		EndDate   func(childComplexity int) int
+		EventID   func(childComplexity int) int
+		ID        func(childComplexity int) int
+		StartDate func(childComplexity int) int
+		UserID    func(childComplexity int) int
 	}
 
 	Query struct {
@@ -224,11 +243,15 @@ type MutationResolver interface {
 	CreateSponsorForEvent(ctx context.Context, input NewSponsor) (*Sponsor, error)
 	CreateEventFavorite(ctx context.Context, input NewEventFavorite) (*EventFavorite, error)
 	CreateVenueFavorite(ctx context.Context, input NewVenueFavorite) (*VenueFavorite, error)
+	CreatePlan(ctx context.Context, input NewPlan) (*Plan, error)
+	CreatePromotion(ctx context.Context, input NewPromotion) (*Promotion, error)
 	UpdateEvent(ctx context.Context, input UpdateEvent) (*Event, error)
 	UpdateEventStatus(ctx context.Context, input UpdateEventStatus) (*UpdateEventState, error)
 	UpdateArtist(ctx context.Context, input UpdateArtist) (*Artist, error)
 	UpdateHost(ctx context.Context, input UpdateHost) (*Host, error)
 	UpdateSponsor(ctx context.Context, input UpdateSponsor) (*Sponsor, error)
+	UpdatePlan(ctx context.Context, input UpdatePlan) (*Plan, error)
+	UpdatePromotion(ctx context.Context, input UpdatePromotion) (*Promotion, error)
 	DeleteEvent(ctx context.Context, input int32) (bool, error)
 	Login(ctx context.Context, input Login) (*LoginResponse, error)
 	RefreshToken(ctx context.Context, input RefreshTokenInput) (*string, error)
@@ -617,6 +640,30 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.CreateEventFavorite(childComplexity, args["input"].(NewEventFavorite)), true
 
+	case "Mutation.createPlan":
+		if e.complexity.Mutation.CreatePlan == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_createPlan_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.CreatePlan(childComplexity, args["input"].(NewPlan)), true
+
+	case "Mutation.createPromotion":
+		if e.complexity.Mutation.CreatePromotion == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_createPromotion_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.CreatePromotion(childComplexity, args["input"].(NewPromotion)), true
+
 	case "Mutation.createSponsorForEvent":
 		if e.complexity.Mutation.CreateSponsorForEvent == nil {
 			break
@@ -761,6 +808,30 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.UpdateHost(childComplexity, args["input"].(UpdateHost)), true
 
+	case "Mutation.updatePlan":
+		if e.complexity.Mutation.UpdatePlan == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_updatePlan_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.UpdatePlan(childComplexity, args["input"].(UpdatePlan)), true
+
+	case "Mutation.updatePromotion":
+		if e.complexity.Mutation.UpdatePromotion == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_updatePromotion_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.UpdatePromotion(childComplexity, args["input"].(UpdatePromotion)), true
+
 	case "Mutation.updateSponsor":
 		if e.complexity.Mutation.UpdateSponsor == nil {
 			break
@@ -772,6 +843,69 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.UpdateSponsor(childComplexity, args["input"].(UpdateSponsor)), true
+
+	case "Plan.description":
+		if e.complexity.Plan.Description == nil {
+			break
+		}
+
+		return e.complexity.Plan.Description(childComplexity), true
+
+	case "Plan.id":
+		if e.complexity.Plan.ID == nil {
+			break
+		}
+
+		return e.complexity.Plan.ID(childComplexity), true
+
+	case "Plan.name":
+		if e.complexity.Plan.Name == nil {
+			break
+		}
+
+		return e.complexity.Plan.Name(childComplexity), true
+
+	case "Plan.price":
+		if e.complexity.Plan.Price == nil {
+			break
+		}
+
+		return e.complexity.Plan.Price(childComplexity), true
+
+	case "Promotion.end_date":
+		if e.complexity.Promotion.EndDate == nil {
+			break
+		}
+
+		return e.complexity.Promotion.EndDate(childComplexity), true
+
+	case "Promotion.event_id":
+		if e.complexity.Promotion.EventID == nil {
+			break
+		}
+
+		return e.complexity.Promotion.EventID(childComplexity), true
+
+	case "Promotion.id":
+		if e.complexity.Promotion.ID == nil {
+			break
+		}
+
+		return e.complexity.Promotion.ID(childComplexity), true
+
+	case "Promotion.start_date":
+		if e.complexity.Promotion.StartDate == nil {
+			break
+		}
+
+		return e.complexity.Promotion.StartDate(childComplexity), true
+
+	case "Promotion.user_id":
+		if e.complexity.Promotion.UserID == nil {
+			break
+		}
+
+		return e.complexity.Promotion.UserID(childComplexity), true
 
 	case "Query.getCategories":
 		if e.complexity.Query.GetCategories == nil {
@@ -1532,6 +1666,21 @@ type VenueFavorite{
   user_id: Int!
 }
 
+type Plan {
+        id: ID!
+        name: String!
+        description: String!
+        price: Float!
+}
+
+type Promotion {
+        id: ID!
+        user_id: ID!
+        event_id : ID!
+        start_date : DateTime!
+        end_date: DateTime!
+}
+
 input NewTicket {
         name: String!
         price: Float!
@@ -1576,6 +1725,34 @@ input NewVenueFavorite{
     user_id: Int!
 }
 
+input NewPlan {
+        name: String!
+        description: String!
+        price: Float!
+}
+
+input NewPromotion {
+        user_id: ID!
+        event_id : ID!
+        plan_id : ID!
+        start_date : DateTime!
+        end_date: DateTime!
+}
+
+input UpdatePlan {
+        id: ID!
+        name: String
+        description: String
+        price: Float
+}
+
+input UpdatePromotion {
+        id: ID!
+        user_id: ID
+        event_id : ID
+        start_date : DateTime
+        end_date: DateTime
+}
 
 type Mutation {
         createCategory(input : NewCategory!): Category!
@@ -1586,6 +1763,8 @@ type Mutation {
         createSponsorForEvent(input: NewSponsor!): Sponsor!
         createEventFavorite(input : NewEventFavorite!): EventFavorite!
         createVenueFavorite(input : NewVenueFavorite!): VenueFavorite!
+        createPlan(input : NewPlan!): Plan!
+        createPromotion(input : NewPromotion!): Promotion!
 
         """ update """ 
         updateEvent(input: UpdateEvent!):Event!
@@ -1593,6 +1772,8 @@ type Mutation {
         updateArtist(input:UpdateArtist! ): Artist!
         updateHost(input:UpdateHost! ): Host!
         updateSponsor(input:UpdateSponsor! ): Sponsor!
+        updatePlan(input : UpdatePlan! ): Plan!
+        updatePromotion(input : UpdatePromotion!): Promotion!
 
         """ delete """ 
         deleteEvent(input: ID!): Boolean!
@@ -1656,6 +1837,36 @@ func (ec *executionContext) field_Mutation_createEvent_args(ctx context.Context,
 	if tmp, ok := rawArgs["input"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
 		arg0, err = ec.unmarshalNNewEvent2githubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgqlgenᚐNewEvent(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["input"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_createPlan_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 NewPlan
+	if tmp, ok := rawArgs["input"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+		arg0, err = ec.unmarshalNNewPlan2githubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgqlgenᚐNewPlan(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["input"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_createPromotion_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 NewPromotion
+	if tmp, ok := rawArgs["input"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+		arg0, err = ec.unmarshalNNewPromotion2githubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgqlgenᚐNewPromotion(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -1836,6 +2047,36 @@ func (ec *executionContext) field_Mutation_updateHost_args(ctx context.Context, 
 	if tmp, ok := rawArgs["input"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
 		arg0, err = ec.unmarshalNUpdateHost2githubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgqlgenᚐUpdateHost(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["input"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_updatePlan_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 UpdatePlan
+	if tmp, ok := rawArgs["input"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+		arg0, err = ec.unmarshalNUpdatePlan2githubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgqlgenᚐUpdatePlan(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["input"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_updatePromotion_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 UpdatePromotion
+	if tmp, ok := rawArgs["input"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+		arg0, err = ec.unmarshalNUpdatePromotion2githubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgqlgenᚐUpdatePromotion(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -3906,6 +4147,90 @@ func (ec *executionContext) _Mutation_createVenueFavorite(ctx context.Context, f
 	return ec.marshalNVenueFavorite2ᚖgithubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgqlgenᚐVenueFavorite(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _Mutation_createPlan(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_createPlan_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().CreatePlan(rctx, args["input"].(NewPlan))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*Plan)
+	fc.Result = res
+	return ec.marshalNPlan2ᚖgithubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgqlgenᚐPlan(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Mutation_createPromotion(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_createPromotion_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().CreatePromotion(rctx, args["input"].(NewPromotion))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*Promotion)
+	fc.Result = res
+	return ec.marshalNPromotion2ᚖgithubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgqlgenᚐPromotion(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _Mutation_updateEvent(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -4116,6 +4441,90 @@ func (ec *executionContext) _Mutation_updateSponsor(ctx context.Context, field g
 	return ec.marshalNSponsor2ᚖgithubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgqlgenᚐSponsor(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _Mutation_updatePlan(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_updatePlan_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().UpdatePlan(rctx, args["input"].(UpdatePlan))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*Plan)
+	fc.Result = res
+	return ec.marshalNPlan2ᚖgithubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgqlgenᚐPlan(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Mutation_updatePromotion(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_updatePromotion_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().UpdatePromotion(rctx, args["input"].(UpdatePromotion))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*Promotion)
+	fc.Result = res
+	return ec.marshalNPromotion2ᚖgithubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgqlgenᚐPromotion(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _Mutation_deleteEvent(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -4234,6 +4643,321 @@ func (ec *executionContext) _Mutation_refreshToken(ctx context.Context, field gr
 	res := resTmp.(*string)
 	fc.Result = res
 	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Plan_id(ctx context.Context, field graphql.CollectedField, obj *Plan) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Plan",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int32)
+	fc.Result = res
+	return ec.marshalNID2int32(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Plan_name(ctx context.Context, field graphql.CollectedField, obj *Plan) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Plan",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Name, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Plan_description(ctx context.Context, field graphql.CollectedField, obj *Plan) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Plan",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Description, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Plan_price(ctx context.Context, field graphql.CollectedField, obj *Plan) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Plan",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Price, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(float64)
+	fc.Result = res
+	return ec.marshalNFloat2float64(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Promotion_id(ctx context.Context, field graphql.CollectedField, obj *Promotion) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Promotion",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int32)
+	fc.Result = res
+	return ec.marshalNID2int32(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Promotion_user_id(ctx context.Context, field graphql.CollectedField, obj *Promotion) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Promotion",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.UserID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int32)
+	fc.Result = res
+	return ec.marshalNID2int32(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Promotion_event_id(ctx context.Context, field graphql.CollectedField, obj *Promotion) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Promotion",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.EventID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int32)
+	fc.Result = res
+	return ec.marshalNID2int32(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Promotion_start_date(ctx context.Context, field graphql.CollectedField, obj *Promotion) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Promotion",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.StartDate, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNDateTime2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Promotion_end_date(ctx context.Context, field graphql.CollectedField, obj *Promotion) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Promotion",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.EndDate, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNDateTime2string(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query_getUser(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -7693,6 +8417,94 @@ func (ec *executionContext) unmarshalInputNewImage(ctx context.Context, obj inte
 	return it, nil
 }
 
+func (ec *executionContext) unmarshalInputNewPlan(ctx context.Context, obj interface{}) (NewPlan, error) {
+	var it NewPlan
+	var asMap = obj.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "name":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("name"))
+			it.Name, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "description":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("description"))
+			it.Description, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "price":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("price"))
+			it.Price, err = ec.unmarshalNFloat2float64(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputNewPromotion(ctx context.Context, obj interface{}) (NewPromotion, error) {
+	var it NewPromotion
+	var asMap = obj.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "user_id":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("user_id"))
+			it.UserID, err = ec.unmarshalNID2int32(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "event_id":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("event_id"))
+			it.EventID, err = ec.unmarshalNID2int32(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "plan_id":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("plan_id"))
+			it.PlanID, err = ec.unmarshalNID2int32(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "start_date":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("start_date"))
+			it.StartDate, err = ec.unmarshalNDateTime2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "end_date":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("end_date"))
+			it.EndDate, err = ec.unmarshalNDateTime2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputNewSponsor(ctx context.Context, obj interface{}) (NewSponsor, error) {
 	var it NewSponsor
 	var asMap = obj.(map[string]interface{})
@@ -8248,6 +9060,102 @@ func (ec *executionContext) unmarshalInputUpdateHost(ctx context.Context, obj in
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("short_bio"))
 			it.ShortBio, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputUpdatePlan(ctx context.Context, obj interface{}) (UpdatePlan, error) {
+	var it UpdatePlan
+	var asMap = obj.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "id":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
+			it.ID, err = ec.unmarshalNID2int32(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "name":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("name"))
+			it.Name, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "description":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("description"))
+			it.Description, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "price":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("price"))
+			it.Price, err = ec.unmarshalOFloat2ᚖfloat64(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputUpdatePromotion(ctx context.Context, obj interface{}) (UpdatePromotion, error) {
+	var it UpdatePromotion
+	var asMap = obj.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "id":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
+			it.ID, err = ec.unmarshalNID2int32(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "user_id":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("user_id"))
+			it.UserID, err = ec.unmarshalOID2ᚖint32(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "event_id":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("event_id"))
+			it.EventID, err = ec.unmarshalOID2ᚖint32(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "start_date":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("start_date"))
+			it.StartDate, err = ec.unmarshalODateTime2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "end_date":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("end_date"))
+			it.EndDate, err = ec.unmarshalODateTime2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -8836,6 +9744,16 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
+		case "createPlan":
+			out.Values[i] = ec._Mutation_createPlan(ctx, field)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "createPromotion":
+			out.Values[i] = ec._Mutation_createPromotion(ctx, field)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		case "updateEvent":
 			out.Values[i] = ec._Mutation_updateEvent(ctx, field)
 			if out.Values[i] == graphql.Null {
@@ -8861,6 +9779,16 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
+		case "updatePlan":
+			out.Values[i] = ec._Mutation_updatePlan(ctx, field)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "updatePromotion":
+			out.Values[i] = ec._Mutation_updatePromotion(ctx, field)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		case "deleteEvent":
 			out.Values[i] = ec._Mutation_deleteEvent(ctx, field)
 			if out.Values[i] == graphql.Null {
@@ -8870,6 +9798,95 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			out.Values[i] = ec._Mutation_login(ctx, field)
 		case "refreshToken":
 			out.Values[i] = ec._Mutation_refreshToken(ctx, field)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var planImplementors = []string{"Plan"}
+
+func (ec *executionContext) _Plan(ctx context.Context, sel ast.SelectionSet, obj *Plan) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, planImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("Plan")
+		case "id":
+			out.Values[i] = ec._Plan_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "name":
+			out.Values[i] = ec._Plan_name(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "description":
+			out.Values[i] = ec._Plan_description(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "price":
+			out.Values[i] = ec._Plan_price(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var promotionImplementors = []string{"Promotion"}
+
+func (ec *executionContext) _Promotion(ctx context.Context, sel ast.SelectionSet, obj *Promotion) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, promotionImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("Promotion")
+		case "id":
+			out.Values[i] = ec._Promotion_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "user_id":
+			out.Values[i] = ec._Promotion_user_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "event_id":
+			out.Values[i] = ec._Promotion_event_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "start_date":
+			out.Values[i] = ec._Promotion_start_date(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "end_date":
+			out.Values[i] = ec._Promotion_end_date(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -9821,6 +10838,16 @@ func (ec *executionContext) unmarshalNNewEventFavorite2githubᚗcomᚋBigListRyR
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
+func (ec *executionContext) unmarshalNNewPlan2githubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgqlgenᚐNewPlan(ctx context.Context, v interface{}) (NewPlan, error) {
+	res, err := ec.unmarshalInputNewPlan(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalNNewPromotion2githubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgqlgenᚐNewPromotion(ctx context.Context, v interface{}) (NewPromotion, error) {
+	res, err := ec.unmarshalInputNewPromotion(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
 func (ec *executionContext) unmarshalNNewSponsor2githubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgqlgenᚐNewSponsor(ctx context.Context, v interface{}) (NewSponsor, error) {
 	res, err := ec.unmarshalInputNewSponsor(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -9844,6 +10871,34 @@ func (ec *executionContext) unmarshalNNewVenue2githubᚗcomᚋBigListRyRyᚋharb
 func (ec *executionContext) unmarshalNNewVenueFavorite2githubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgqlgenᚐNewVenueFavorite(ctx context.Context, v interface{}) (NewVenueFavorite, error) {
 	res, err := ec.unmarshalInputNewVenueFavorite(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNPlan2githubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgqlgenᚐPlan(ctx context.Context, sel ast.SelectionSet, v Plan) graphql.Marshaler {
+	return ec._Plan(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNPlan2ᚖgithubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgqlgenᚐPlan(ctx context.Context, sel ast.SelectionSet, v *Plan) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._Plan(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalNPromotion2githubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgqlgenᚐPromotion(ctx context.Context, sel ast.SelectionSet, v Promotion) graphql.Marshaler {
+	return ec._Promotion(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNPromotion2ᚖgithubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgqlgenᚐPromotion(ctx context.Context, sel ast.SelectionSet, v *Promotion) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._Promotion(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalNRefreshTokenInput2githubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgqlgenᚐRefreshTokenInput(ctx context.Context, v interface{}) (RefreshTokenInput, error) {
@@ -9925,6 +10980,16 @@ func (ec *executionContext) unmarshalNUpdateEventStatus2githubᚗcomᚋBigListRy
 
 func (ec *executionContext) unmarshalNUpdateHost2githubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgqlgenᚐUpdateHost(ctx context.Context, v interface{}) (UpdateHost, error) {
 	res, err := ec.unmarshalInputUpdateHost(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalNUpdatePlan2githubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgqlgenᚐUpdatePlan(ctx context.Context, v interface{}) (UpdatePlan, error) {
+	res, err := ec.unmarshalInputUpdatePlan(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalNUpdatePromotion2githubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgqlgenᚐUpdatePromotion(ctx context.Context, v interface{}) (UpdatePromotion, error) {
+	res, err := ec.unmarshalInputUpdatePromotion(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
@@ -10383,6 +11448,21 @@ func (ec *executionContext) marshalOFloat2ᚖfloat64(ctx context.Context, sel as
 		return graphql.Null
 	}
 	return graphql.MarshalFloat(*v)
+}
+
+func (ec *executionContext) unmarshalOID2ᚖint32(ctx context.Context, v interface{}) (*int32, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := graphql.UnmarshalInt32(v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalOID2ᚖint32(ctx context.Context, sel ast.SelectionSet, v *int32) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return graphql.MarshalInt32(*v)
 }
 
 func (ec *executionContext) marshalOImage2ᚕᚖgithubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgqlgenᚐImage(ctx context.Context, sel ast.SelectionSet, v []*Image) graphql.Marshaler {

@@ -31,7 +31,7 @@ func init() {
 	if err != nil {
 		log.Fatalln("cannot connect to database, ", err)
 	}
-	
+
 	store = db.NewStore(conn)
 	tokenMaker, err = token.NewJWTMaker(config.TokenSymmetricKey)
 	if err != nil {
@@ -1374,7 +1374,6 @@ func (r *mutationResolver) UpdateVenue(ctx context.Context, input UpdateVenue) (
 		arg.StatusToUpdate = true
 	}
 
-
 	venue, err := store.UpdateVenue(ctx, arg)
 	if err != nil {
 		return nil, err
@@ -1389,6 +1388,119 @@ func (r *mutationResolver) UpdateVenue(ctx context.Context, input UpdateVenue) (
 		CountryCode: &venue.CountryCode.String,
 		Longitude:   &venue.Longitude.Float64,
 		Latitude:    &venue.Latitude.Float64,
+	}, nil
+}
+
+func GetDateHelper(dateString string) (*time.Time, error) {
+	date, err := util.ProcessDateTime("rfc", dateString)
+	if err != nil {
+		return nil, err
+	}
+	return date, nil
+}
+func (r *mutationResolver) CreatePlan(ctx context.Context, input NewPlan) (*Plan, error) {
+
+	arg := db.CreatePlanParams{
+		Name:        input.Name,
+		Description: input.Description,
+		Price:       input.Price,
+	}
+
+	plan, err := store.CreatePlan(ctx, arg)
+	if err != nil {
+		return nil, err
+	}
+	return &Plan{
+		ID:          plan.ID,
+		Name:        plan.Name,
+		Description: plan.Description,
+		Price:       plan.Price,
+	}, nil
+}
+
+func (r *mutationResolver) CreatePromotion(ctx context.Context, input NewPromotion) (*Promotion, error) {
+
+	d1, _ := GetDateHelper(input.StartDate)
+
+	d2, _ := GetDateHelper(input.EndDate)
+
+	arg := db.CreatePromotionParams{
+		EventID:   input.EventID,
+		UserID:    input.UserID,
+		PlanID:    input.PlanID,
+		StartDate: *d1,
+		EndDate:   *d2,
+	}
+
+	promotion, err := store.CreatePromotion(ctx, arg)
+	if err != nil {
+		return nil, err
+	}
+	return &Promotion{
+		ID:        promotion.ID,
+		EventID:   promotion.EventID,
+		UserID:    promotion.UserID,
+		StartDate: promotion.StartDate.String(),
+		EndDate:   promotion.EndDate.String(),
+	}, nil
+}
+
+func (r *mutationResolver) UpdatePlan(ctx context.Context, input UpdatePlan) (*Plan, error) {
+	arg := db.UpdatePlanParams{
+		ID: input.ID,
+	}
+	if input.Name != nil {
+		arg.NameToUpdate = true
+		arg.Name = *input.Name
+	}
+	if input.Description != nil {
+		arg.Description = *input.Description
+		arg.DescriptionToUpdate = true
+	}
+	if input.Price != nil {
+		arg.Price = *input.Price
+		arg.PriceToUpdate = true
+	}
+
+	plan, err := store.UpdatePlan(ctx, arg)
+	if err != nil {
+		return nil, err
+	}
+	return &Plan{
+		ID:          plan.ID,
+		Name:        plan.Name,
+		Description: plan.Description,
+		Price:       plan.Price,
+	}, nil
+}
+
+func (r *mutationResolver) UpdatePromotion(ctx context.Context, input UpdatePromotion) (*Promotion, error) {
+	arg := db.UpdatePromotionParams{
+		ID: input.ID,
+	}
+
+	if input.StartDate != nil {
+		d1, _ := GetDateHelper(*input.StartDate)
+		arg.StartDate = *d1
+		arg.StartDateToUpdate = true
+	}
+
+	if input.EndDate != nil {
+		d1, _ := GetDateHelper(*input.EndDate)
+		arg.EndDate = *d1
+		arg.EndDateToUpdate = true
+	}
+
+	promotion, err := store.UpdatePromotion(ctx, arg)
+	if err != nil {
+		return nil, err
+	}
+	return &Promotion{
+		ID:        promotion.ID,
+		EventID:   promotion.EventID,
+		UserID:    promotion.UserID,
+		StartDate: promotion.StartDate.String(),
+		EndDate:   promotion.EndDate.String(),
 	}, nil
 }
 

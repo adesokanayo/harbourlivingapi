@@ -188,6 +188,24 @@ CREATE TABLE "venues_favorites" (
                                   "created_at" timestamp NOT NULL DEFAULT (now())
 );
 
+CREATE TABLE "promotions" (
+                                  "id" SERIAL PRIMARY KEY,
+                                  "event_id" int NOT NULL,
+                                  "user_id" int NOT NULL,
+                                  "plan_id" int NOT NULL,
+                                  "start_date" timestamp NOT NULL, 
+                                  "end_date" timestamp NOT NULL,
+                                  "created_at" timestamp NOT NULL DEFAULT (now())
+);
+
+CREATE TABLE "plans" (
+                                  "id" SERIAL PRIMARY KEY,
+                                  "name" varchar NOT NULL,
+                                  "description" varchar NOT NULL,
+                                  "price" float NOT NULL,
+                                  "created_at" timestamp NOT NULL DEFAULT (now())
+);
+
 ALTER TABLE "users" ADD FOREIGN KEY ("usertype") REFERENCES "users_type" ("id");
 
 ALTER TABLE "events" ADD FOREIGN KEY ("venue") REFERENCES "venues" ("id")
@@ -255,6 +273,13 @@ ALTER TABLE "venues_favorites" ADD FOREIGN KEY ("user_id") REFERENCES "users" ("
 ON UPDATE CASCADE ON DELETE CASCADE;
 
 ALTER TABLE "venues" ADD FOREIGN KEY ("status") REFERENCES "venues_status" ("id");
+
+ALTER TABLE "promotions" ADD FOREIGN KEY ("user_id") REFERENCES "users" ("id");
+
+ALTER TABLE "promotions" ADD FOREIGN KEY ("event_id") REFERENCES "events" ("id");
+
+ALTER TABLE "promotions" ADD FOREIGN KEY ("plan_id") REFERENCES "plans" ("id");
+
 
 CREATE INDEX ON "users" ("id");
 

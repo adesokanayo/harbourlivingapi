@@ -271,6 +271,21 @@ type VenueFavorite{
   user_id: Int!
 }
 
+type Plan {
+        id: ID!
+        name: String!
+        description: String!
+        price: Float!
+}
+
+type Promotion {
+        id: ID!
+        user_id: ID!
+        event_id : ID!
+        start_date : DateTime!
+        end_date: DateTime!
+}
+
 input NewTicket {
         name: String!
         price: Float!
@@ -315,6 +330,34 @@ input NewVenueFavorite{
     user_id: Int!
 }
 
+input NewPlan {
+        name: String!
+        description: String!
+        price: Float!
+}
+
+input NewPromotion {
+        user_id: ID!
+        event_id : ID!
+        plan_id : ID!
+        start_date : DateTime!
+        end_date: DateTime!
+}
+
+input UpdatePlan {
+        id: ID!
+        name: String
+        description: String
+        price: Float
+}
+
+input UpdatePromotion {
+        id: ID!
+        user_id: ID
+        event_id : ID
+        start_date : DateTime
+        end_date: DateTime
+}
 
 type Mutation {
         createCategory(input : NewCategory!): Category!
@@ -325,6 +368,8 @@ type Mutation {
         createSponsorForEvent(input: NewSponsor!): Sponsor!
         createEventFavorite(input : NewEventFavorite!): EventFavorite!
         createVenueFavorite(input : NewVenueFavorite!): VenueFavorite!
+        createPlan(input : NewPlan!): Plan!
+        createPromotion(input : NewPromotion!): Promotion!
 
         """ update """ 
         updateEvent(input: UpdateEvent!):Event!
@@ -332,6 +377,8 @@ type Mutation {
         updateArtist(input:UpdateArtist! ): Artist!
         updateHost(input:UpdateHost! ): Host!
         updateSponsor(input:UpdateSponsor! ): Sponsor!
+        updatePlan(input : UpdatePlan! ): Plan!
+        updatePromotion(input : UpdatePromotion!): Promotion!
 
         """ delete """ 
         deleteEvent(input: ID!): Boolean!
