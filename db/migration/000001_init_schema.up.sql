@@ -299,7 +299,7 @@ CREATE INDEX ON "events" ("end_date");
 
 CREATE INDEX ON "events" ("type");
 
-
+---======Seed Data=======-------
 
 INSERT  INTO users_type ( "description", "status")
 VALUES
@@ -356,3 +356,13 @@ VALUES
 INSERT  INTO videos ("name","url" )
 VALUES
     ( 'face', 'https://www.gravatar.com/avatar/205e460b479e2e5b48aec07710c08d50');
+
+INSERT INTO users ("phone", "first_name", "last_name","username","password", "email","usertype","date_of_birth")
+VALUES
+(
+  '08067648635','demofirstname','demolastname','demouser','passsword','demouser@gmail.com','1','2022-01-01T14:00:12-00:00');
+
+INSERT INTO events ("title", "description", "banner_image","start_date","end_date", "venue","type","user_id","category","status")
+VALUES
+(
+  'demoTitle','demo description','https://demobannerurl','2022-01-01T14:00:12-00:00','2022-01-01T14:00:12-00:00','1','1','1','1','1');
