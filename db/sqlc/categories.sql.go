@@ -14,7 +14,7 @@ INSERT INTO categories (
     image,
     status
 ) VALUES
-  ($1, $2, $3) RETURNING id, description, image, status, created_at
+  ( $1, $2, $3) RETURNING id, description, image, status, created_at
 `
 
 type CreateCategoryParams struct {
