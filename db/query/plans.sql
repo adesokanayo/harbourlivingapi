@@ -11,6 +11,10 @@ no_of_days
 SELECT * from plans
 WHERE id = $1;
 
+-- name: GetAllPlans :many
+SELECT * from plans
+order by id desc;
+
 -- name: DeletePlan :exec
 DELETE from plans
 WHERE id = $1;

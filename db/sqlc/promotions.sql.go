@@ -58,6 +58,42 @@ func (q *Queries) DeletePromotion(ctx context.Context, id int32) error {
 	return err
 }
 
+const getAllPromotions = `-- name: GetAllPromotions :many
+SELECT id, event_id, user_id, plan_id, start_date, end_date, created_at  FROM promotions
+order by id desc
+`
+
+func (q *Queries) GetAllPromotions(ctx context.Context) ([]Promotion, error) {
+	rows, err := q.db.QueryContext(ctx, getAllPromotions)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []Promotion{}
+	for rows.Next() {
+		var i Promotion
+		if err := rows.Scan(
+			&i.ID,
+			&i.EventID,
+			&i.UserID,
+			&i.PlanID,
+			&i.StartDate,
+			&i.EndDate,
+			&i.CreatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getPromotion = `-- name: GetPromotion :one
 SELECT id, event_id, user_id, plan_id, start_date, end_date, created_at FROM promotions
 WHERE id = $1 LIMIT 1

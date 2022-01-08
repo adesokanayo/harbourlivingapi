@@ -168,11 +168,17 @@ type ComplexityRoot struct {
 	}
 
 	Query struct {
+		GetAllNews          func(childComplexity int) int
+		GetAllPlans         func(childComplexity int) int
+		GetAllPromotions    func(childComplexity int) int
 		GetCategories       func(childComplexity int) int
 		GetCategory         func(childComplexity int, input int32) int
 		GetEvent            func(childComplexity int, input int32) int
 		GetEvents           func(childComplexity int, input GetEvent) int
 		GetEventsByLocation func(childComplexity int, input GetEventByLocation) int
+		GetNews             func(childComplexity int, input int32) int
+		GetPlan             func(childComplexity int, input int32) int
+		GetPromotion        func(childComplexity int, input int32) int
 		GetUser             func(childComplexity int, input int32) int
 		GetUsers            func(childComplexity int) int
 		GetVenue            func(childComplexity int, input int32) int
@@ -287,6 +293,12 @@ type QueryResolver interface {
 	GetEventsByLocation(ctx context.Context, input GetEventByLocation) ([]Event, error)
 	GetCategory(ctx context.Context, input int32) (*Category, error)
 	GetCategories(ctx context.Context) ([]Category, error)
+	GetAllNews(ctx context.Context) ([]News, error)
+	GetAllPlans(ctx context.Context) ([]Plan, error)
+	GetAllPromotions(ctx context.Context) ([]Promotion, error)
+	GetPromotion(ctx context.Context, input int32) (*Promotion, error)
+	GetPlan(ctx context.Context, input int32) (*Plan, error)
+	GetNews(ctx context.Context, input int32) (*News, error)
 }
 
 type executableSchema struct {
@@ -1052,6 +1064,27 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Promotion.UserID(childComplexity), true
 
+	case "Query.getAllNews":
+		if e.complexity.Query.GetAllNews == nil {
+			break
+		}
+
+		return e.complexity.Query.GetAllNews(childComplexity), true
+
+	case "Query.getAllPlans":
+		if e.complexity.Query.GetAllPlans == nil {
+			break
+		}
+
+		return e.complexity.Query.GetAllPlans(childComplexity), true
+
+	case "Query.getAllPromotions":
+		if e.complexity.Query.GetAllPromotions == nil {
+			break
+		}
+
+		return e.complexity.Query.GetAllPromotions(childComplexity), true
+
 	case "Query.getCategories":
 		if e.complexity.Query.GetCategories == nil {
 			break
@@ -1106,6 +1139,42 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.GetEventsByLocation(childComplexity, args["input"].(GetEventByLocation)), true
+
+	case "Query.getNews":
+		if e.complexity.Query.GetNews == nil {
+			break
+		}
+
+		args, err := ec.field_Query_getNews_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.GetNews(childComplexity, args["input"].(int32)), true
+
+	case "Query.getPlan":
+		if e.complexity.Query.GetPlan == nil {
+			break
+		}
+
+		args, err := ec.field_Query_getPlan_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.GetPlan(childComplexity, args["input"].(int32)), true
+
+	case "Query.getPromotion":
+		if e.complexity.Query.GetPromotion == nil {
+			break
+		}
+
+		args, err := ec.field_Query_getPromotion_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.GetPromotion(childComplexity, args["input"].(int32)), true
 
 	case "Query.getUser":
 		if e.complexity.Query.GetUser == nil {
@@ -1976,6 +2045,13 @@ type Query {
         getEventsByLocation(input: GetEventByLocation!): [Event!]
         getCategory( input: ID!): Category!
         getCategories: [Category!]
+        getAllNews: [News!]
+        getAllPlans: [Plan!] 
+        getAllPromotions: [Promotion!]
+        getPromotion(input: ID!): Promotion!
+        getPlan(input: ID!): Plan!
+        getNews(input: ID!): News!
+        
 }`, BuiltIn: false},
 }
 var parsedSchema = gqlparser.MustLoadSchema(sources...)
@@ -2426,6 +2502,51 @@ func (ec *executionContext) field_Query_getEvents_args(ctx context.Context, rawA
 	if tmp, ok := rawArgs["input"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
 		arg0, err = ec.unmarshalNGetEvent2githubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgqlgenᚐGetEvent(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["input"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_getNews_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 int32
+	if tmp, ok := rawArgs["input"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+		arg0, err = ec.unmarshalNID2int32(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["input"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_getPlan_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 int32
+	if tmp, ok := rawArgs["input"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+		arg0, err = ec.unmarshalNID2int32(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["input"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_getPromotion_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 int32
+	if tmp, ok := rawArgs["input"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+		arg0, err = ec.unmarshalNID2int32(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -6040,6 +6161,228 @@ func (ec *executionContext) _Query_getCategories(ctx context.Context, field grap
 	res := resTmp.([]Category)
 	fc.Result = res
 	return ec.marshalOCategory2ᚕgithubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgqlgenᚐCategoryᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_getAllNews(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().GetAllNews(rctx)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]News)
+	fc.Result = res
+	return ec.marshalONews2ᚕgithubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgqlgenᚐNewsᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_getAllPlans(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().GetAllPlans(rctx)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]Plan)
+	fc.Result = res
+	return ec.marshalOPlan2ᚕgithubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgqlgenᚐPlanᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_getAllPromotions(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().GetAllPromotions(rctx)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]Promotion)
+	fc.Result = res
+	return ec.marshalOPromotion2ᚕgithubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgqlgenᚐPromotionᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_getPromotion(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Query_getPromotion_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().GetPromotion(rctx, args["input"].(int32))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*Promotion)
+	fc.Result = res
+	return ec.marshalNPromotion2ᚖgithubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgqlgenᚐPromotion(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_getPlan(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Query_getPlan_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().GetPlan(rctx, args["input"].(int32))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*Plan)
+	fc.Result = res
+	return ec.marshalNPlan2ᚖgithubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgqlgenᚐPlan(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_getNews(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Query_getNews_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().GetNews(rctx, args["input"].(int32))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*News)
+	fc.Result = res
+	return ec.marshalNNews2ᚖgithubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgqlgenᚐNews(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query___type(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -11026,6 +11369,81 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 				res = ec._Query_getCategories(ctx, field)
 				return res
 			})
+		case "getAllNews":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_getAllNews(ctx, field)
+				return res
+			})
+		case "getAllPlans":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_getAllPlans(ctx, field)
+				return res
+			})
+		case "getAllPromotions":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_getAllPromotions(ctx, field)
+				return res
+			})
+		case "getPromotion":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_getPromotion(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
+		case "getPlan":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_getPlan(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
+		case "getNews":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_getNews(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
 		case "__type":
 			out.Values[i] = ec._Query___type(ctx, field)
 		case "__schema":
@@ -12669,6 +13087,126 @@ func (ec *executionContext) unmarshalONewVideo2ᚖgithubᚗcomᚋBigListRyRyᚋh
 	}
 	res, err := ec.unmarshalInputNewVideo(ctx, v)
 	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalONews2ᚕgithubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgqlgenᚐNewsᚄ(ctx context.Context, sel ast.SelectionSet, v []News) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNNews2githubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgqlgenᚐNews(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+	return ret
+}
+
+func (ec *executionContext) marshalOPlan2ᚕgithubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgqlgenᚐPlanᚄ(ctx context.Context, sel ast.SelectionSet, v []Plan) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNPlan2githubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgqlgenᚐPlan(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+	return ret
+}
+
+func (ec *executionContext) marshalOPromotion2ᚕgithubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgqlgenᚐPromotionᚄ(ctx context.Context, sel ast.SelectionSet, v []Promotion) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNPromotion2githubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgqlgenᚐPromotion(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+	return ret
 }
 
 func (ec *executionContext) marshalOSponsor2ᚕᚖgithubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgqlgenᚐSponsor(ctx context.Context, sel ast.SelectionSet, v []*Sponsor) graphql.Marshaler {

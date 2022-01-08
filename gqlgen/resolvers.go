@@ -1650,6 +1650,126 @@ func (r *mutationResolver) DeleteTicket(ctx context.Context, input int32) (bool,
 	return true, nil
 }
 
+func (r *queryResolver) GetPlan(ctx context.Context, input int32) (*Plan, error) {
+
+	plan, err := store.GetPlan(ctx, input)
+
+	if err != nil {
+		return nil, err
+	}
+	return &Plan{
+		ID:          plan.ID,
+		Name:        plan.Name,
+		Description: plan.Description,
+		Price:       plan.Price,
+		NoOfDays:    int(plan.NoOfDays),
+	}, nil
+
+}
+
+func (r *queryResolver) GetPromotion(ctx context.Context, input int32) (*Promotion, error) {
+
+	promotion, err := store.GetPromotion(ctx, input)
+
+	if err != nil {
+		return nil, err
+	}
+	return &Promotion{
+		ID:        promotion.ID,
+		UserID:    promotion.EventID,
+		EventID:   promotion.EventID,
+		StartDate: promotion.StartDate.String(),
+		EndDate:   promotion.EndDate.String(),
+	}, nil
+
+}
+
+func (r *queryResolver) GetNews(ctx context.Context, input int32) (*News, error) {
+
+	news, err := store.GetNews(ctx, input)
+
+	if err != nil {
+		return nil, err
+	}
+	return &News{
+		ID:           news.ID,
+		Title:        news.Title,
+		Description:  news.Description,
+		FeatureImage: *&news.FeatureImage.String,
+		Body:         news.Body,
+		PublishDate:  news.PublishDate.String(),
+		Tags:         &news.Tags.String,
+	}, nil
+
+}
+
+func (r *queryResolver) GetAllPlans(ctx context.Context) ([]Plan, error) {
+
+	var plans []Plan
+	allPlans, err := store.GetAllPlans(ctx)
+
+	if err != nil {
+		return nil, err
+	}
+
+	for _, plan := range allPlans {
+		plans = append(plans, Plan{
+			ID:          plan.ID,
+			Name:        plan.Name,
+			Description: plan.Description,
+			Price:       plan.Price,
+			NoOfDays:    int(plan.NoOfDays),
+		})
+	}
+	return plans, nil
+
+}
+
+func (r *queryResolver) GetAllPromotions(ctx context.Context) ([]Promotion, error) {
+	var promotions []Promotion
+	AllPromotions, err := store.GetAllPromotions(ctx)
+
+	if err != nil {
+		return nil, err
+	}
+
+	for _, promotion := range AllPromotions {
+
+		promotions = append(promotions, Promotion{
+			ID:        promotion.ID,
+			UserID:    promotion.EventID,
+			EventID:   promotion.EventID,
+			StartDate: promotion.StartDate.String(),
+			EndDate:   promotion.EndDate.String(),
+		})
+	}
+	return promotions, nil
+
+}
+
+func (r *queryResolver) GetAllNews(ctx context.Context) ([]News, error) {
+	var allNews []News
+
+	dbNews, err := store.GetAllNews(ctx)
+
+	if err != nil {
+		return nil, err
+	}
+	for _, news := range dbNews {
+		allNews = append(allNews, News{
+			ID:           news.ID,
+			Title:        news.Title,
+			Description:  news.Description,
+			FeatureImage: *&news.FeatureImage.String,
+			Body:         news.Body,
+			PublishDate:  news.PublishDate.String(),
+			Tags:         &news.Tags.String,
+		})
+	}
+	return allNews, nil
+
+}
+
 // Mutation returns MutationResolver implementation.
 func (r *Resolver) Mutation() MutationResolver { return &mutationResolver{r} }
 

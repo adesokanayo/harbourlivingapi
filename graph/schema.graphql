@@ -436,4 +436,11 @@ type Query {
         getEventsByLocation(input: GetEventByLocation!): [Event!]
         getCategory( input: ID!): Category!
         getCategories: [Category!]
+        getAllNews: [News!]
+        getAllPlans: [Plan!] 
+        getAllPromotions: [Promotion!]
+        getPromotion(input: ID!): Promotion!
+        getPlan(input: ID!): Plan!
+        getNews(input: ID!): News!
+        
 }

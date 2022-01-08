@@ -6,6 +6,10 @@ WHERE id = @id LIMIT 1;
 DELETE FROM news
 WHERE id = $1;
 
+-- name: GetAllNews :many
+SELECT * from news
+order by id desc;
+
 -- name: CreateNews :one
 INSERT INTO news (
     title,

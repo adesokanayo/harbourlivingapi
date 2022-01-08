@@ -10,6 +10,10 @@ WHERE event_id = @event_id LIMIT 1;
 DELETE FROM promotions
 WHERE id = $1;
 
+-- name: GetAllPromotions :many
+SELECT *  FROM promotions
+order by id desc;
+
 -- name: CreatePromotion :one
 INSERT INTO promotions (
     event_id,

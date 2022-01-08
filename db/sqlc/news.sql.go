@@ -67,6 +67,44 @@ func (q *Queries) DeleteNews(ctx context.Context, id int32) error {
 	return err
 }
 
+const getAllNews = `-- name: GetAllNews :many
+SELECT id, title, description, feature_image, body, user_id, publish_date, tags, created_at from news
+order by id desc
+`
+
+func (q *Queries) GetAllNews(ctx context.Context) ([]News, error) {
+	rows, err := q.db.QueryContext(ctx, getAllNews)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []News{}
+	for rows.Next() {
+		var i News
+		if err := rows.Scan(
+			&i.ID,
+			&i.Title,
+			&i.Description,
+			&i.FeatureImage,
+			&i.Body,
+			&i.UserID,
+			&i.PublishDate,
+			&i.Tags,
+			&i.CreatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getNews = `-- name: GetNews :one
 SELECT id, title, description, feature_image, body, user_id, publish_date, tags, created_at FROM news
 WHERE id = $1 LIMIT 1
