@@ -219,6 +219,13 @@ CREATE TABLE "news" (
                                   "created_at" timestamp NOT NULL DEFAULT (now())
 );
 
+CREATE TABLE "events_views" (
+                                  "id" SERIAL PRIMARY KEY,
+                                  "event_id" int NOT NULL,
+                                  "user_id" int NOT NULL,
+                                  "created_at" timestamp NOT NULL DEFAULT (now())
+);
+
 ALTER TABLE "users" ADD FOREIGN KEY ("usertype") REFERENCES "users_type" ("id");
 
 ALTER TABLE "events" ADD FOREIGN KEY ("venue") REFERENCES "venues" ("id")
@@ -294,6 +301,12 @@ ALTER TABLE "promotions" ADD FOREIGN KEY ("event_id") REFERENCES "events" ("id")
 ALTER TABLE "promotions" ADD FOREIGN KEY ("plan_id") REFERENCES "plans" ("id");
 
 ALTER TABLE "news" ADD FOREIGN KEY ("user_id") REFERENCES "users" ("id");
+
+ALTER TABLE "events_views" ADD FOREIGN KEY ("event_id") REFERENCES "events" ("id")
+ON UPDATE CASCADE ON DELETE CASCADE;
+
+ALTER TABLE "events_views" ADD FOREIGN KEY ("user_id") REFERENCES "users" ("id")
+ON UPDATE CASCADE ON DELETE CASCADE;
 
 
 CREATE INDEX ON "users" ("id");

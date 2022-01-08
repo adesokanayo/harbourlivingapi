@@ -96,6 +96,31 @@ func (q *Queries) CreateFavoriteEvent(ctx context.Context, arg CreateFavoriteEve
 	return i, err
 }
 
+const createViewEvent = `-- name: CreateViewEvent :one
+INSERT INTO events_views (
+    event_id,
+    user_id
+) VALUES
+  ($1, $2) RETURNING id, event_id, user_id, created_at
+`
+
+type CreateViewEventParams struct {
+	EventID int32 `json:"event_id"`
+	UserID  int32 `json:"user_id"`
+}
+
+func (q *Queries) CreateViewEvent(ctx context.Context, arg CreateViewEventParams) (EventsView, error) {
+	row := q.db.QueryRowContext(ctx, createViewEvent, arg.EventID, arg.UserID)
+	var i EventsView
+	err := row.Scan(
+		&i.ID,
+		&i.EventID,
+		&i.UserID,
+		&i.CreatedAt,
+	)
+	return i, err
+}
+
 const deleteEvent = `-- name: DeleteEvent :exec
 DELETE FROM events
 WHERE id = $1
@@ -140,7 +165,7 @@ WHERE category = $1 AND
 e.status = $2 AND e.end_date >= CURRENT_DATE
 ORDER BY e.id desc
 LIMIT $3
-OFFSET $4
+OFFSET $4 ROWS
 `
 
 type GetEventsParams struct {
@@ -351,6 +376,40 @@ func (q *Queries) GetFavoriteEvents(ctx context.Context, userID int32) ([]Events
 	items := []EventsFavorite{}
 	for rows.Next() {
 		var i EventsFavorite
+		if err := rows.Scan(
+			&i.ID,
+			&i.EventID,
+			&i.UserID,
+			&i.CreatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getViewedEvents = `-- name: GetViewedEvents :many
+SELECT id, event_id, user_id, created_at FROM events_views 
+where user_id = $1
+ORDER BY id desc
+`
+
+func (q *Queries) GetViewedEvents(ctx context.Context, userID int32) ([]EventsView, error) {
+	rows, err := q.db.QueryContext(ctx, getViewedEvents, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []EventsView{}
+	for rows.Next() {
+		var i EventsView
 		if err := rows.Scan(
 			&i.ID,
 			&i.EventID,

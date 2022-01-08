@@ -95,6 +95,13 @@ type EventsVideo struct {
 	CreatedAt time.Time `json:"created_at"`
 }
 
+type EventsView struct {
+	ID        int32     `json:"id"`
+	EventID   int32     `json:"event_id"`
+	UserID    int32     `json:"user_id"`
+	CreatedAt time.Time `json:"created_at"`
+}
+
 type Host struct {
 	ID          int32          `json:"id"`
 	UserID      int32          `json:"user_id"`

@@ -35,6 +35,8 @@ type Event struct {
 	Status      int        `json:"status"`
 	Images      []*Image   `json:"images"`
 	Videos      []*Video   `json:"videos"`
+	Meta        *Metadata  `json:"meta"`
+	Promoted    bool       `json:"promoted"`
 }
 
 type EventFavorite struct {
@@ -49,11 +51,17 @@ type EventType struct {
 	Status      int    `json:"status"`
 }
 
+type EventView struct {
+	ID      int32 `json:"id"`
+	EventID int   `json:"event_id"`
+	UserID  int   `json:"user_id"`
+}
+
 type GetEvent struct {
-	Category int `json:"category"`
-	PageSize int `json:"pageSize"`
-	Offset   int `json:"offset"`
-	Status   int `json:"status"`
+	Category   int `json:"category"`
+	PageNumber int `json:"pageNumber"`
+	Limit      int `json:"limit"`
+	Status     int `json:"status"`
 }
 
 type GetEventByLocation struct {
@@ -118,6 +126,11 @@ type NewEvent struct {
 }
 
 type NewEventFavorite struct {
+	EventID int `json:"event_id"`
+	UserID  int `json:"user_id"`
+}
+
+type NewEventView struct {
 	EventID int `json:"event_id"`
 	UserID  int `json:"user_id"`
 }
@@ -389,4 +402,9 @@ type Video struct {
 	EventID int32   `json:"event_id"`
 	Name    *string `json:"name"`
 	URL     string  `json:"url"`
+}
+
+type Metadata struct {
+	TotalView     int32 `json:"total_view"`
+	TotalFavorite int32 `json:"total_favorite"`
 }

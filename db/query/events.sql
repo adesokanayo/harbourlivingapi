@@ -9,7 +9,7 @@ WHERE category = $1 AND
 e.status = $2 AND e.end_date >= CURRENT_DATE
 ORDER BY e.id desc
 LIMIT $3
-OFFSET $4;
+OFFSET $4 ROWS;
 
 -- name: DeleteEvent :exec
 DELETE FROM events
@@ -74,5 +74,17 @@ INSERT INTO events_favorites (
 
 -- name: GetFavoriteEvents :many
 SELECT * FROM events_favorites 
+where user_id = @user_id
+ORDER BY id desc;
+
+-- name: CreateViewEvent :one
+INSERT INTO events_views (
+    event_id,
+    user_id
+) VALUES
+  (@event_id, @user_id) RETURNING *;
+
+-- name: GetViewedEvents :many
+SELECT * FROM events_views 
 where user_id = @user_id
 ORDER BY id desc;

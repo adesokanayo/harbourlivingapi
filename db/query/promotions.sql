@@ -2,9 +2,9 @@
 SELECT * FROM promotions
 WHERE id = @id LIMIT 1;
 
--- name: GetPromotionForEvent :one
+-- name: GetPromotionsForEvent :many
 SELECT * FROM promotions
-WHERE event_id = @event_id LIMIT 1;
+WHERE event_id = @event_id;
 
 -- name: DeletePromotion :exec
 DELETE FROM promotions

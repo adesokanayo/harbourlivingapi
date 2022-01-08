@@ -724,6 +724,7 @@ func (r *queryResolver) GetEvent(ctx context.Context, input int32) (*Event, erro
 	var images []*Image
 	var videos []*Video
 	var tickets []*Ticket
+	var promoted bool
 
 	event, err := store.GetEvent(ctx, input)
 	if err != nil {
@@ -787,6 +788,27 @@ func (r *queryResolver) GetEvent(ctx context.Context, input int32) (*Event, erro
 		})
 	}
 
+	// determine favorites
+	eventsFavorites, err := store.GetFavoriteEvents(ctx, event.ID)
+	if err != nil {
+		return nil, err
+	}
+
+	// get views
+	eventsViews, err := store.GetViewedEvents(ctx, event.ID)
+	if err != nil {
+		return nil, err
+	}
+
+	// check if event is Promoted
+	promotions, err := store.GetPromotionsForEvent(ctx, event.ID)
+	if err != nil {
+		return nil, err
+	}
+	if len(promotions) > 0 {
+		promoted = true
+	}
+
 	return &Event{
 		ID:          event.ID,
 		Title:       event.Title,
@@ -803,6 +825,11 @@ func (r *queryResolver) GetEvent(ctx context.Context, input int32) (*Event, erro
 		Images:      images,
 		Videos:      videos,
 		Tickets:     tickets,
+		Meta: &Metadata{
+			TotalFavorite: int32(len(eventsFavorites)),
+			TotalView:     int32(len(eventsViews)),
+		},
+		Promoted: promoted,
 	}, nil
 }
 
@@ -812,12 +839,13 @@ func (r *queryResolver) GetEvents(ctx context.Context, input GetEvent) ([]Event,
 	var images []*Image
 	var videos []*Video
 	var eventSponsors []*Sponsor
+	var promoted bool
 
 	arg := db.GetEventsParams{
 		Category: int32(input.Category),
 		Status:   int32(input.Status),
-		Limit:    int32(input.PageSize),
-		Offset:   int32(input.Offset),
+		Limit:    int32(input.PageNumber),
+		Offset:   int32((input.PageNumber * input.Limit) - input.Limit),
 	}
 	events, err := store.GetEvents(ctx, arg)
 	if err != nil {
@@ -865,6 +893,15 @@ func (r *queryResolver) GetEvents(ctx context.Context, input GetEvent) ([]Event,
 			})
 		}
 
+		//check if event is promoted
+		promotions, err := store.GetPromotionsForEvent(ctx, event.ID)
+		if err != nil {
+			return nil, err
+		}
+		if len(promotions) > 0 {
+			promoted = true
+		}
+
 		result = append(result, Event{
 			ID:          event.ID,
 			Title:       event.Title,
@@ -879,6 +916,7 @@ func (r *queryResolver) GetEvents(ctx context.Context, input GetEvent) ([]Event,
 			Sponsors:    eventSponsors,
 			Images:      images,
 			Videos:      videos,
+			Promoted:    promoted,
 		})
 	}
 
@@ -1768,6 +1806,25 @@ func (r *queryResolver) GetAllNews(ctx context.Context) ([]News, error) {
 	}
 	return allNews, nil
 
+}
+
+func (r *mutationResolver) CreateEventView(ctx context.Context, input NewEventView) (*EventView, error) {
+
+	arg := db.CreateViewEventParams{
+		EventID: int32(input.EventID),
+		UserID:  int32(input.UserID),
+	}
+
+	eventView, err := store.CreateViewEvent(ctx, arg)
+	if err != nil {
+		return nil, err
+	}
+
+	return &EventView{
+		ID:      eventView.ID,
+		EventID: int(eventView.EventID),
+		UserID:  int(eventView.UserID),
+	}, nil
 }
 
 // Mutation returns MutationResolver implementation.

@@ -114,24 +114,40 @@ func (q *Queries) GetPromotion(ctx context.Context, id int32) (Promotion, error)
 	return i, err
 }
 
-const getPromotionForEvent = `-- name: GetPromotionForEvent :one
+const getPromotionsForEvent = `-- name: GetPromotionsForEvent :many
 SELECT id, event_id, user_id, plan_id, start_date, end_date, created_at FROM promotions
-WHERE event_id = $1 LIMIT 1
+WHERE event_id = $1
 `
 
-func (q *Queries) GetPromotionForEvent(ctx context.Context, eventID int32) (Promotion, error) {
-	row := q.db.QueryRowContext(ctx, getPromotionForEvent, eventID)
-	var i Promotion
-	err := row.Scan(
-		&i.ID,
-		&i.EventID,
-		&i.UserID,
-		&i.PlanID,
-		&i.StartDate,
-		&i.EndDate,
-		&i.CreatedAt,
-	)
-	return i, err
+func (q *Queries) GetPromotionsForEvent(ctx context.Context, eventID int32) ([]Promotion, error) {
+	rows, err := q.db.QueryContext(ctx, getPromotionsForEvent, eventID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []Promotion{}
+	for rows.Next() {
+		var i Promotion
+		if err := rows.Scan(
+			&i.ID,
+			&i.EventID,
+			&i.UserID,
+			&i.PlanID,
+			&i.StartDate,
+			&i.EndDate,
+			&i.CreatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
 
 const updatePromotion = `-- name: UpdatePromotion :one

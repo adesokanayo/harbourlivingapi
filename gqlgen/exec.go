@@ -66,6 +66,8 @@ type ComplexityRoot struct {
 		HostID      func(childComplexity int) int
 		ID          func(childComplexity int) int
 		Images      func(childComplexity int) int
+		Meta        func(childComplexity int) int
+		Promoted    func(childComplexity int) int
 		Sponsors    func(childComplexity int) int
 		StartDate   func(childComplexity int) int
 		Status      func(childComplexity int) int
@@ -87,6 +89,12 @@ type ComplexityRoot struct {
 		Description func(childComplexity int) int
 		ID          func(childComplexity int) int
 		Status      func(childComplexity int) int
+	}
+
+	EventView struct {
+		EventID func(childComplexity int) int
+		ID      func(childComplexity int) int
+		UserID  func(childComplexity int) int
 	}
 
 	Host struct {
@@ -116,6 +124,7 @@ type ComplexityRoot struct {
 		CreateCategory        func(childComplexity int, input NewCategory) int
 		CreateEvent           func(childComplexity int, input NewEvent) int
 		CreateEventFavorite   func(childComplexity int, input NewEventFavorite) int
+		CreateEventView       func(childComplexity int, input NewEventView) int
 		CreateNews            func(childComplexity int, input NewNews) int
 		CreatePlan            func(childComplexity int, input NewPlan) int
 		CreatePromotion       func(childComplexity int, input NewPromotion) int
@@ -255,6 +264,11 @@ type ComplexityRoot struct {
 		Name    func(childComplexity int) int
 		URL     func(childComplexity int) int
 	}
+
+	Metadata struct {
+		TotalFavorite func(childComplexity int) int
+		TotalView     func(childComplexity int) int
+	}
 }
 
 type MutationResolver interface {
@@ -269,6 +283,7 @@ type MutationResolver interface {
 	CreatePlan(ctx context.Context, input NewPlan) (*Plan, error)
 	CreatePromotion(ctx context.Context, input NewPromotion) (*Promotion, error)
 	CreateNews(ctx context.Context, input NewNews) (*News, error)
+	CreateEventView(ctx context.Context, input NewEventView) (*EventView, error)
 	UpdateEvent(ctx context.Context, input UpdateEvent) (*Event, error)
 	UpdateEventStatus(ctx context.Context, input UpdateEventStatus) (*UpdateEventState, error)
 	UpdateArtist(ctx context.Context, input UpdateArtist) (*Artist, error)
@@ -435,6 +450,20 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Event.Images(childComplexity), true
 
+	case "Event.meta":
+		if e.complexity.Event.Meta == nil {
+			break
+		}
+
+		return e.complexity.Event.Meta(childComplexity), true
+
+	case "Event.promoted":
+		if e.complexity.Event.Promoted == nil {
+			break
+		}
+
+		return e.complexity.Event.Promoted(childComplexity), true
+
 	case "Event.sponsors":
 		if e.complexity.Event.Sponsors == nil {
 			break
@@ -539,6 +568,27 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.EventType.Status(childComplexity), true
+
+	case "EventView.event_id":
+		if e.complexity.EventView.EventID == nil {
+			break
+		}
+
+		return e.complexity.EventView.EventID(childComplexity), true
+
+	case "EventView.id":
+		if e.complexity.EventView.ID == nil {
+			break
+		}
+
+		return e.complexity.EventView.ID(childComplexity), true
+
+	case "EventView.user_id":
+		if e.complexity.EventView.UserID == nil {
+			break
+		}
+
+		return e.complexity.EventView.UserID(childComplexity), true
 
 	case "Host.avatar":
 		if e.complexity.Host.Avatar == nil {
@@ -673,6 +723,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.CreateEventFavorite(childComplexity, args["input"].(NewEventFavorite)), true
+
+	case "Mutation.createEventView":
+		if e.complexity.Mutation.CreateEventView == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_createEventView_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.CreateEventView(childComplexity, args["input"].(NewEventView)), true
 
 	case "Mutation.createNews":
 		if e.complexity.Mutation.CreateNews == nil {
@@ -1543,6 +1605,20 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Video.URL(childComplexity), true
 
+	case "metadata.total_favorite":
+		if e.complexity.Metadata.TotalFavorite == nil {
+			break
+		}
+
+		return e.complexity.Metadata.TotalFavorite(childComplexity), true
+
+	case "metadata.total_view":
+		if e.complexity.Metadata.TotalView == nil {
+			break
+		}
+
+		return e.complexity.Metadata.TotalView(childComplexity), true
+
 	}
 	return 0, false
 }
@@ -1669,6 +1745,8 @@ type Event {
         status: Int!
         images: [Image]
         videos: [Video]
+        meta: metadata
+        promoted: Boolean!
         }
 
 type Venue {
@@ -1739,8 +1817,8 @@ input NewVenue {
 
 input GetEvent{
         category: Int!
-        pageSize: Int!
-        offset: Int!
+        pageNumber: Int!
+        limit: Int!
         status: Int!
 }
 
@@ -2002,6 +2080,22 @@ input UpdateNews {
         tags : String
 }
 
+type metadata {
+  total_view: ID!
+  total_favorite: ID!
+}
+
+type EventView{
+  id : ID!
+  event_id : Int!
+  user_id: Int!
+}
+
+input NewEventView{
+    event_id: Int!
+    user_id: Int!
+}
+
 type Mutation {
         createCategory(input : NewCategory!): Category!
         createVenue(input: NewVenue!): Venue!
@@ -2014,6 +2108,7 @@ type Mutation {
         createPlan(input : NewPlan!): Plan!
         createPromotion(input : NewPromotion!): Promotion!
         createNews(input :NewNews!): News!
+        createEventView(input : NewEventView!): EventView!
 
         """ update """ 
         updateEvent(input: UpdateEvent!):Event!
@@ -2082,6 +2177,21 @@ func (ec *executionContext) field_Mutation_createEventFavorite_args(ctx context.
 	if tmp, ok := rawArgs["input"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
 		arg0, err = ec.unmarshalNNewEventFavorite2githubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgqlgenᚐNewEventFavorite(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["input"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_createEventView_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 NewEventView
+	if tmp, ok := rawArgs["input"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+		arg0, err = ec.unmarshalNNewEventView2githubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgqlgenᚐNewEventView(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -3512,6 +3622,73 @@ func (ec *executionContext) _Event_videos(ctx context.Context, field graphql.Col
 	return ec.marshalOVideo2ᚕᚖgithubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgqlgenᚐVideo(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _Event_meta(ctx context.Context, field graphql.CollectedField, obj *Event) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Event",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Meta, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*Metadata)
+	fc.Result = res
+	return ec.marshalOmetadata2ᚖgithubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgqlgenᚐMetadata(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Event_promoted(ctx context.Context, field graphql.CollectedField, obj *Event) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Event",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Promoted, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(bool)
+	fc.Result = res
+	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _EventFavorite_id(ctx context.Context, field graphql.CollectedField, obj *EventFavorite) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -3706,6 +3883,111 @@ func (ec *executionContext) _EventType_status(ctx context.Context, field graphql
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Status, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _EventView_id(ctx context.Context, field graphql.CollectedField, obj *EventView) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "EventView",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int32)
+	fc.Result = res
+	return ec.marshalNID2int32(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _EventView_event_id(ctx context.Context, field graphql.CollectedField, obj *EventView) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "EventView",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.EventID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _EventView_user_id(ctx context.Context, field graphql.CollectedField, obj *EventView) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "EventView",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.UserID, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -4651,6 +4933,48 @@ func (ec *executionContext) _Mutation_createNews(ctx context.Context, field grap
 	res := resTmp.(*News)
 	fc.Result = res
 	return ec.marshalNNews2ᚖgithubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgqlgenᚐNews(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Mutation_createEventView(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_createEventView_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().CreateEventView(rctx, args["input"].(NewEventView))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*EventView)
+	fc.Result = res
+	return ec.marshalNEventView2ᚖgithubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgqlgenᚐEventView(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Mutation_updateEvent(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -9165,6 +9489,76 @@ func (ec *executionContext) ___Type_ofType(ctx context.Context, field graphql.Co
 	return ec.marshalO__Type2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐType(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _metadata_total_view(ctx context.Context, field graphql.CollectedField, obj *Metadata) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "metadata",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.TotalView, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int32)
+	fc.Result = res
+	return ec.marshalNID2int32(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _metadata_total_favorite(ctx context.Context, field graphql.CollectedField, obj *Metadata) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "metadata",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.TotalFavorite, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int32)
+	fc.Result = res
+	return ec.marshalNID2int32(ctx, field.Selections, res)
+}
+
 // endregion **************************** field.gotpl *****************************
 
 // region    **************************** input.gotpl *****************************
@@ -9183,19 +9577,19 @@ func (ec *executionContext) unmarshalInputGetEvent(ctx context.Context, obj inte
 			if err != nil {
 				return it, err
 			}
-		case "pageSize":
+		case "pageNumber":
 			var err error
 
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("pageSize"))
-			it.PageSize, err = ec.unmarshalNInt2int(ctx, v)
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("pageNumber"))
+			it.PageNumber, err = ec.unmarshalNInt2int(ctx, v)
 			if err != nil {
 				return it, err
 			}
-		case "offset":
+		case "limit":
 			var err error
 
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("offset"))
-			it.Offset, err = ec.unmarshalNInt2int(ctx, v)
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("limit"))
+			it.Limit, err = ec.unmarshalNInt2int(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -9459,6 +9853,34 @@ func (ec *executionContext) unmarshalInputNewEvent(ctx context.Context, obj inte
 
 func (ec *executionContext) unmarshalInputNewEventFavorite(ctx context.Context, obj interface{}) (NewEventFavorite, error) {
 	var it NewEventFavorite
+	var asMap = obj.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "event_id":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("event_id"))
+			it.EventID, err = ec.unmarshalNInt2int(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "user_id":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("user_id"))
+			it.UserID, err = ec.unmarshalNInt2int(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputNewEventView(ctx context.Context, obj interface{}) (NewEventView, error) {
+	var it NewEventView
 	var asMap = obj.(map[string]interface{})
 
 	for k, v := range asMap {
@@ -10765,6 +11187,13 @@ func (ec *executionContext) _Event(ctx context.Context, sel ast.SelectionSet, ob
 			out.Values[i] = ec._Event_images(ctx, field, obj)
 		case "videos":
 			out.Values[i] = ec._Event_videos(ctx, field, obj)
+		case "meta":
+			out.Values[i] = ec._Event_meta(ctx, field, obj)
+		case "promoted":
+			out.Values[i] = ec._Event_promoted(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -10836,6 +11265,43 @@ func (ec *executionContext) _EventType(ctx context.Context, sel ast.SelectionSet
 			}
 		case "status":
 			out.Values[i] = ec._EventType_status(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var eventViewImplementors = []string{"EventView"}
+
+func (ec *executionContext) _EventView(ctx context.Context, sel ast.SelectionSet, obj *EventView) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, eventViewImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("EventView")
+		case "id":
+			out.Values[i] = ec._EventView_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "event_id":
+			out.Values[i] = ec._EventView_event_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "user_id":
+			out.Values[i] = ec._EventView_user_id(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
@@ -11032,6 +11498,11 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			}
 		case "createNews":
 			out.Values[i] = ec._Mutation_createNews(ctx, field)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "createEventView":
+			out.Values[i] = ec._Mutation_createEventView(ctx, field)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
@@ -12062,6 +12533,38 @@ func (ec *executionContext) ___Type(ctx context.Context, sel ast.SelectionSet, o
 	return out
 }
 
+var metadataImplementors = []string{"metadata"}
+
+func (ec *executionContext) _metadata(ctx context.Context, sel ast.SelectionSet, obj *Metadata) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, metadataImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("metadata")
+		case "total_view":
+			out.Values[i] = ec._metadata_total_view(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "total_favorite":
+			out.Values[i] = ec._metadata_total_favorite(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
 // endregion **************************** object.gotpl ****************************
 
 // region    ***************************** type.gotpl *****************************
@@ -12189,6 +12692,20 @@ func (ec *executionContext) marshalNEventFavorite2ᚖgithubᚗcomᚋBigListRyRy�
 	return ec._EventFavorite(ctx, sel, v)
 }
 
+func (ec *executionContext) marshalNEventView2githubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgqlgenᚐEventView(ctx context.Context, sel ast.SelectionSet, v EventView) graphql.Marshaler {
+	return ec._EventView(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNEventView2ᚖgithubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgqlgenᚐEventView(ctx context.Context, sel ast.SelectionSet, v *EventView) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._EventView(ctx, sel, v)
+}
+
 func (ec *executionContext) unmarshalNFloat2float64(ctx context.Context, v interface{}) (float64, error) {
 	res, err := graphql.UnmarshalFloat(v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -12275,6 +12792,11 @@ func (ec *executionContext) unmarshalNNewEvent2githubᚗcomᚋBigListRyRyᚋharb
 
 func (ec *executionContext) unmarshalNNewEventFavorite2githubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgqlgenᚐNewEventFavorite(ctx context.Context, v interface{}) (NewEventFavorite, error) {
 	res, err := ec.unmarshalInputNewEventFavorite(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalNNewEventView2githubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgqlgenᚐNewEventView(ctx context.Context, v interface{}) (NewEventView, error) {
+	res, err := ec.unmarshalInputNewEventView(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
@@ -13640,6 +14162,13 @@ func (ec *executionContext) marshalO__Type2ᚖgithubᚗcomᚋ99designsᚋgqlgen�
 		return graphql.Null
 	}
 	return ec.___Type(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalOmetadata2ᚖgithubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgqlgenᚐMetadata(ctx context.Context, sel ast.SelectionSet, v *Metadata) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._metadata(ctx, sel, v)
 }
 
 // endregion ***************************** type.gotpl *****************************

@@ -60,6 +60,8 @@ type Event {
         status: Int!
         images: [Image]
         videos: [Video]
+        meta: metadata
+        promoted: Boolean!
         }
 
 type Venue {
@@ -130,8 +132,8 @@ input NewVenue {
 
 input GetEvent{
         category: Int!
-        pageSize: Int!
-        offset: Int!
+        pageNumber: Int!
+        limit: Int!
         status: Int!
 }
 
@@ -393,6 +395,22 @@ input UpdateNews {
         tags : String
 }
 
+type metadata {
+  total_view: ID!
+  total_favorite: ID!
+}
+
+type EventView{
+  id : ID!
+  event_id : Int!
+  user_id: Int!
+}
+
+input NewEventView{
+    event_id: Int!
+    user_id: Int!
+}
+
 type Mutation {
         createCategory(input : NewCategory!): Category!
         createVenue(input: NewVenue!): Venue!
@@ -405,6 +423,7 @@ type Mutation {
         createPlan(input : NewPlan!): Plan!
         createPromotion(input : NewPromotion!): Promotion!
         createNews(input :NewNews!): News!
+        createEventView(input : NewEventView!): EventView!
 
         """ update """ 
         updateEvent(input: UpdateEvent!):Event!
