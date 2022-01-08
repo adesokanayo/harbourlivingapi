@@ -382,11 +382,11 @@ VALUES
 (
   'demoTitle','demo description','https://demobannerurl','2022-01-01T14:00:12-00:00','2022-01-01T14:00:12-00:00','1','1','1','1','1');
 
-INSERT INTO plans ("name", "description","price","no_of_days")
+INSERT INTO plans ("name", "description", "price", "no_of_days")
 VALUES(
   'Standard Plan','Bess plan for low budget','20.00','10');
 
 
 INSERT INTO promotions ("event_id", "user_id","plan_id","start_date","end_date")
 VALUES(
-  '1','1','1','10','2022-01-01T14:00:12-00:00','2022-03-01T14:00:12-00:00');
+  '1','1','1','2022-01-01T14:00:12-00:00','2022-03-01T14:00:12-00:00');
