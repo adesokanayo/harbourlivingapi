@@ -8,6 +8,7 @@ import (
 	"time"
 
 	db "github.com/BigListRyRy/harbourlivingapi/db/sqlc"
+	"github.com/BigListRyRy/harbourlivingapi/token"
 	"github.com/BigListRyRy/harbourlivingapi/util"
 	"github.com/gin-gonic/gin"
 )
@@ -24,7 +25,7 @@ type CreateUserRequest struct {
 }
 
 type GetUserRequest struct {
-	ID int32 `uri:"id", binding:"required",min=1;`
+	ID int32 `uri:"id", binding:"required",min="1";`
 }
 
 type loginUserRequest struct {
@@ -91,7 +92,7 @@ func (s *Server) CreateUser(ctx *gin.Context) {
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return
 	}
-	dateOrTime, err := util.ProcessDateTime("dob",req.DateOfBirth)
+	dateOrTime, err := util.ProcessDateTime("dob", req.DateOfBirth)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return
@@ -159,7 +160,14 @@ func (s *Server) Login(ctx *gin.Context) {
 		return
 	}
 
-	token, err := s.tokenMaker.CreateToken(user.Username, time.Minute)
+	userinfo := token.UserInfo{
+		UserID:   int(user.ID),
+		Username: user.Username,
+		Email:    user.Email,
+		UserType: int(user.Usertype),
+	}
+
+	token, err := s.tokenMaker.CreateToken(userinfo, time.Minute)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return

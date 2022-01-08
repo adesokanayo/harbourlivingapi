@@ -10,16 +10,26 @@ import (
 	"time"
 
 	db "github.com/BigListRyRy/harbourlivingapi/db/sqlc"
+	"github.com/BigListRyRy/harbourlivingapi/middleware"
 	token "github.com/BigListRyRy/harbourlivingapi/token"
 	"github.com/BigListRyRy/harbourlivingapi/util"
 	_ "github.com/lib/pq"
 	"github.com/pkg/errors"
 )
 
+const (
+	AttendeeHarbour HarbourUserTypes = iota
+	HostHarbour
+	SponsorHarbour
+	AdminHarbour
+)
+
 var (
 	store *db.Store
 )
 var tokenMaker token.Maker
+
+type HarbourUserTypes int
 
 func init() {
 	config, err := util.LoadConfig(".")
@@ -196,6 +206,10 @@ func (r *mutationResolver) CreateUser(ctx context.Context, input NewUser) (*User
 
 func (r *mutationResolver) CreateCategory(ctx context.Context, input NewCategory) (*Category, error) {
 
+	userinfo := middleware.CtxValue(ctx)
+	if userinfo.UserType != int(AdminHarbour) {
+		return nil, errors.New(util.ErrPermissionDenied)
+	}
 	arg := db.CreateCategoryParams{}
 
 	if input.Image != nil {
@@ -203,6 +217,7 @@ func (r *mutationResolver) CreateCategory(ctx context.Context, input NewCategory
 	}
 	arg.Description = input.Description
 	arg.Status = int32(input.Status)
+	
 	category, err := store.CreateCategory(ctx, arg)
 
 	if err != nil {
@@ -599,7 +614,14 @@ func (r *mutationResolver) Login(ctx context.Context, input Login) (*LoginRespon
 		return nil, errors.New("invalid username & password combination")
 	}
 
-	token, err := tokenMaker.CreateToken(user.Username, time.Hour*24)
+	userinfo := token.UserInfo{
+		UserID:   int(user.ID),
+		Username: user.Username,
+		Email:    user.Email,
+		UserType: int(user.Usertype),
+	}
+
+	token, err := tokenMaker.CreateToken(userinfo, time.Hour*24)
 	if err != nil {
 		return nil, errors.New("unable to create token")
 	}
@@ -624,7 +646,22 @@ func (r *mutationResolver) RefreshToken(ctx context.Context, input RefreshTokenI
 		return nil, errors.New("invalid token")
 	}
 
-	token, err := tokenMaker.CreateToken(username, time.Hour*24)
+	user, err := store.GetUsername(ctx, username)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, errors.New("invalid user")
+		}
+		return nil, err
+	}
+
+	userinfo := token.UserInfo{
+		UserID:   int(user.ID),
+		Username: user.Username,
+		Email:    user.Email,
+		UserType: int(user.Usertype),
+	}
+
+	token, err := tokenMaker.CreateToken(userinfo, time.Hour*24)
 	if err != nil {
 		return nil, err
 	}
@@ -1204,9 +1241,11 @@ func (q *queryResolver) GetCategories(ctx context.Context) ([]Category, error) {
 
 func (r *mutationResolver) CreateEventFavorite(ctx context.Context, input NewEventFavorite) (*EventFavorite, error) {
 
+	userinfo := middleware.CtxValue(ctx)
+
 	arg := db.CreateFavoriteEventParams{
 		EventID: int32(input.EventID),
-		UserID:  int32(input.UserID),
+		UserID:  int32(userinfo.UserID),
 	}
 
 	eventFavorite, err := store.CreateFavoriteEvent(ctx, arg)

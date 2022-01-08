@@ -1,5 +1,9 @@
 package util
 
+const (
+	ErrPermissionDenied = "You are not allowed to perform this operation"
+)
+
 type CustomError struct {
 	errMessage string
 	code       int

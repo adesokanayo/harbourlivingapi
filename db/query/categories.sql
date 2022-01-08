@@ -20,4 +20,4 @@ INSERT INTO categories (
     image,
     status
 ) VALUES
-  (@description, @image, @status) RETURNING *;
+  ( @description, @image, @status) RETURNING *;

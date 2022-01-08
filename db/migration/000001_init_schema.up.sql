@@ -333,7 +333,8 @@ INSERT  INTO users_type ( "description", "status")
 VALUES
     ('Attendee',1),
     ('Host',1),
-    ('Sponsor',1);
+    ('Sponsor',1),
+    ('Admin',1);
 
 INSERT  INTO events_type ("description", "status")
 VALUES
@@ -388,7 +389,7 @@ VALUES
 INSERT INTO users ("phone", "first_name", "last_name","username","password", "email","usertype","date_of_birth")
 VALUES
 (
-  '08067648635','demofirstname','demolastname','demouser','passsword','demouser@gmail.com','1','2022-01-01T14:00:12-00:00');
+  '08067648635','demofirstname','demolastname','demouser','$2a$10$cutZ4yVSagcNMjD8ofqP3eTT4iaOFu1MlZjM977E4ZJLdSrXkV48q','demouser@gmail.com','1','2022-01-01T14:00:12-00:00');
 
 INSERT INTO events ("title", "description", "banner_image","start_date","end_date", "venue","type","user_id","category","status")
 VALUES

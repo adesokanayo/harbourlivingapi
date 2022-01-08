@@ -13,13 +13,19 @@ func TestJWTMaker(t *testing.T) {
 	maker, err := NewJWTMaker(util.RandomString(32))
 	require.NoError(t, err)
 
-	username := util.RandomOwner()
 	duration := time.Minute
 
 	issuedAt := time.Now()
 	expiredAt := issuedAt.Add(duration)
 
-	token, err := maker.CreateToken(username, duration)
+	userinfo := UserInfo{
+		UserID:   1,
+		Username: util.RandomOwner(),
+		Email:    util.RandomEmail(),
+		UserType: 1,
+	}
+
+	token, err := maker.CreateToken(userinfo, duration)
 	require.NoError(t, err)
 	require.NotEmpty(t, token)
 
@@ -28,7 +34,10 @@ func TestJWTMaker(t *testing.T) {
 	require.NotEmpty(t, token)
 
 	require.NotZero(t, payload.ID)
-	require.Equal(t, username, payload.Username)
+	require.Equal(t, userinfo.Username, payload.Username)
+	require.Equal(t, userinfo.Email, payload.Email)
+	require.Equal(t, userinfo.UserType, payload.UserType)
+	require.Equal(t, userinfo.UserID, payload.UserID)
 	require.WithinDuration(t, issuedAt, payload.IssuedAt, time.Second)
 	require.WithinDuration(t, expiredAt, payload.ExpiredAt, time.Second)
 }
@@ -37,7 +46,14 @@ func TestExpiredJWTToken(t *testing.T) {
 	maker, err := NewJWTMaker(util.RandomString(32))
 	require.NoError(t, err)
 
-	token, err := maker.CreateToken(util.RandomOwner(), -time.Minute)
+	userinfo := UserInfo{
+		UserID:   1,
+		Username: util.RandomOwner(),
+		Email:    util.RandomEmail(),
+		UserType: 1,
+	}
+
+	token, err := maker.CreateToken(userinfo, -time.Minute)
 	require.NoError(t, err)
 	require.NotEmpty(t, token)
 
@@ -48,7 +64,14 @@ func TestExpiredJWTToken(t *testing.T) {
 }
 
 func TestInvalidJWTTokenAlgNone(t *testing.T) {
-	payload, err := NewPayload(util.RandomOwner(), time.Minute)
+
+	userinfo := UserInfo{
+		UserID:   1,
+		Username: util.RandomOwner(),
+		Email:    util.RandomEmail(),
+		UserType: 1,
+	}
+	payload, err := NewPayload(userinfo, time.Minute)
 	require.NoError(t, err)
 
 	jwtToken := jwt.NewWithClaims(jwt.SigningMethodNone, payload)
@@ -68,14 +91,20 @@ func TestParseToken(t *testing.T) {
 	secret := util.RandomString(32)
 	maker, err := NewJWTMaker(secret)
 	require.NoError(t, err)
-	user := util.RandomOwner()
 
-	token, err := maker.CreateToken(user, time.Minute)
+	userinfo := UserInfo{
+		UserID:   1,
+		Username: util.RandomOwner(),
+		Email:    util.RandomEmail(),
+		UserType: 1,
+	}
+
+	token, err := maker.CreateToken(userinfo, time.Minute)
 	require.NoError(t, err)
 	require.NotEmpty(t, token)
 
 	username, err := maker.ParseToken(token)
 	require.NoError(t, err)
 	require.NotNil(t, username)
-	require.Equal(t, user, username)
+	require.Equal(t, userinfo.Username, username)
 }
