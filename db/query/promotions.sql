@@ -3,8 +3,9 @@ SELECT * FROM promotions
 WHERE id = @id LIMIT 1;
 
 -- name: GetPromotionsForEvent :many
-SELECT * FROM promotions
-WHERE event_id = @event_id;
+SELECT * FROM promotions p
+WHERE event_id = @event_id AND
+p.end_date >= CURRENT_DATE;
 
 -- name: DeletePromotion :exec
 DELETE FROM promotions

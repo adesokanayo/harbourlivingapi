@@ -115,8 +115,9 @@ func (q *Queries) GetPromotion(ctx context.Context, id int32) (Promotion, error)
 }
 
 const getPromotionsForEvent = `-- name: GetPromotionsForEvent :many
-SELECT id, event_id, user_id, plan_id, start_date, end_date, created_at FROM promotions
-WHERE event_id = $1
+SELECT id, event_id, user_id, plan_id, start_date, end_date, created_at FROM promotions p
+WHERE event_id = $1 AND
+p.end_date >= CURRENT_DATE
 `
 
 func (q *Queries) GetPromotionsForEvent(ctx context.Context, eventID int32) ([]Promotion, error) {
