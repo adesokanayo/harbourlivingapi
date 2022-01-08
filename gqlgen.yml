@@ -3,11 +3,11 @@
 
 schema: graph/schema.graphql
 exec:
-  filename: gqlgen/exec.go
+  filename: graphql/exec.go
 model:
-  filename: gqlgen/model.go
+  filename: graphql/model.go
 resolver:
-  package: gqlgen
+  package: graphql
   filename_template: "{name}.resolvers.go"
   type: Resolver
 

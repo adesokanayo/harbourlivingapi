@@ -2,11 +2,13 @@ package api
 
 import (
 	"fmt"
+
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/playground"
 	db "github.com/BigListRyRy/harbourlivingapi/db/sqlc"
 	_ "github.com/BigListRyRy/harbourlivingapi/docs"
-	gqlgen "github.com/BigListRyRy/harbourlivingapi/gqlgen"
+
+	"github.com/BigListRyRy/harbourlivingapi/graphql"
 	"github.com/BigListRyRy/harbourlivingapi/token"
 	"github.com/BigListRyRy/harbourlivingapi/util"
 	"github.com/gin-gonic/gin"
@@ -67,7 +69,7 @@ func (s *Server) Start(address string) error {
 func graphqlHandler() gin.HandlerFunc {
 	// NewExecutableSchema and Config are in the generated.go file
 	// Resolver is in the resolver.go file
-	h := handler.NewDefaultServer(gqlgen.NewExecutableSchema(gqlgen.Config{Resolvers: &gqlgen.Resolver{}}))
+	h := handler.NewDefaultServer(graphql.NewExecutableSchema(graphql.Config{Resolvers: &graphql.Resolver{}}))
 
 	return func(c *gin.Context) {
 		h.ServeHTTP(c.Writer, c.Request)

@@ -7,19 +7,23 @@ import (
 
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/playground"
-	"github.com/BigListRyRy/harbourlivingapi/gqlgen"
+	"github.com/BigListRyRy/harbourlivingapi/graphql"
 	"github.com/BigListRyRy/harbourlivingapi/middleware"
 )
 
 const defaultPort = "3007"
 
 func main() {
+	start()
+}
+
+func start() {
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = defaultPort
 	}
 
-	srv := handler.NewDefaultServer(gqlgen.NewExecutableSchema(gqlgen.Config{Resolvers: &gqlgen.Resolver{}}))
+	srv := handler.NewDefaultServer(graphql.NewExecutableSchema(graphql.Config{Resolvers: &graphql.Resolver{}}))
 
 	http.Handle("/", playground.Handler("GraphQL playground", "/query"))
 	http.Handle("/query", middleware.AuthMiddleware(CorsMiddleware(srv)))
