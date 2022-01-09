@@ -226,6 +226,27 @@ CREATE TABLE "events_views" (
                                   "created_at" timestamp NOT NULL DEFAULT (now())
 );
 
+CREATE TABLE "schedules" (
+                                  "id" SERIAL PRIMARY KEY,
+                                  "event_id" int NOT NULL,
+                                  "date" timestamp NOT NULL,
+                                  "start_time" time  NOT NULL,
+                                  "end_time" time NOT NULL,
+                                  "created_at" timestamp NOT NULL DEFAULT (now())
+);
+
+
+CREATE TABLE "dayplans" (
+                                  "id" SERIAL PRIMARY KEY,
+                                  "start_time" time NOT NULL,
+                                  "end_time" time NOT NULL,
+                                  "schedule_id" int NOT NULL,
+                                  "title" varchar,
+                                  "description" varchar,
+                                  "performer_name" varchar,
+                                  "created_at" timestamp NOT NULL DEFAULT (now())
+);
+
 ALTER TABLE "users" ADD FOREIGN KEY ("usertype") REFERENCES "users_type" ("id");
 
 ALTER TABLE "events" ADD FOREIGN KEY ("venue") REFERENCES "venues" ("id")
@@ -306,6 +327,12 @@ ALTER TABLE "events_views" ADD FOREIGN KEY ("event_id") REFERENCES "events" ("id
 ON UPDATE CASCADE ON DELETE CASCADE;
 
 ALTER TABLE "events_views" ADD FOREIGN KEY ("user_id") REFERENCES "users" ("id")
+ON UPDATE CASCADE ON DELETE CASCADE;
+
+ALTER TABLE "schedules" ADD FOREIGN KEY ("event_id") REFERENCES "events" ("id")
+ON UPDATE CASCADE ON DELETE CASCADE;
+
+ALTER TABLE "dayplans" ADD FOREIGN KEY ("schedule_id") REFERENCES "schedules" ("id")
 ON UPDATE CASCADE ON DELETE CASCADE;
 
 

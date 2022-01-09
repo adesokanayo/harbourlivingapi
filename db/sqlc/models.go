@@ -24,6 +24,17 @@ type Category struct {
 	CreatedAt   sql.NullTime   `json:"created_at"`
 }
 
+type Dayplan struct {
+	ID            int32          `json:"id"`
+	StartTime     time.Time      `json:"start_time"`
+	EndTime       time.Time      `json:"end_time"`
+	ScheduleID    int32          `json:"schedule_id"`
+	Title         sql.NullString `json:"title"`
+	Description   sql.NullString `json:"description"`
+	PerformerName sql.NullString `json:"performer_name"`
+	CreatedAt     time.Time      `json:"created_at"`
+}
+
 type Event struct {
 	ID          int32         `json:"id"`
 	Title       string        `json:"title"`
@@ -145,6 +156,15 @@ type Promotion struct {
 	PlanID    int32     `json:"plan_id"`
 	StartDate time.Time `json:"start_date"`
 	EndDate   time.Time `json:"end_date"`
+	CreatedAt time.Time `json:"created_at"`
+}
+
+type Schedule struct {
+	ID        int32     `json:"id"`
+	EventID   int32     `json:"event_id"`
+	Date      time.Time `json:"date"`
+	StartTime time.Time `json:"start_time"`
+	EndTime   time.Time `json:"end_time"`
 	CreatedAt time.Time `json:"created_at"`
 }
 

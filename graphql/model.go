@@ -2,6 +2,10 @@
 
 package graphql
 
+import (
+	"time"
+)
+
 type Artist struct {
 	ID          int32    `json:"id"`
 	UserID      int      `json:"user_id"`
@@ -16,6 +20,16 @@ type Category struct {
 	Description string `json:"description"`
 	Image       string `json:"image"`
 	Status      int    `json:"status"`
+}
+
+type DayPlan struct {
+	ID            int32     `json:"id"`
+	StartTime     time.Time `json:"start_time"`
+	EndTime       time.Time `json:"end_time"`
+	ScheduleID    int32     `json:"schedule_id"`
+	Title         *string   `json:"title"`
+	Description   *string   `json:"description"`
+	PerformerName *string   `json:"performer_name"`
 }
 
 type Event struct {
@@ -109,6 +123,15 @@ type NewCategory struct {
 	Status      int     `json:"status"`
 }
 
+type NewDayPlan struct {
+	StartTime     time.Time `json:"start_time"`
+	EndTime       time.Time `json:"end_time"`
+	ScheduleID    int32     `json:"schedule_id"`
+	Title         *string   `json:"title"`
+	Description   *string   `json:"description"`
+	PerformerName *string   `json:"performer_name"`
+}
+
 type NewEvent struct {
 	Title       string       `json:"title"`
 	Description string       `json:"description"`
@@ -168,6 +191,13 @@ type NewPromotion struct {
 	PlanID    int32  `json:"plan_id"`
 	StartDate string `json:"start_date"`
 	EndDate   string `json:"end_date"`
+}
+
+type NewSchedule struct {
+	EventID   int32     `json:"event_id"`
+	Date      string    `json:"date"`
+	StartTime time.Time `json:"start_time"`
+	EndTime   time.Time `json:"end_time"`
 }
 
 type NewSponsor struct {
@@ -250,6 +280,14 @@ type RefreshTokenInput struct {
 	Token string `json:"token"`
 }
 
+type Schedule struct {
+	ID        int32     `json:"id"`
+	EventID   int32     `json:"event_id"`
+	Date      string    `json:"date"`
+	StartTime time.Time `json:"start_time"`
+	EndTime   time.Time `json:"end_time"`
+}
+
 type Sponsor struct {
 	ID          int32    `json:"id"`
 	UserID      int      `json:"user_id"`
@@ -273,6 +311,15 @@ type UpdateArtist struct {
 	Avatar      *string `json:"avatar"`
 	DisplayName *string `json:"display_name"`
 	ShortBio    *string `json:"short_bio"`
+}
+
+type UpdateDayPlan struct {
+	ID            int32      `json:"id"`
+	StartTime     *time.Time `json:"start_time"`
+	EndTime       *time.Time `json:"end_time"`
+	Title         *string    `json:"title"`
+	Description   *string    `json:"description"`
+	PerformerName *string    `json:"performer_name"`
 }
 
 type UpdateEvent struct {
@@ -331,6 +378,13 @@ type UpdatePromotion struct {
 	EventID   *int32  `json:"event_id"`
 	StartDate *string `json:"start_date"`
 	EndDate   *string `json:"end_date"`
+}
+
+type UpdateSchedule struct {
+	ID        int32      `json:"id"`
+	Date      *string    `json:"date"`
+	StartTime *time.Time `json:"start_time"`
+	EndTime   *time.Time `json:"end_time"`
 }
 
 type UpdateSponsor struct {

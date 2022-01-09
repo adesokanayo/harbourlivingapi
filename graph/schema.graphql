@@ -300,6 +300,24 @@ type News {
         tags : String
 }
 
+type Schedule {
+        id: ID!
+        event_id: ID!
+        date : DateTime!
+        start_time : Time!
+        end_time : Time!
+}
+
+type DayPlan {
+        id: ID!
+        start_time: Time!
+        end_time : Time!
+        schedule_id :ID!
+        title : String
+        description : String
+        performer_name : String
+}
+
 input NewTicket {
         name: String!
         price: Float!
@@ -411,6 +429,40 @@ input NewEventView{
     user_id: Int!
 }
 
+
+input NewSchedule {
+        event_id: ID!
+        date : DateTime!
+        start_time : Time!
+        end_time : Time!
+}
+
+input  NewDayPlan {
+        start_time: Time!
+        end_time : Time!
+        schedule_id :ID!
+        title : String
+        description : String
+        performer_name : String
+}
+
+
+input UpdateSchedule {
+        id :ID!
+        date : DateTime
+        start_time : Time
+        end_time : Time
+}
+
+input  UpdateDayPlan {
+        id :ID!
+        start_time: Time
+        end_time : Time
+        title : String
+        description : String
+        performer_name : String
+}
+
 type Mutation {
         createCategory(input : NewCategory!): Category!
         createVenue(input: NewVenue!): Venue!
@@ -424,7 +476,9 @@ type Mutation {
         createPromotion(input : NewPromotion!): Promotion!
         createNews(input :NewNews!): News!
         createEventView(input : NewEventView!): EventView!
-
+        createSchedule(input: NewSchedule!): Schedule!
+        createDayPlan(input: NewDayPlan!): DayPlan!
+    
         """ update """ 
         updateEvent(input: UpdateEvent!):Event!
         updateEventStatus(input: UpdateEventStatus!): UpdateEventState!
@@ -433,6 +487,8 @@ type Mutation {
         updateSponsor(input:UpdateSponsor! ): Sponsor!
         updatePlan(input : UpdatePlan! ): Plan!
         updatePromotion(input : UpdatePromotion!): Promotion!
+        updateSchedule(input: UpdateSchedule!): Schedule!
+        updateDayPlan(input: UpdateDayPlan!): DayPlan!
 
         """ delete """ 
         deleteEvent(input: ID!): Boolean!
@@ -440,6 +496,8 @@ type Mutation {
         deletePlan (input: ID!): Boolean!
         deletePromotion (input: ID!): Boolean!
         deleteTicket (input: ID!): Boolean!
+        deleteDayPlan(input:ID!):Boolean!
+        deleteSchedule(input: ID!):Boolean!
 
         """ operations """ 
         login(input: Login!): LoginResponse

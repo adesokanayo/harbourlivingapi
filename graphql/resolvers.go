@@ -217,7 +217,7 @@ func (r *mutationResolver) CreateCategory(ctx context.Context, input NewCategory
 	}
 	arg.Description = input.Description
 	arg.Status = int32(input.Status)
-	
+
 	category, err := store.CreateCategory(ctx, arg)
 
 	if err != nil {
@@ -1864,6 +1864,178 @@ func (r *mutationResolver) CreateEventView(ctx context.Context, input NewEventVi
 		EventID: int(eventView.EventID),
 		UserID:  int(eventView.UserID),
 	}, nil
+}
+
+func (r *mutationResolver) CreateSchedule(ctx context.Context, input NewSchedule) (*Schedule, error) {
+
+	d1, err := util.ProcessDateTime(util.LayoutISODOB, input.Date)
+	if err != nil {
+		return nil, err
+	}
+
+	arg := db.CreateScheduleParams{
+		EventID:   int32(input.EventID),
+		Date:      *d1,
+		StartTime: input.StartTime,
+		EndTime:   input.EndTime,
+	}
+
+	schedule, err := store.CreateSchedule(ctx, arg)
+	if err != nil {
+		return nil, err
+	}
+
+	return &Schedule{
+		ID:        schedule.ID,
+		EventID:   schedule.EventID,
+		Date:      schedule.Date.String(),
+		StartTime: schedule.StartTime,
+		EndTime:   schedule.EndTime,
+	}, nil
+}
+
+func (r *mutationResolver) UpdateSchedule(ctx context.Context, input UpdateSchedule) (*Schedule, error) {
+
+	arg := db.UpdateScheduleParams{
+		ID: input.ID,
+	}
+
+	if input.Date != nil {
+		d1, err := util.ProcessDateTime(util.LayoutISODOB, *input.Date)
+		if err != nil {
+			return nil, err
+		}
+		arg.Date = *d1
+		arg.DateIDToUpdate = true
+	}
+
+	if input.StartTime != nil {
+		arg.StartTime = *input.StartTime
+		arg.StartTimeToUpdate = true
+	}
+
+	if input.EndTime != nil {
+		arg.EndTime = *input.EndTime
+		arg.EndTimeToUpdate = true
+	}
+
+	schedule, err := store.UpdateSchedule(ctx, arg)
+	if err != nil {
+		return nil, err
+	}
+
+	return &Schedule{
+		ID:        schedule.ID,
+		EventID:   schedule.EventID,
+		Date:      schedule.Date.String(),
+		StartTime: schedule.StartTime,
+		EndTime:   schedule.EndTime,
+	}, nil
+}
+func (r *mutationResolver) CreateDayPlan(ctx context.Context, input NewDayPlan) (*DayPlan, error) {
+
+	arg := db.CreateDayplanParams{
+		StartTime:  input.StartTime,
+		EndTime:    input.EndTime,
+		ScheduleID: input.ScheduleID,
+		Title: sql.NullString{
+			Valid:  true,
+			String: *input.Title,
+		},
+		Description: sql.NullString{
+			Valid:  true,
+			String: *input.Description,
+		},
+		PerformerName: sql.NullString{
+			Valid:  true,
+			String: *input.PerformerName,
+		},
+	}
+
+	dayplan, err := store.CreateDayplan(ctx, arg)
+	if err != nil {
+		return nil, err
+	}
+
+	return &DayPlan{
+		ID:            dayplan.ID,
+		StartTime:     dayplan.StartTime,
+		EndTime:       dayplan.EndTime,
+		ScheduleID:    dayplan.ScheduleID,
+		Title:         &dayplan.Title.String,
+		Description:   &dayplan.Description.String,
+		PerformerName: &dayplan.PerformerName.String,
+	}, nil
+}
+
+func (r *mutationResolver) UpdateDayPlan(ctx context.Context, input UpdateDayPlan) (*DayPlan, error) {
+
+	arg := db.UpdateDayPlanParams{
+		ID: input.ID,
+	}
+
+	if input.StartTime != nil {
+		arg.StartTime = *input.StartTime
+		arg.StartTimeToUpdate = true
+	}
+
+	if input.EndTime != nil {
+		arg.EndTime = *input.EndTime
+		arg.EndTimeToUpdate = true
+	}
+
+	if input.Description != nil {
+		arg.Description = *input.Description
+		arg.DescriptionToUpdate = true
+	}
+
+	if input.PerformerName != nil {
+		arg.PerformerName = *input.PerformerName
+		arg.PerformerNameToUpdate = true
+	}
+
+	dayplan, err := store.UpdateDayPlan(ctx, arg)
+	if err != nil {
+		return nil, err
+	}
+
+	return &DayPlan{
+		ID:            dayplan.ID,
+		StartTime:     dayplan.StartTime,
+		EndTime:       dayplan.EndTime,
+		ScheduleID:    dayplan.ScheduleID,
+		Title:         &dayplan.Title.String,
+		Description:   &dayplan.Description.String,
+		PerformerName: &dayplan.PerformerName.String,
+	}, nil
+}
+
+func (r *mutationResolver) DeleteSchedule(ctx context.Context, input int32) (bool, error) {
+
+	_, err := store.GetSchedule(ctx, input)
+	if err != nil {
+		return false, err
+	}
+
+	err = store.DeleteSchedule(ctx, input)
+	if err != nil {
+		return false, err
+	}
+	return true, nil
+}
+
+func (r *mutationResolver) DeleteDayPlan(ctx context.Context, input int32) (bool, error) {
+
+	_, err := store.GetDayplan(ctx, input)
+	if err != nil {
+		return false, err
+	}
+
+	err = store.DeleteDayPlan(ctx, input)
+	if err != nil {
+		return false, err
+	}
+	return true, nil
 }
 
 // Mutation returns MutationResolver implementation.

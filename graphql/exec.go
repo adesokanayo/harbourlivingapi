@@ -9,6 +9,7 @@ import (
 	"strconv"
 	"sync"
 	"sync/atomic"
+	"time"
 
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/graphql/introspection"
@@ -56,6 +57,16 @@ type ComplexityRoot struct {
 		ID          func(childComplexity int) int
 		Image       func(childComplexity int) int
 		Status      func(childComplexity int) int
+	}
+
+	DayPlan struct {
+		Description   func(childComplexity int) int
+		EndTime       func(childComplexity int) int
+		ID            func(childComplexity int) int
+		PerformerName func(childComplexity int) int
+		ScheduleID    func(childComplexity int) int
+		StartTime     func(childComplexity int) int
+		Title         func(childComplexity int) int
 	}
 
 	Event struct {
@@ -122,30 +133,36 @@ type ComplexityRoot struct {
 
 	Mutation struct {
 		CreateCategory        func(childComplexity int, input NewCategory) int
+		CreateDayPlan         func(childComplexity int, input NewDayPlan) int
 		CreateEvent           func(childComplexity int, input NewEvent) int
 		CreateEventFavorite   func(childComplexity int, input NewEventFavorite) int
 		CreateEventView       func(childComplexity int, input NewEventView) int
 		CreateNews            func(childComplexity int, input NewNews) int
 		CreatePlan            func(childComplexity int, input NewPlan) int
 		CreatePromotion       func(childComplexity int, input NewPromotion) int
+		CreateSchedule        func(childComplexity int, input NewSchedule) int
 		CreateSponsorForEvent func(childComplexity int, input NewSponsor) int
 		CreateTicket          func(childComplexity int, input NewTicket) int
 		CreateUser            func(childComplexity int, input NewUser) int
 		CreateVenue           func(childComplexity int, input NewVenue) int
 		CreateVenueFavorite   func(childComplexity int, input NewVenueFavorite) int
+		DeleteDayPlan         func(childComplexity int, input int32) int
 		DeleteEvent           func(childComplexity int, input int32) int
 		DeleteNews            func(childComplexity int, input int32) int
 		DeletePlan            func(childComplexity int, input int32) int
 		DeletePromotion       func(childComplexity int, input int32) int
+		DeleteSchedule        func(childComplexity int, input int32) int
 		DeleteTicket          func(childComplexity int, input int32) int
 		Login                 func(childComplexity int, input Login) int
 		RefreshToken          func(childComplexity int, input RefreshTokenInput) int
 		UpdateArtist          func(childComplexity int, input UpdateArtist) int
+		UpdateDayPlan         func(childComplexity int, input UpdateDayPlan) int
 		UpdateEvent           func(childComplexity int, input UpdateEvent) int
 		UpdateEventStatus     func(childComplexity int, input UpdateEventStatus) int
 		UpdateHost            func(childComplexity int, input UpdateHost) int
 		UpdatePlan            func(childComplexity int, input UpdatePlan) int
 		UpdatePromotion       func(childComplexity int, input UpdatePromotion) int
+		UpdateSchedule        func(childComplexity int, input UpdateSchedule) int
 		UpdateSponsor         func(childComplexity int, input UpdateSponsor) int
 	}
 
@@ -191,6 +208,14 @@ type ComplexityRoot struct {
 		GetUser             func(childComplexity int, input int32) int
 		GetUsers            func(childComplexity int) int
 		GetVenue            func(childComplexity int, input int32) int
+	}
+
+	Schedule struct {
+		Date      func(childComplexity int) int
+		EndTime   func(childComplexity int) int
+		EventID   func(childComplexity int) int
+		ID        func(childComplexity int) int
+		StartTime func(childComplexity int) int
 	}
 
 	Sponsor struct {
@@ -284,6 +309,8 @@ type MutationResolver interface {
 	CreatePromotion(ctx context.Context, input NewPromotion) (*Promotion, error)
 	CreateNews(ctx context.Context, input NewNews) (*News, error)
 	CreateEventView(ctx context.Context, input NewEventView) (*EventView, error)
+	CreateSchedule(ctx context.Context, input NewSchedule) (*Schedule, error)
+	CreateDayPlan(ctx context.Context, input NewDayPlan) (*DayPlan, error)
 	UpdateEvent(ctx context.Context, input UpdateEvent) (*Event, error)
 	UpdateEventStatus(ctx context.Context, input UpdateEventStatus) (*UpdateEventState, error)
 	UpdateArtist(ctx context.Context, input UpdateArtist) (*Artist, error)
@@ -291,11 +318,15 @@ type MutationResolver interface {
 	UpdateSponsor(ctx context.Context, input UpdateSponsor) (*Sponsor, error)
 	UpdatePlan(ctx context.Context, input UpdatePlan) (*Plan, error)
 	UpdatePromotion(ctx context.Context, input UpdatePromotion) (*Promotion, error)
+	UpdateSchedule(ctx context.Context, input UpdateSchedule) (*Schedule, error)
+	UpdateDayPlan(ctx context.Context, input UpdateDayPlan) (*DayPlan, error)
 	DeleteEvent(ctx context.Context, input int32) (bool, error)
 	DeleteNews(ctx context.Context, input int32) (bool, error)
 	DeletePlan(ctx context.Context, input int32) (bool, error)
 	DeletePromotion(ctx context.Context, input int32) (bool, error)
 	DeleteTicket(ctx context.Context, input int32) (bool, error)
+	DeleteDayPlan(ctx context.Context, input int32) (bool, error)
+	DeleteSchedule(ctx context.Context, input int32) (bool, error)
 	Login(ctx context.Context, input Login) (*LoginResponse, error)
 	RefreshToken(ctx context.Context, input RefreshTokenInput) (*string, error)
 }
@@ -400,6 +431,55 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Category.Status(childComplexity), true
+
+	case "DayPlan.description":
+		if e.complexity.DayPlan.Description == nil {
+			break
+		}
+
+		return e.complexity.DayPlan.Description(childComplexity), true
+
+	case "DayPlan.end_time":
+		if e.complexity.DayPlan.EndTime == nil {
+			break
+		}
+
+		return e.complexity.DayPlan.EndTime(childComplexity), true
+
+	case "DayPlan.id":
+		if e.complexity.DayPlan.ID == nil {
+			break
+		}
+
+		return e.complexity.DayPlan.ID(childComplexity), true
+
+	case "DayPlan.performer_name":
+		if e.complexity.DayPlan.PerformerName == nil {
+			break
+		}
+
+		return e.complexity.DayPlan.PerformerName(childComplexity), true
+
+	case "DayPlan.schedule_id":
+		if e.complexity.DayPlan.ScheduleID == nil {
+			break
+		}
+
+		return e.complexity.DayPlan.ScheduleID(childComplexity), true
+
+	case "DayPlan.start_time":
+		if e.complexity.DayPlan.StartTime == nil {
+			break
+		}
+
+		return e.complexity.DayPlan.StartTime(childComplexity), true
+
+	case "DayPlan.title":
+		if e.complexity.DayPlan.Title == nil {
+			break
+		}
+
+		return e.complexity.DayPlan.Title(childComplexity), true
 
 	case "Event.banner_image":
 		if e.complexity.Event.BannerImage == nil {
@@ -700,6 +780,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.CreateCategory(childComplexity, args["input"].(NewCategory)), true
 
+	case "Mutation.createDayPlan":
+		if e.complexity.Mutation.CreateDayPlan == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_createDayPlan_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.CreateDayPlan(childComplexity, args["input"].(NewDayPlan)), true
+
 	case "Mutation.createEvent":
 		if e.complexity.Mutation.CreateEvent == nil {
 			break
@@ -772,6 +864,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.CreatePromotion(childComplexity, args["input"].(NewPromotion)), true
 
+	case "Mutation.createSchedule":
+		if e.complexity.Mutation.CreateSchedule == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_createSchedule_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.CreateSchedule(childComplexity, args["input"].(NewSchedule)), true
+
 	case "Mutation.createSponsorForEvent":
 		if e.complexity.Mutation.CreateSponsorForEvent == nil {
 			break
@@ -832,6 +936,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.CreateVenueFavorite(childComplexity, args["input"].(NewVenueFavorite)), true
 
+	case "Mutation.deleteDayPlan":
+		if e.complexity.Mutation.DeleteDayPlan == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_deleteDayPlan_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.DeleteDayPlan(childComplexity, args["input"].(int32)), true
+
 	case "Mutation.deleteEvent":
 		if e.complexity.Mutation.DeleteEvent == nil {
 			break
@@ -880,6 +996,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.DeletePromotion(childComplexity, args["input"].(int32)), true
 
+	case "Mutation.deleteSchedule":
+		if e.complexity.Mutation.DeleteSchedule == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_deleteSchedule_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.DeleteSchedule(childComplexity, args["input"].(int32)), true
+
 	case "Mutation.deleteTicket":
 		if e.complexity.Mutation.DeleteTicket == nil {
 			break
@@ -927,6 +1055,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.UpdateArtist(childComplexity, args["input"].(UpdateArtist)), true
+
+	case "Mutation.updateDayPlan":
+		if e.complexity.Mutation.UpdateDayPlan == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_updateDayPlan_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.UpdateDayPlan(childComplexity, args["input"].(UpdateDayPlan)), true
 
 	case "Mutation.updateEvent":
 		if e.complexity.Mutation.UpdateEvent == nil {
@@ -987,6 +1127,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.UpdatePromotion(childComplexity, args["input"].(UpdatePromotion)), true
+
+	case "Mutation.updateSchedule":
+		if e.complexity.Mutation.UpdateSchedule == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_updateSchedule_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.UpdateSchedule(childComplexity, args["input"].(UpdateSchedule)), true
 
 	case "Mutation.updateSponsor":
 		if e.complexity.Mutation.UpdateSponsor == nil {
@@ -1268,6 +1420,41 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.GetVenue(childComplexity, args["input"].(int32)), true
+
+	case "Schedule.date":
+		if e.complexity.Schedule.Date == nil {
+			break
+		}
+
+		return e.complexity.Schedule.Date(childComplexity), true
+
+	case "Schedule.end_time":
+		if e.complexity.Schedule.EndTime == nil {
+			break
+		}
+
+		return e.complexity.Schedule.EndTime(childComplexity), true
+
+	case "Schedule.event_id":
+		if e.complexity.Schedule.EventID == nil {
+			break
+		}
+
+		return e.complexity.Schedule.EventID(childComplexity), true
+
+	case "Schedule.id":
+		if e.complexity.Schedule.ID == nil {
+			break
+		}
+
+		return e.complexity.Schedule.ID(childComplexity), true
+
+	case "Schedule.start_time":
+		if e.complexity.Schedule.StartTime == nil {
+			break
+		}
+
+		return e.complexity.Schedule.StartTime(childComplexity), true
 
 	case "Sponsor.avatar":
 		if e.complexity.Sponsor.Avatar == nil {
@@ -1985,6 +2172,24 @@ type News {
         tags : String
 }
 
+type Schedule {
+        id: ID!
+        event_id: ID!
+        date : DateTime!
+        start_time : Time!
+        end_time : Time!
+}
+
+type DayPlan {
+        id: ID!
+        start_time: Time!
+        end_time : Time!
+        schedule_id :ID!
+        title : String
+        description : String
+        performer_name : String
+}
+
 input NewTicket {
         name: String!
         price: Float!
@@ -2096,6 +2301,40 @@ input NewEventView{
     user_id: Int!
 }
 
+
+input NewSchedule {
+        event_id: ID!
+        date : DateTime!
+        start_time : Time!
+        end_time : Time!
+}
+
+input  NewDayPlan {
+        start_time: Time!
+        end_time : Time!
+        schedule_id :ID!
+        title : String
+        description : String
+        performer_name : String
+}
+
+
+input UpdateSchedule {
+        id :ID!
+        date : DateTime
+        start_time : Time
+        end_time : Time
+}
+
+input  UpdateDayPlan {
+        id :ID!
+        start_time: Time
+        end_time : Time
+        title : String
+        description : String
+        performer_name : String
+}
+
 type Mutation {
         createCategory(input : NewCategory!): Category!
         createVenue(input: NewVenue!): Venue!
@@ -2109,7 +2348,9 @@ type Mutation {
         createPromotion(input : NewPromotion!): Promotion!
         createNews(input :NewNews!): News!
         createEventView(input : NewEventView!): EventView!
-
+        createSchedule(input: NewSchedule!): Schedule!
+        createDayPlan(input: NewDayPlan!): DayPlan!
+    
         """ update """ 
         updateEvent(input: UpdateEvent!):Event!
         updateEventStatus(input: UpdateEventStatus!): UpdateEventState!
@@ -2118,6 +2359,8 @@ type Mutation {
         updateSponsor(input:UpdateSponsor! ): Sponsor!
         updatePlan(input : UpdatePlan! ): Plan!
         updatePromotion(input : UpdatePromotion!): Promotion!
+        updateSchedule(input: UpdateSchedule!): Schedule!
+        updateDayPlan(input: UpdateDayPlan!): DayPlan!
 
         """ delete """ 
         deleteEvent(input: ID!): Boolean!
@@ -2125,6 +2368,8 @@ type Mutation {
         deletePlan (input: ID!): Boolean!
         deletePromotion (input: ID!): Boolean!
         deleteTicket (input: ID!): Boolean!
+        deleteDayPlan(input:ID!):Boolean!
+        deleteSchedule(input: ID!):Boolean!
 
         """ operations """ 
         login(input: Login!): LoginResponse
@@ -2162,6 +2407,21 @@ func (ec *executionContext) field_Mutation_createCategory_args(ctx context.Conte
 	if tmp, ok := rawArgs["input"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
 		arg0, err = ec.unmarshalNNewCategory2githubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgraphqlᚐNewCategory(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["input"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_createDayPlan_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 NewDayPlan
+	if tmp, ok := rawArgs["input"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+		arg0, err = ec.unmarshalNNewDayPlan2githubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgraphqlᚐNewDayPlan(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -2260,6 +2520,21 @@ func (ec *executionContext) field_Mutation_createPromotion_args(ctx context.Cont
 	return args, nil
 }
 
+func (ec *executionContext) field_Mutation_createSchedule_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 NewSchedule
+	if tmp, ok := rawArgs["input"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+		arg0, err = ec.unmarshalNNewSchedule2githubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgraphqlᚐNewSchedule(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["input"] = arg0
+	return args, nil
+}
+
 func (ec *executionContext) field_Mutation_createSponsorForEvent_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -2335,6 +2610,21 @@ func (ec *executionContext) field_Mutation_createVenue_args(ctx context.Context,
 	return args, nil
 }
 
+func (ec *executionContext) field_Mutation_deleteDayPlan_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 int32
+	if tmp, ok := rawArgs["input"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+		arg0, err = ec.unmarshalNID2int32(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["input"] = arg0
+	return args, nil
+}
+
 func (ec *executionContext) field_Mutation_deleteEvent_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -2381,6 +2671,21 @@ func (ec *executionContext) field_Mutation_deletePlan_args(ctx context.Context, 
 }
 
 func (ec *executionContext) field_Mutation_deletePromotion_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 int32
+	if tmp, ok := rawArgs["input"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+		arg0, err = ec.unmarshalNID2int32(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["input"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_deleteSchedule_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
 	var arg0 int32
@@ -2447,6 +2752,21 @@ func (ec *executionContext) field_Mutation_updateArtist_args(ctx context.Context
 	if tmp, ok := rawArgs["input"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
 		arg0, err = ec.unmarshalNUpdateArtist2githubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgraphqlᚐUpdateArtist(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["input"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_updateDayPlan_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 UpdateDayPlan
+	if tmp, ok := rawArgs["input"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+		arg0, err = ec.unmarshalNUpdateDayPlan2githubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgraphqlᚐUpdateDayPlan(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -2522,6 +2842,21 @@ func (ec *executionContext) field_Mutation_updatePromotion_args(ctx context.Cont
 	if tmp, ok := rawArgs["input"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
 		arg0, err = ec.unmarshalNUpdatePromotion2githubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgraphqlᚐUpdatePromotion(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["input"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_updateSchedule_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 UpdateSchedule
+	if tmp, ok := rawArgs["input"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+		arg0, err = ec.unmarshalNUpdateSchedule2githubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgraphqlᚐUpdateSchedule(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -3072,6 +3407,242 @@ func (ec *executionContext) _Category_status(ctx context.Context, field graphql.
 	res := resTmp.(int)
 	fc.Result = res
 	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _DayPlan_id(ctx context.Context, field graphql.CollectedField, obj *DayPlan) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "DayPlan",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int32)
+	fc.Result = res
+	return ec.marshalNID2int32(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _DayPlan_start_time(ctx context.Context, field graphql.CollectedField, obj *DayPlan) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "DayPlan",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.StartTime, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(time.Time)
+	fc.Result = res
+	return ec.marshalNTime2timeᚐTime(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _DayPlan_end_time(ctx context.Context, field graphql.CollectedField, obj *DayPlan) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "DayPlan",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.EndTime, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(time.Time)
+	fc.Result = res
+	return ec.marshalNTime2timeᚐTime(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _DayPlan_schedule_id(ctx context.Context, field graphql.CollectedField, obj *DayPlan) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "DayPlan",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ScheduleID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int32)
+	fc.Result = res
+	return ec.marshalNID2int32(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _DayPlan_title(ctx context.Context, field graphql.CollectedField, obj *DayPlan) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "DayPlan",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Title, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _DayPlan_description(ctx context.Context, field graphql.CollectedField, obj *DayPlan) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "DayPlan",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Description, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _DayPlan_performer_name(ctx context.Context, field graphql.CollectedField, obj *DayPlan) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "DayPlan",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.PerformerName, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Event_id(ctx context.Context, field graphql.CollectedField, obj *Event) (ret graphql.Marshaler) {
@@ -4977,6 +5548,90 @@ func (ec *executionContext) _Mutation_createEventView(ctx context.Context, field
 	return ec.marshalNEventView2ᚖgithubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgraphqlᚐEventView(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _Mutation_createSchedule(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_createSchedule_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().CreateSchedule(rctx, args["input"].(NewSchedule))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*Schedule)
+	fc.Result = res
+	return ec.marshalNSchedule2ᚖgithubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgraphqlᚐSchedule(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Mutation_createDayPlan(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_createDayPlan_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().CreateDayPlan(rctx, args["input"].(NewDayPlan))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*DayPlan)
+	fc.Result = res
+	return ec.marshalNDayPlan2ᚖgithubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgraphqlᚐDayPlan(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _Mutation_updateEvent(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -5271,6 +5926,90 @@ func (ec *executionContext) _Mutation_updatePromotion(ctx context.Context, field
 	return ec.marshalNPromotion2ᚖgithubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgraphqlᚐPromotion(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _Mutation_updateSchedule(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_updateSchedule_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().UpdateSchedule(rctx, args["input"].(UpdateSchedule))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*Schedule)
+	fc.Result = res
+	return ec.marshalNSchedule2ᚖgithubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgraphqlᚐSchedule(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Mutation_updateDayPlan(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_updateDayPlan_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().UpdateDayPlan(rctx, args["input"].(UpdateDayPlan))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*DayPlan)
+	fc.Result = res
+	return ec.marshalNDayPlan2ᚖgithubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgraphqlᚐDayPlan(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _Mutation_deleteEvent(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -5465,6 +6204,90 @@ func (ec *executionContext) _Mutation_deleteTicket(ctx context.Context, field gr
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Mutation().DeleteTicket(rctx, args["input"].(int32))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(bool)
+	fc.Result = res
+	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Mutation_deleteDayPlan(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_deleteDayPlan_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().DeleteDayPlan(rctx, args["input"].(int32))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(bool)
+	fc.Result = res
+	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Mutation_deleteSchedule(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_deleteSchedule_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().DeleteSchedule(rctx, args["input"].(int32))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -6778,6 +7601,181 @@ func (ec *executionContext) _Query___schema(ctx context.Context, field graphql.C
 	res := resTmp.(*introspection.Schema)
 	fc.Result = res
 	return ec.marshalO__Schema2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐSchema(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Schedule_id(ctx context.Context, field graphql.CollectedField, obj *Schedule) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Schedule",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int32)
+	fc.Result = res
+	return ec.marshalNID2int32(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Schedule_event_id(ctx context.Context, field graphql.CollectedField, obj *Schedule) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Schedule",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.EventID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int32)
+	fc.Result = res
+	return ec.marshalNID2int32(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Schedule_date(ctx context.Context, field graphql.CollectedField, obj *Schedule) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Schedule",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Date, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNDateTime2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Schedule_start_time(ctx context.Context, field graphql.CollectedField, obj *Schedule) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Schedule",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.StartTime, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(time.Time)
+	fc.Result = res
+	return ec.marshalNTime2timeᚐTime(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Schedule_end_time(ctx context.Context, field graphql.CollectedField, obj *Schedule) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Schedule",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.EndTime, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(time.Time)
+	fc.Result = res
+	return ec.marshalNTime2timeᚐTime(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Sponsor_id(ctx context.Context, field graphql.CollectedField, obj *Sponsor) (ret graphql.Marshaler) {
@@ -9735,6 +10733,66 @@ func (ec *executionContext) unmarshalInputNewCategory(ctx context.Context, obj i
 	return it, nil
 }
 
+func (ec *executionContext) unmarshalInputNewDayPlan(ctx context.Context, obj interface{}) (NewDayPlan, error) {
+	var it NewDayPlan
+	var asMap = obj.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "start_time":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("start_time"))
+			it.StartTime, err = ec.unmarshalNTime2timeᚐTime(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "end_time":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("end_time"))
+			it.EndTime, err = ec.unmarshalNTime2timeᚐTime(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "schedule_id":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("schedule_id"))
+			it.ScheduleID, err = ec.unmarshalNID2int32(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "title":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("title"))
+			it.Title, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "description":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("description"))
+			it.Description, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "performer_name":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("performer_name"))
+			it.PerformerName, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputNewEvent(ctx context.Context, obj interface{}) (NewEvent, error) {
 	var it NewEvent
 	var asMap = obj.(map[string]interface{})
@@ -10118,6 +11176,50 @@ func (ec *executionContext) unmarshalInputNewPromotion(ctx context.Context, obj 
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("end_date"))
 			it.EndDate, err = ec.unmarshalNDateTime2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputNewSchedule(ctx context.Context, obj interface{}) (NewSchedule, error) {
+	var it NewSchedule
+	var asMap = obj.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "event_id":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("event_id"))
+			it.EventID, err = ec.unmarshalNID2int32(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "date":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("date"))
+			it.Date, err = ec.unmarshalNDateTime2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "start_time":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("start_time"))
+			it.StartTime, err = ec.unmarshalNTime2timeᚐTime(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "end_time":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("end_time"))
+			it.EndTime, err = ec.unmarshalNTime2timeᚐTime(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -10511,6 +11613,66 @@ func (ec *executionContext) unmarshalInputUpdateArtist(ctx context.Context, obj 
 	return it, nil
 }
 
+func (ec *executionContext) unmarshalInputUpdateDayPlan(ctx context.Context, obj interface{}) (UpdateDayPlan, error) {
+	var it UpdateDayPlan
+	var asMap = obj.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "id":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
+			it.ID, err = ec.unmarshalNID2int32(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "start_time":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("start_time"))
+			it.StartTime, err = ec.unmarshalOTime2ᚖtimeᚐTime(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "end_time":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("end_time"))
+			it.EndTime, err = ec.unmarshalOTime2ᚖtimeᚐTime(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "title":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("title"))
+			it.Title, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "description":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("description"))
+			it.Description, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "performer_name":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("performer_name"))
+			it.PerformerName, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputUpdateEvent(ctx context.Context, obj interface{}) (UpdateEvent, error) {
 	var it UpdateEvent
 	var asMap = obj.(map[string]interface{})
@@ -10863,6 +12025,50 @@ func (ec *executionContext) unmarshalInputUpdatePromotion(ctx context.Context, o
 	return it, nil
 }
 
+func (ec *executionContext) unmarshalInputUpdateSchedule(ctx context.Context, obj interface{}) (UpdateSchedule, error) {
+	var it UpdateSchedule
+	var asMap = obj.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "id":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
+			it.ID, err = ec.unmarshalNID2int32(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "date":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("date"))
+			it.Date, err = ec.unmarshalODateTime2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "start_time":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("start_time"))
+			it.StartTime, err = ec.unmarshalOTime2ᚖtimeᚐTime(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "end_time":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("end_time"))
+			it.EndTime, err = ec.unmarshalOTime2ᚖtimeᚐTime(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputUpdateSponsor(ctx context.Context, obj interface{}) (UpdateSponsor, error) {
 	var it UpdateSponsor
 	var asMap = obj.(map[string]interface{})
@@ -11097,6 +12303,54 @@ func (ec *executionContext) _Category(ctx context.Context, sel ast.SelectionSet,
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var dayPlanImplementors = []string{"DayPlan"}
+
+func (ec *executionContext) _DayPlan(ctx context.Context, sel ast.SelectionSet, obj *DayPlan) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, dayPlanImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("DayPlan")
+		case "id":
+			out.Values[i] = ec._DayPlan_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "start_time":
+			out.Values[i] = ec._DayPlan_start_time(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "end_time":
+			out.Values[i] = ec._DayPlan_end_time(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "schedule_id":
+			out.Values[i] = ec._DayPlan_schedule_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "title":
+			out.Values[i] = ec._DayPlan_title(ctx, field, obj)
+		case "description":
+			out.Values[i] = ec._DayPlan_description(ctx, field, obj)
+		case "performer_name":
+			out.Values[i] = ec._DayPlan_performer_name(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -11506,6 +12760,16 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
+		case "createSchedule":
+			out.Values[i] = ec._Mutation_createSchedule(ctx, field)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "createDayPlan":
+			out.Values[i] = ec._Mutation_createDayPlan(ctx, field)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		case "updateEvent":
 			out.Values[i] = ec._Mutation_updateEvent(ctx, field)
 			if out.Values[i] == graphql.Null {
@@ -11541,6 +12805,16 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
+		case "updateSchedule":
+			out.Values[i] = ec._Mutation_updateSchedule(ctx, field)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "updateDayPlan":
+			out.Values[i] = ec._Mutation_updateDayPlan(ctx, field)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		case "deleteEvent":
 			out.Values[i] = ec._Mutation_deleteEvent(ctx, field)
 			if out.Values[i] == graphql.Null {
@@ -11563,6 +12837,16 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			}
 		case "deleteTicket":
 			out.Values[i] = ec._Mutation_deleteTicket(ctx, field)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "deleteDayPlan":
+			out.Values[i] = ec._Mutation_deleteDayPlan(ctx, field)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "deleteSchedule":
+			out.Values[i] = ec._Mutation_deleteSchedule(ctx, field)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
@@ -11919,6 +13203,53 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 			out.Values[i] = ec._Query___type(ctx, field)
 		case "__schema":
 			out.Values[i] = ec._Query___schema(ctx, field)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var scheduleImplementors = []string{"Schedule"}
+
+func (ec *executionContext) _Schedule(ctx context.Context, sel ast.SelectionSet, obj *Schedule) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, scheduleImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("Schedule")
+		case "id":
+			out.Values[i] = ec._Schedule_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "event_id":
+			out.Values[i] = ec._Schedule_event_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "date":
+			out.Values[i] = ec._Schedule_date(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "start_time":
+			out.Values[i] = ec._Schedule_start_time(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "end_time":
+			out.Values[i] = ec._Schedule_end_time(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -12627,6 +13958,20 @@ func (ec *executionContext) marshalNDateTime2string(ctx context.Context, sel ast
 	return res
 }
 
+func (ec *executionContext) marshalNDayPlan2githubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgraphqlᚐDayPlan(ctx context.Context, sel ast.SelectionSet, v DayPlan) graphql.Marshaler {
+	return ec._DayPlan(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNDayPlan2ᚖgithubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgraphqlᚐDayPlan(ctx context.Context, sel ast.SelectionSet, v *DayPlan) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._DayPlan(ctx, sel, v)
+}
+
 func (ec *executionContext) marshalNEvent2githubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgraphqlᚐEvent(ctx context.Context, sel ast.SelectionSet, v Event) graphql.Marshaler {
 	return ec._Event(ctx, sel, &v)
 }
@@ -12785,6 +14130,11 @@ func (ec *executionContext) unmarshalNNewCategory2githubᚗcomᚋBigListRyRyᚋh
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
+func (ec *executionContext) unmarshalNNewDayPlan2githubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgraphqlᚐNewDayPlan(ctx context.Context, v interface{}) (NewDayPlan, error) {
+	res, err := ec.unmarshalInputNewDayPlan(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
 func (ec *executionContext) unmarshalNNewEvent2githubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgraphqlᚐNewEvent(ctx context.Context, v interface{}) (NewEvent, error) {
 	res, err := ec.unmarshalInputNewEvent(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -12812,6 +14162,11 @@ func (ec *executionContext) unmarshalNNewPlan2githubᚗcomᚋBigListRyRyᚋharbo
 
 func (ec *executionContext) unmarshalNNewPromotion2githubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgraphqlᚐNewPromotion(ctx context.Context, v interface{}) (NewPromotion, error) {
 	res, err := ec.unmarshalInputNewPromotion(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalNNewSchedule2githubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgraphqlᚐNewSchedule(ctx context.Context, v interface{}) (NewSchedule, error) {
+	res, err := ec.unmarshalInputNewSchedule(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
@@ -12887,6 +14242,20 @@ func (ec *executionContext) unmarshalNRefreshTokenInput2githubᚗcomᚋBigListRy
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
+func (ec *executionContext) marshalNSchedule2githubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgraphqlᚐSchedule(ctx context.Context, sel ast.SelectionSet, v Schedule) graphql.Marshaler {
+	return ec._Schedule(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNSchedule2ᚖgithubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgraphqlᚐSchedule(ctx context.Context, sel ast.SelectionSet, v *Schedule) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._Schedule(ctx, sel, v)
+}
+
 func (ec *executionContext) marshalNSponsor2githubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgraphqlᚐSponsor(ctx context.Context, sel ast.SelectionSet, v Sponsor) graphql.Marshaler {
 	return ec._Sponsor(ctx, sel, &v)
 }
@@ -12930,8 +14299,28 @@ func (ec *executionContext) marshalNTicket2ᚖgithubᚗcomᚋBigListRyRyᚋharbo
 	return ec._Ticket(ctx, sel, v)
 }
 
+func (ec *executionContext) unmarshalNTime2timeᚐTime(ctx context.Context, v interface{}) (time.Time, error) {
+	res, err := graphql.UnmarshalTime(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNTime2timeᚐTime(ctx context.Context, sel ast.SelectionSet, v time.Time) graphql.Marshaler {
+	res := graphql.MarshalTime(v)
+	if res == graphql.Null {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+	}
+	return res
+}
+
 func (ec *executionContext) unmarshalNUpdateArtist2githubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgraphqlᚐUpdateArtist(ctx context.Context, v interface{}) (UpdateArtist, error) {
 	res, err := ec.unmarshalInputUpdateArtist(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalNUpdateDayPlan2githubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgraphqlᚐUpdateDayPlan(ctx context.Context, v interface{}) (UpdateDayPlan, error) {
+	res, err := ec.unmarshalInputUpdateDayPlan(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
@@ -12971,6 +14360,11 @@ func (ec *executionContext) unmarshalNUpdatePlan2githubᚗcomᚋBigListRyRyᚋha
 
 func (ec *executionContext) unmarshalNUpdatePromotion2githubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgraphqlᚐUpdatePromotion(ctx context.Context, v interface{}) (UpdatePromotion, error) {
 	res, err := ec.unmarshalInputUpdatePromotion(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalNUpdateSchedule2githubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgraphqlᚐUpdateSchedule(ctx context.Context, v interface{}) (UpdateSchedule, error) {
+	res, err := ec.unmarshalInputUpdateSchedule(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
@@ -13847,6 +15241,21 @@ func (ec *executionContext) marshalOTicket2ᚖgithubᚗcomᚋBigListRyRyᚋharbo
 		return graphql.Null
 	}
 	return ec._Ticket(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalOTime2ᚖtimeᚐTime(ctx context.Context, v interface{}) (*time.Time, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := graphql.UnmarshalTime(v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalOTime2ᚖtimeᚐTime(ctx context.Context, sel ast.SelectionSet, v *time.Time) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return graphql.MarshalTime(*v)
 }
 
 func (ec *executionContext) marshalOUser2ᚕgithubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgraphqlᚐUserᚄ(ctx context.Context, sel ast.SelectionSet, v []User) graphql.Marshaler {

@@ -48,15 +48,8 @@ func ProcessDateTime(layout, input string) (*time.Time, error) {
 			return nil, err
 		}
 		return &time, nil
-	/*case LayoutISOTime:
-	time, err := time.Parse(LayoutISOTime, input)
-	if err != nil {
-		return nil, err
-	}
-	return &time, nil
-	*/
 	default:
-		time, err := time.Parse(LayoutISODOB, input)
+		time, err := time.Parse(time.Kitchen, input)
 		if err != nil {
 			return nil, err
 		}
