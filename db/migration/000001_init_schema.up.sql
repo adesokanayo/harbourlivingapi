@@ -214,9 +214,17 @@ CREATE TABLE "news" (
                                   "feature_image" varchar ,
                                   "body" text NOT NULL,
                                   "user_id" int NOT NULL,
+                                  "status" int NOT NULL,
                                   "publish_date" timestamp NOT NULL,
                                   "tags" text ,
                                   "created_at" timestamp NOT NULL DEFAULT (now())
+);
+
+
+CREATE TABLE "news_status" (
+                                 "id" SERIAL PRIMARY KEY,
+                                 "description" varchar,
+                                 "created_at" timestamp NOT NULL DEFAULT (now())
 );
 
 CREATE TABLE "events_views" (
@@ -403,7 +411,13 @@ VALUES
     ( 'Rejected'),
     ( 'Completed');
 
-
+INSERT  INTO news_status ("description" )
+VALUES 
+    ( 'Draft'),
+    ( 'Published'),
+    ( 'Approved'),
+    ( 'Rejected'),
+    ( 'Deleted');
 
 INSERT  INTO images ("name","url" )
 VALUES

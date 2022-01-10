@@ -3,6 +3,7 @@ directive @goField(forceResolver: Boolean, name: String) on FIELD_DEFINITION | I
 
 scalar Time
 scalar DateTime
+scalar Date
 
 type User {
         id: ID!
@@ -298,6 +299,7 @@ type News {
         user_id : ID!
         publish_date: DateTime!
         tags : String
+        status: Int!
 }
 
 type Schedule {
@@ -401,6 +403,7 @@ input NewNews {
         user_id : ID!
         publish_date: DateTime!
         tags : String
+        status: Int!
 }
 
 input UpdateNews {
@@ -411,6 +414,7 @@ input UpdateNews {
         body : String
         publish_date: DateTime
         tags : String
+        status: Int
 }
 
 type metadata {
@@ -432,7 +436,7 @@ input NewEventView{
 
 input NewSchedule {
         event_id: ID!
-        date : DateTime!
+        date : Date!
         start_time : Time!
         end_time : Time!
 }
@@ -449,7 +453,7 @@ input  NewDayPlan {
 
 input UpdateSchedule {
         id :ID!
-        date : DateTime
+        date : Date
         start_time : Time
         end_time : Time
 }

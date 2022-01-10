@@ -172,6 +172,7 @@ type ComplexityRoot struct {
 		FeatureImage func(childComplexity int) int
 		ID           func(childComplexity int) int
 		PublishDate  func(childComplexity int) int
+		Status       func(childComplexity int) int
 		Tags         func(childComplexity int) int
 		Title        func(childComplexity int) int
 		UserID       func(childComplexity int) int
@@ -1187,6 +1188,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.News.PublishDate(childComplexity), true
 
+	case "News.status":
+		if e.complexity.News.Status == nil {
+			break
+		}
+
+		return e.complexity.News.Status(childComplexity), true
+
 	case "News.tags":
 		if e.complexity.News.Tags == nil {
 			break
@@ -1875,6 +1883,7 @@ directive @goField(forceResolver: Boolean, name: String) on FIELD_DEFINITION | I
 
 scalar Time
 scalar DateTime
+scalar Date
 
 type User {
         id: ID!
@@ -2170,6 +2179,7 @@ type News {
         user_id : ID!
         publish_date: DateTime!
         tags : String
+        status: Int!
 }
 
 type Schedule {
@@ -2273,6 +2283,7 @@ input NewNews {
         user_id : ID!
         publish_date: DateTime!
         tags : String
+        status: Int!
 }
 
 input UpdateNews {
@@ -2283,6 +2294,7 @@ input UpdateNews {
         body : String
         publish_date: DateTime
         tags : String
+        status: Int
 }
 
 type metadata {
@@ -2304,7 +2316,7 @@ input NewEventView{
 
 input NewSchedule {
         event_id: ID!
-        date : DateTime!
+        date : Date!
         start_time : Time!
         end_time : Time!
 }
@@ -2321,7 +2333,7 @@ input  NewDayPlan {
 
 input UpdateSchedule {
         id :ID!
-        date : DateTime
+        date : Date
         start_time : Time
         end_time : Time
 }
@@ -6657,6 +6669,41 @@ func (ec *executionContext) _News_tags(ctx context.Context, field graphql.Collec
 	res := resTmp.(*string)
 	fc.Result = res
 	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _News_status(ctx context.Context, field graphql.CollectedField, obj *News) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "News",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Status, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Plan_id(ctx context.Context, field graphql.CollectedField, obj *Plan) (ret graphql.Marshaler) {
@@ -11083,6 +11130,14 @@ func (ec *executionContext) unmarshalInputNewNews(ctx context.Context, obj inter
 			if err != nil {
 				return it, err
 			}
+		case "status":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("status"))
+			it.Status, err = ec.unmarshalNInt2int(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		}
 	}
 
@@ -11203,7 +11258,7 @@ func (ec *executionContext) unmarshalInputNewSchedule(ctx context.Context, obj i
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("date"))
-			it.Date, err = ec.unmarshalNDateTime2string(ctx, v)
+			it.Date, err = ec.unmarshalNDate2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -11915,6 +11970,14 @@ func (ec *executionContext) unmarshalInputUpdateNews(ctx context.Context, obj in
 			if err != nil {
 				return it, err
 			}
+		case "status":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("status"))
+			it.Status, err = ec.unmarshalOInt2ᚖint(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		}
 	}
 
@@ -12043,7 +12106,7 @@ func (ec *executionContext) unmarshalInputUpdateSchedule(ctx context.Context, ob
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("date"))
-			it.Date, err = ec.unmarshalODateTime2ᚖstring(ctx, v)
+			it.Date, err = ec.unmarshalODate2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -12913,6 +12976,11 @@ func (ec *executionContext) _News(ctx context.Context, sel ast.SelectionSet, obj
 			}
 		case "tags":
 			out.Values[i] = ec._News_tags(ctx, field, obj)
+		case "status":
+			out.Values[i] = ec._News_status(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -13943,6 +14011,21 @@ func (ec *executionContext) marshalNCategory2ᚖgithubᚗcomᚋBigListRyRyᚋhar
 	return ec._Category(ctx, sel, v)
 }
 
+func (ec *executionContext) unmarshalNDate2string(ctx context.Context, v interface{}) (string, error) {
+	res, err := graphql.UnmarshalString(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNDate2string(ctx context.Context, sel ast.SelectionSet, v string) graphql.Marshaler {
+	res := graphql.MarshalString(v)
+	if res == graphql.Null {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+	}
+	return res
+}
+
 func (ec *executionContext) unmarshalNDateTime2string(ctx context.Context, v interface{}) (string, error) {
 	res, err := graphql.UnmarshalString(v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -14706,6 +14789,21 @@ func (ec *executionContext) marshalOCategory2ᚕgithubᚗcomᚋBigListRyRyᚋhar
 	}
 	wg.Wait()
 	return ret
+}
+
+func (ec *executionContext) unmarshalODate2ᚖstring(ctx context.Context, v interface{}) (*string, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := graphql.UnmarshalString(v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalODate2ᚖstring(ctx context.Context, sel ast.SelectionSet, v *string) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return graphql.MarshalString(*v)
 }
 
 func (ec *executionContext) unmarshalODateTime2ᚖstring(ctx context.Context, v interface{}) (*string, error) {

@@ -18,9 +18,10 @@ INSERT INTO news (
     body,
     user_id,
     publish_date,
-    tags
+    tags,
+    status
 ) VALUES
-  ($1, $2, $3, $4, $5, $6, $7 ) RETURNING *;
+  ($1, $2, $3, $4, $5, $6, $7, $8 ) RETURNING *;
 
 -- name: UpdateNews :one
 UPDATE news SET
@@ -35,5 +36,7 @@ UPDATE news SET
  publish_date = CASE WHEN @publish_date_to_update::boolean
         THEN @publish_date::timestamptz ELSE publish_date END,
  tags = CASE WHEN @tags_date_to_update::boolean
-        THEN @tags::text ELSE tags END
+        THEN @tags::text ELSE tags END,
+status = CASE WHEN @status_to_update::boolean
+        THEN @status::int ELSE status END
 WHERE id = @id RETURNING *;

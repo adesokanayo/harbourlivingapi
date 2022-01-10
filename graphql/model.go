@@ -176,6 +176,7 @@ type NewNews struct {
 	UserID       int32   `json:"user_id"`
 	PublishDate  string  `json:"publish_date"`
 	Tags         *string `json:"tags"`
+	Status       int     `json:"status"`
 }
 
 type NewPlan struct {
@@ -258,6 +259,7 @@ type News struct {
 	UserID       int32   `json:"user_id"`
 	PublishDate  string  `json:"publish_date"`
 	Tags         *string `json:"tags"`
+	Status       int     `json:"status"`
 }
 
 type Plan struct {
@@ -362,6 +364,7 @@ type UpdateNews struct {
 	Body         *string `json:"body"`
 	PublishDate  *string `json:"publish_date"`
 	Tags         *string `json:"tags"`
+	Status       *int    `json:"status"`
 }
 
 type UpdatePlan struct {

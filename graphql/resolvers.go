@@ -1606,6 +1606,7 @@ func (r *mutationResolver) CreateNews(ctx context.Context, input NewNews) (*News
 			String: *input.Tags,
 			Valid:  true,
 		},
+		Status: int32(input.Status),
 	}
 
 	news, err := store.CreateNews(ctx, arg)
@@ -1620,6 +1621,7 @@ func (r *mutationResolver) CreateNews(ctx context.Context, input NewNews) (*News
 		Body:         news.Body,
 		PublishDate:  news.PublishDate.String(),
 		Tags:         &news.Tags.String,
+		Status:       int(news.Status),
 	}, nil
 }
 
@@ -1656,6 +1658,16 @@ func (r *mutationResolver) UpdateNews(ctx context.Context, input UpdateNews) (*N
 		arg.TagsDateToUpdate = true
 	}
 
+	if input.Tags != nil {
+		arg.Tags = *input.Tags
+		arg.TagsDateToUpdate = true
+	}
+
+	if input.Status != nil {
+		arg.Status = int32(*input.Status)
+		arg.StatusToUpdate = true
+	}
+
 	news, err := store.UpdateNews(ctx, arg)
 	if err != nil {
 		return nil, err
@@ -1668,6 +1680,7 @@ func (r *mutationResolver) UpdateNews(ctx context.Context, input UpdateNews) (*N
 		Body:         news.Body,
 		PublishDate:  news.PublishDate.String(),
 		Tags:         &news.Tags.String,
+		Status:       int(news.Status),
 	}, nil
 }
 
@@ -1776,6 +1789,7 @@ func (r *queryResolver) GetNews(ctx context.Context, input int32) (*News, error)
 		Body:         news.Body,
 		PublishDate:  news.PublishDate.String(),
 		Tags:         &news.Tags.String,
+		Status:       int(news.Status),
 	}, nil
 
 }

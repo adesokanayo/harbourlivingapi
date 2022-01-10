@@ -17,9 +17,10 @@ INSERT INTO news (
     body,
     user_id,
     publish_date,
-    tags
+    tags,
+    status
 ) VALUES
-  ($1, $2, $3, $4, $5, $6, $7 ) RETURNING id, title, description, feature_image, body, user_id, publish_date, tags, created_at
+  ($1, $2, $3, $4, $5, $6, $7, $8 ) RETURNING id, title, description, feature_image, body, user_id, status, publish_date, tags, created_at
 `
 
 type CreateNewsParams struct {
@@ -30,6 +31,7 @@ type CreateNewsParams struct {
 	UserID       int32          `json:"user_id"`
 	PublishDate  time.Time      `json:"publish_date"`
 	Tags         sql.NullString `json:"tags"`
+	Status       int32          `json:"status"`
 }
 
 func (q *Queries) CreateNews(ctx context.Context, arg CreateNewsParams) (News, error) {
@@ -41,6 +43,7 @@ func (q *Queries) CreateNews(ctx context.Context, arg CreateNewsParams) (News, e
 		arg.UserID,
 		arg.PublishDate,
 		arg.Tags,
+		arg.Status,
 	)
 	var i News
 	err := row.Scan(
@@ -50,6 +53,7 @@ func (q *Queries) CreateNews(ctx context.Context, arg CreateNewsParams) (News, e
 		&i.FeatureImage,
 		&i.Body,
 		&i.UserID,
+		&i.Status,
 		&i.PublishDate,
 		&i.Tags,
 		&i.CreatedAt,
@@ -68,7 +72,7 @@ func (q *Queries) DeleteNews(ctx context.Context, id int32) error {
 }
 
 const getAllNews = `-- name: GetAllNews :many
-SELECT id, title, description, feature_image, body, user_id, publish_date, tags, created_at from news
+SELECT id, title, description, feature_image, body, user_id, status, publish_date, tags, created_at from news
 order by id desc
 `
 
@@ -88,6 +92,7 @@ func (q *Queries) GetAllNews(ctx context.Context) ([]News, error) {
 			&i.FeatureImage,
 			&i.Body,
 			&i.UserID,
+			&i.Status,
 			&i.PublishDate,
 			&i.Tags,
 			&i.CreatedAt,
@@ -106,7 +111,7 @@ func (q *Queries) GetAllNews(ctx context.Context) ([]News, error) {
 }
 
 const getNews = `-- name: GetNews :one
-SELECT id, title, description, feature_image, body, user_id, publish_date, tags, created_at FROM news
+SELECT id, title, description, feature_image, body, user_id, status, publish_date, tags, created_at FROM news
 WHERE id = $1 LIMIT 1
 `
 
@@ -120,6 +125,7 @@ func (q *Queries) GetNews(ctx context.Context, id int32) (News, error) {
 		&i.FeatureImage,
 		&i.Body,
 		&i.UserID,
+		&i.Status,
 		&i.PublishDate,
 		&i.Tags,
 		&i.CreatedAt,
@@ -140,8 +146,10 @@ UPDATE news SET
  publish_date = CASE WHEN $9::boolean
         THEN $10::timestamptz ELSE publish_date END,
  tags = CASE WHEN $11::boolean
-        THEN $12::text ELSE tags END
-WHERE id = $13 RETURNING id, title, description, feature_image, body, user_id, publish_date, tags, created_at
+        THEN $12::text ELSE tags END,
+status = CASE WHEN $13::boolean
+        THEN $14::int ELSE status END
+WHERE id = $15 RETURNING id, title, description, feature_image, body, user_id, status, publish_date, tags, created_at
 `
 
 type UpdateNewsParams struct {
@@ -157,6 +165,8 @@ type UpdateNewsParams struct {
 	PublishDate          time.Time `json:"publish_date"`
 	TagsDateToUpdate     bool      `json:"tags_date_to_update"`
 	Tags                 string    `json:"tags"`
+	StatusToUpdate       bool      `json:"status_to_update"`
+	Status               int32     `json:"status"`
 	ID                   int32     `json:"id"`
 }
 
@@ -174,6 +184,8 @@ func (q *Queries) UpdateNews(ctx context.Context, arg UpdateNewsParams) (News, e
 		arg.PublishDate,
 		arg.TagsDateToUpdate,
 		arg.Tags,
+		arg.StatusToUpdate,
+		arg.Status,
 		arg.ID,
 	)
 	var i News
@@ -184,6 +196,7 @@ func (q *Queries) UpdateNews(ctx context.Context, arg UpdateNewsParams) (News, e
 		&i.FeatureImage,
 		&i.Body,
 		&i.UserID,
+		&i.Status,
 		&i.PublishDate,
 		&i.Tags,
 		&i.CreatedAt,

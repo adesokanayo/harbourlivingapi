@@ -135,9 +135,16 @@ type News struct {
 	FeatureImage sql.NullString `json:"feature_image"`
 	Body         string         `json:"body"`
 	UserID       int32          `json:"user_id"`
+	Status       int32          `json:"status"`
 	PublishDate  time.Time      `json:"publish_date"`
 	Tags         sql.NullString `json:"tags"`
 	CreatedAt    time.Time      `json:"created_at"`
+}
+
+type NewsStatus struct {
+	ID          int32          `json:"id"`
+	Description sql.NullString `json:"description"`
+	CreatedAt   time.Time      `json:"created_at"`
 }
 
 type Plan struct {
