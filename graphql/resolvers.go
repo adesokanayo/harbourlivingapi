@@ -1262,9 +1262,10 @@ func (r *mutationResolver) CreateEventFavorite(ctx context.Context, input NewEve
 
 func (r *mutationResolver) CreateVenueFavorite(ctx context.Context, input NewVenueFavorite) (*VenueFavorite, error) {
 
+		userinfo := middleware.CtxValue(ctx)
 	arg := db.CreateVenueFavoriteParams{
 		VenueID: int32(input.VenueID),
-		UserID:  int32(input.UserID),
+		UserID:  int32(userinfo.UserID),
 	}
 
 	venueFavorite, err := store.CreateVenueFavorite(ctx, arg)
