@@ -17,19 +17,10 @@ import (
 	"github.com/pkg/errors"
 )
 
-const (
-	AttendeeHarbour HarbourUserTypes = iota
-	HostHarbour
-	SponsorHarbour
-	AdminHarbour
-)
-
 var (
 	store *db.Store
 )
 var tokenMaker token.Maker
-
-type HarbourUserTypes int
 
 func init() {
 	config, err := util.LoadConfig(".")
@@ -199,7 +190,7 @@ func (r *mutationResolver) CreateUser(ctx context.Context, input NewUser) (*User
 		Email:     user.Email,
 		Username:  user.Username,
 		Password:  user.Password,
-		Usertype:  int(user.Usertype),
+		Usertype:  ConvertDbToUserRole(user.Usertype),
 		Avatar:    user.AvatarUrl.String,
 	}, nil
 }
@@ -207,7 +198,7 @@ func (r *mutationResolver) CreateUser(ctx context.Context, input NewUser) (*User
 func (r *mutationResolver) CreateCategory(ctx context.Context, input NewCategory) (*Category, error) {
 
 	userinfo := middleware.CtxValue(ctx)
-	if userinfo.UserType != int(AdminHarbour) {
+	if userinfo.UserType != ConvertUserRoleToDb(UserRoleAdmin) {
 		return nil, errors.New(util.ErrPermissionDenied)
 	}
 	arg := db.CreateCategoryParams{}
@@ -252,7 +243,7 @@ func (r *mutationResolver) CreateEvent(ctx context.Context, input NewEvent) (*Ev
 		Type:        int32(input.Type),
 		UserID:      int32(input.UserID),
 		Category:    int32(input.Category),
-		Status:      int32(input.Status),
+		Status:      int32(ConvertEventStatusOptionToDb(input.Status)),
 	}
 
 	//Use Transaction
@@ -400,7 +391,7 @@ func (r *mutationResolver) CreateEvent(ctx context.Context, input NewEvent) (*Ev
 			HostID:      int(linkedEventHost.HostID),
 			Images:      images,
 			Videos:      videos,
-			Status:      int(event.Status),
+			Status:      ConvertDbToEventStatusOption(event.Status),
 			Tickets:     tickets,
 		}
 		return nil
@@ -474,7 +465,7 @@ func (r *mutationResolver) UpdateEvent(ctx context.Context, input UpdateEvent) (
 	}
 
 	if input.Status != nil {
-		arg.Status = int32(*input.Status)
+		arg.Status = int32(ConvertEventStatusOptionToDb(*input.Status))
 		arg.StatusToUpdate = true
 	}
 
@@ -575,6 +566,7 @@ func (r *mutationResolver) UpdateEvent(ctx context.Context, input UpdateEvent) (
 			Images:      images,
 			Videos:      videos,
 			Venue:       int(event.Venue),
+			Status:      ConvertDbToEventStatusOption(event.Status),
 		}
 		return nil
 	})
@@ -630,7 +622,7 @@ func (r *mutationResolver) Login(ctx context.Context, input Login) (*LoginRespon
 		User: &User{
 			ID:        user.ID,
 			Email:     user.Email,
-			Usertype:  int(user.Usertype),
+			Usertype:  ConvertDbToUserRole(user.Usertype),
 			Username:  user.Username,
 			LastName:  user.LastName,
 			Phone:     &user.Phone.String,
@@ -715,7 +707,7 @@ func (r *queryResolver) GetUser(ctx context.Context, input int32) (*User, error)
 		Email:           user.Email,
 		Username:        user.Username,
 		Password:        user.Password,
-		Usertype:        int(user.Usertype),
+		Usertype:        ConvertDbToUserRole(user.Usertype),
 		FavoritesEvents: events,
 		FavoritesVenues: venues,
 	}, nil
@@ -854,11 +846,11 @@ func (r *queryResolver) GetEvent(ctx context.Context, input int32) (*Event, erro
 		StartDate:   event.StartDate.String(),
 		EndDate:     event.EndDate.String(),
 		Venue:       int(event.Venue),
-		Type:        int(event.Type),
+		Type:        ConvertDbToEventTypeOption(event.Type),
 		UserID:      event.UserID,
 		Category:    int(event.Category),
 		Sponsors:    sponsors,
-		Status:      int(event.Status),
+		Status:      ConvertDbToEventStatusOption(event.Status),
 		Images:      images,
 		Videos:      videos,
 		Tickets:     tickets,
@@ -870,7 +862,7 @@ func (r *queryResolver) GetEvent(ctx context.Context, input int32) (*Event, erro
 	}, nil
 }
 
-func (r *queryResolver) GetEvents(ctx context.Context, input GetEvent) ([]Event, error) {
+func (r *queryResolver) GetAllEvents(ctx context.Context, input GetEvent) ([]Event, error) {
 
 	var result []Event
 	var images []*Image
@@ -879,11 +871,15 @@ func (r *queryResolver) GetEvents(ctx context.Context, input GetEvent) ([]Event,
 	var promoted bool
 
 	arg := db.GetEventsParams{
-		Category: int32(input.Category),
-		Status:   int32(input.Status),
-		Limit:    int32(input.PageNumber),
-		Offset:   int32((input.PageNumber * input.Limit) - input.Limit),
+		Status: int32(input.Status),
+		Limit:  int32(input.PageNumber),
+		Offset: int32((input.PageNumber * input.Limit) - input.Limit),
 	}
+/*
+	if input.Category != nil {
+		arg.Category = int32(*input.Category)
+	}
+*/
 	events, err := store.GetEvents(ctx, arg)
 	if err != nil {
 		return nil, err
@@ -946,7 +942,7 @@ func (r *queryResolver) GetEvents(ctx context.Context, input GetEvent) ([]Event,
 			StartDate:   event.StartDate.String(),
 			EndDate:     event.EndDate.String(),
 			Category:    int(event.Category),
-			Type:        int(event.Type),
+			Type:        ConvertDbToEventTypeOption(event.Type),
 			UserID:      event.UserID,
 			Venue:       int(event.Venue),
 			BannerImage: event.BannerImage,
@@ -996,7 +992,7 @@ func (r *queryResolver) GetEventsByLocation(ctx context.Context, input GetEventB
 			StartDate:   event.StartDate.String(),
 			EndDate:     event.EndDate.String(),
 			Category:    int(event.Category),
-			Type:        int(event.Type),
+			Type:        ConvertDbToEventTypeOption(event.Type),
 			UserID:      event.UserID,
 			Venue:       int(event.Venue),
 			//BannerImage: *event.BannerImage,
@@ -1022,7 +1018,7 @@ func (r *queryResolver) GetUsers(ctx context.Context) ([]User, error) {
 			Email:     u.Email,
 			Username:  u.Username,
 			Password:  u.Password,
-			Usertype:  int(u.Usertype),
+			Usertype:  ConvertDbToUserRole(u.Usertype),
 			Avatar:    u.AvatarUrl.String,
 		})
 	}
@@ -1094,7 +1090,7 @@ func (r *mutationResolver) CreateSponsorForEvent(ctx context.Context, input NewS
 func (r *mutationResolver) UpdateEventStatus(ctx context.Context, input UpdateEventStatus) (*UpdateEventState, error) {
 	arg := db.UpdateEventStatusParams{
 		ID:     int32(input.EventID),
-		Status: int32(input.EventStatus),
+		Status: int32(ConvertEventStatusOptionToDb(input.EventStatus)),
 	}
 	result, err := store.UpdateEventStatus(ctx, arg)
 	if err != nil {
@@ -1102,7 +1098,7 @@ func (r *mutationResolver) UpdateEventStatus(ctx context.Context, input UpdateEv
 	}
 	return &UpdateEventState{
 		EventID:     int(result.ID),
-		EventStatus: int(result.Status),
+		EventStatus: ConvertDbToEventStatusOption(result.Status),
 	}, nil
 }
 
@@ -1262,7 +1258,7 @@ func (r *mutationResolver) CreateEventFavorite(ctx context.Context, input NewEve
 
 func (r *mutationResolver) CreateVenueFavorite(ctx context.Context, input NewVenueFavorite) (*VenueFavorite, error) {
 
-		userinfo := middleware.CtxValue(ctx)
+	userinfo := middleware.CtxValue(ctx)
 	arg := db.CreateVenueFavoriteParams{
 		VenueID: int32(input.VenueID),
 		UserID:  int32(userinfo.UserID),
@@ -1357,11 +1353,11 @@ func GetEventHelper(ctx context.Context, input int32) (*Event, error) {
 		StartDate:   event.StartDate.String(),
 		EndDate:     event.EndDate.String(),
 		Venue:       int(event.Venue),
-		Type:        int(event.Type),
+		Type:        ConvertDbToEventTypeOption(event.Type),
 		UserID:      event.UserID,
 		Category:    int(event.Category),
 		Sponsors:    sponsors,
-		Status:      int(event.Status),
+		Status:      ConvertDbToEventStatusOption(event.Status),
 		Images:      images,
 		Videos:      videos,
 		Tickets:     tickets,

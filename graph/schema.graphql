@@ -5,6 +5,28 @@ scalar Time
 scalar DateTime
 scalar Date
 
+enum UserRole {
+ATTENDEE
+HOST
+SPONSOR
+ADMIN
+
+}
+
+enum EventTypeOption {
+FREE
+PAID
+}
+
+enum EventStatusOption {
+DRAFT
+PUBLISHED
+APPROVED
+REJECTED
+COMPLETED
+}
+
+
 type User {
         id: ID!
         phone: String
@@ -13,7 +35,7 @@ type User {
         email: String!
         username: String!
         password: String!
-        usertype: Int!
+        usertype: UserRole!
         avatar : String!
         favorites_venues: [Venue] 
         favorites_events: [Event]  
@@ -21,7 +43,7 @@ type User {
 
 type Usertype {
         id: ID!
-        description: String!
+        description: UserRole!
         status: Int
         }
 
@@ -52,13 +74,13 @@ type Event {
         startDate:   DateTime!
         endDate:     DateTime!
         venue: Int!
-        type: Int!
+        type: EventTypeOption!
         user_id: ID!
         category: Int!
         sponsors : [Sponsor]
         hostID: Int!
         tickets : [Ticket]
-        status: Int!
+        status: EventStatusOption!
         images: [Image]
         videos: [Video]
         meta: metadata
@@ -132,7 +154,7 @@ input NewVenue {
 }
 
 input GetEvent{
-        category: Int!
+        category: Int
         pageNumber: Int!
         limit: Int!
         status: Int!
@@ -154,7 +176,7 @@ input NewEvent {
         type: Int!
         user_id: ID!
         category: Int!
-        status: Int!
+        status: EventStatusOption!
         images: [NewImage]
         videos: [NewVideo]   
         tickets : [NewTicket]     
@@ -170,7 +192,7 @@ input UpdateEvent {
         venue: Int
         type: Int
         category: Int
-        status: Int
+        status: EventStatusOption
         images: [NewImage]
         videos: [NewVideo]        
 }
@@ -250,7 +272,7 @@ input NewArtist {
 
 type UpdateEventState{
         event_id: Int!
-        event_status: Int!
+        event_status: EventStatusOption!
 }
 
 type Ticket {
@@ -330,7 +352,7 @@ input NewTicket {
 
 input UpdateEventStatus{
     event_id: Int!
-    event_status: Int!
+    event_status: EventStatusOption!
 }
 
 input UpdateHost{
@@ -513,7 +535,7 @@ type Query {
         getEvent(input: ID!): Event 
         getVenue(input: ID!): Venue
         getUsers : [User!]
-        getEvents(input: GetEvent!): [Event!]
+        getAllEvents(input: GetEvent!): [Event!]
         getEventsByLocation(input: GetEventByLocation!): [Event!]
         getCategory( input: ID!): Category!
         getCategories: [Category!]

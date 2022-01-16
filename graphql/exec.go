@@ -195,13 +195,13 @@ type ComplexityRoot struct {
 	}
 
 	Query struct {
+		GetAllEvents        func(childComplexity int, input GetEvent) int
 		GetAllNews          func(childComplexity int) int
 		GetAllPlans         func(childComplexity int) int
 		GetAllPromotions    func(childComplexity int) int
 		GetCategories       func(childComplexity int) int
 		GetCategory         func(childComplexity int, input int32) int
 		GetEvent            func(childComplexity int, input int32) int
-		GetEvents           func(childComplexity int, input GetEvent) int
 		GetEventsByLocation func(childComplexity int, input GetEventByLocation) int
 		GetNews             func(childComplexity int, input int32) int
 		GetPlan             func(childComplexity int, input int32) int
@@ -336,7 +336,7 @@ type QueryResolver interface {
 	GetEvent(ctx context.Context, input int32) (*Event, error)
 	GetVenue(ctx context.Context, input int32) (*Venue, error)
 	GetUsers(ctx context.Context) ([]User, error)
-	GetEvents(ctx context.Context, input GetEvent) ([]Event, error)
+	GetAllEvents(ctx context.Context, input GetEvent) ([]Event, error)
 	GetEventsByLocation(ctx context.Context, input GetEventByLocation) ([]Event, error)
 	GetCategory(ctx context.Context, input int32) (*Category, error)
 	GetCategories(ctx context.Context) ([]Category, error)
@@ -1286,6 +1286,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Promotion.UserID(childComplexity), true
 
+	case "Query.getAllEvents":
+		if e.complexity.Query.GetAllEvents == nil {
+			break
+		}
+
+		args, err := ec.field_Query_getAllEvents_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.GetAllEvents(childComplexity, args["input"].(GetEvent)), true
+
 	case "Query.getAllNews":
 		if e.complexity.Query.GetAllNews == nil {
 			break
@@ -1337,18 +1349,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.GetEvent(childComplexity, args["input"].(int32)), true
-
-	case "Query.getEvents":
-		if e.complexity.Query.GetEvents == nil {
-			break
-		}
-
-		args, err := ec.field_Query_getEvents_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Query.GetEvents(childComplexity, args["input"].(GetEvent)), true
 
 	case "Query.getEventsByLocation":
 		if e.complexity.Query.GetEventsByLocation == nil {
@@ -1885,6 +1885,28 @@ scalar Time
 scalar DateTime
 scalar Date
 
+enum UserRole {
+ATTENDEE
+HOST
+SPONSOR
+ADMIN
+
+}
+
+enum EventTypeOption {
+FREE
+PAID
+}
+
+enum EventStatusOption {
+DRAFT
+PUBLISHED
+APPROVED
+REJECTED
+COMPLETED
+}
+
+
 type User {
         id: ID!
         phone: String
@@ -1893,7 +1915,7 @@ type User {
         email: String!
         username: String!
         password: String!
-        usertype: Int!
+        usertype: UserRole!
         avatar : String!
         favorites_venues: [Venue] 
         favorites_events: [Event]  
@@ -1901,7 +1923,7 @@ type User {
 
 type Usertype {
         id: ID!
-        description: String!
+        description: UserRole!
         status: Int
         }
 
@@ -1932,13 +1954,13 @@ type Event {
         startDate:   DateTime!
         endDate:     DateTime!
         venue: Int!
-        type: Int!
+        type: EventTypeOption!
         user_id: ID!
         category: Int!
         sponsors : [Sponsor]
         hostID: Int!
         tickets : [Ticket]
-        status: Int!
+        status: EventStatusOption!
         images: [Image]
         videos: [Video]
         meta: metadata
@@ -2012,7 +2034,7 @@ input NewVenue {
 }
 
 input GetEvent{
-        category: Int!
+        category: Int
         pageNumber: Int!
         limit: Int!
         status: Int!
@@ -2034,7 +2056,7 @@ input NewEvent {
         type: Int!
         user_id: ID!
         category: Int!
-        status: Int!
+        status: EventStatusOption!
         images: [NewImage]
         videos: [NewVideo]   
         tickets : [NewTicket]     
@@ -2050,7 +2072,7 @@ input UpdateEvent {
         venue: Int
         type: Int
         category: Int
-        status: Int
+        status: EventStatusOption
         images: [NewImage]
         videos: [NewVideo]        
 }
@@ -2130,7 +2152,7 @@ input NewArtist {
 
 type UpdateEventState{
         event_id: Int!
-        event_status: Int!
+        event_status: EventStatusOption!
 }
 
 type Ticket {
@@ -2210,7 +2232,7 @@ input NewTicket {
 
 input UpdateEventStatus{
     event_id: Int!
-    event_status: Int!
+    event_status: EventStatusOption!
 }
 
 input UpdateHost{
@@ -2393,7 +2415,7 @@ type Query {
         getEvent(input: ID!): Event 
         getVenue(input: ID!): Venue
         getUsers : [User!]
-        getEvents(input: GetEvent!): [Event!]
+        getAllEvents(input: GetEvent!): [Event!]
         getEventsByLocation(input: GetEventByLocation!): [Event!]
         getCategory( input: ID!): Category!
         getCategories: [Category!]
@@ -2907,6 +2929,21 @@ func (ec *executionContext) field_Query___type_args(ctx context.Context, rawArgs
 	return args, nil
 }
 
+func (ec *executionContext) field_Query_getAllEvents_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 GetEvent
+	if tmp, ok := rawArgs["input"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+		arg0, err = ec.unmarshalNGetEvent2githubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgraphqlᚐGetEvent(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["input"] = arg0
+	return args, nil
+}
+
 func (ec *executionContext) field_Query_getCategory_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -2944,21 +2981,6 @@ func (ec *executionContext) field_Query_getEventsByLocation_args(ctx context.Con
 	if tmp, ok := rawArgs["input"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
 		arg0, err = ec.unmarshalNGetEventByLocation2githubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgraphqlᚐGetEventByLocation(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["input"] = arg0
-	return args, nil
-}
-
-func (ec *executionContext) field_Query_getEvents_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	var arg0 GetEvent
-	if tmp, ok := rawArgs["input"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-		arg0, err = ec.unmarshalNGetEvent2githubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgraphqlᚐGetEvent(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -3932,9 +3954,9 @@ func (ec *executionContext) _Event_type(ctx context.Context, field graphql.Colle
 		}
 		return graphql.Null
 	}
-	res := resTmp.(int)
+	res := resTmp.(EventTypeOption)
 	fc.Result = res
-	return ec.marshalNInt2int(ctx, field.Selections, res)
+	return ec.marshalNEventTypeOption2githubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgraphqlᚐEventTypeOption(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Event_user_id(ctx context.Context, field graphql.CollectedField, obj *Event) (ret graphql.Marshaler) {
@@ -4136,9 +4158,9 @@ func (ec *executionContext) _Event_status(ctx context.Context, field graphql.Col
 		}
 		return graphql.Null
 	}
-	res := resTmp.(int)
+	res := resTmp.(EventStatusOption)
 	fc.Result = res
-	return ec.marshalNInt2int(ctx, field.Selections, res)
+	return ec.marshalNEventStatusOption2githubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgraphqlᚐEventStatusOption(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Event_images(ctx context.Context, field graphql.CollectedField, obj *Event) (ret graphql.Marshaler) {
@@ -7205,7 +7227,7 @@ func (ec *executionContext) _Query_getUsers(ctx context.Context, field graphql.C
 	return ec.marshalOUser2ᚕgithubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgraphqlᚐUserᚄ(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Query_getEvents(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+func (ec *executionContext) _Query_getAllEvents(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -7222,7 +7244,7 @@ func (ec *executionContext) _Query_getEvents(ctx context.Context, field graphql.
 
 	ctx = graphql.WithFieldContext(ctx, fc)
 	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := ec.field_Query_getEvents_args(ctx, rawArgs)
+	args, err := ec.field_Query_getAllEvents_args(ctx, rawArgs)
 	if err != nil {
 		ec.Error(ctx, err)
 		return graphql.Null
@@ -7230,7 +7252,7 @@ func (ec *executionContext) _Query_getEvents(ctx context.Context, field graphql.
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().GetEvents(rctx, args["input"].(GetEvent))
+		return ec.resolvers.Query().GetAllEvents(rctx, args["input"].(GetEvent))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -8298,9 +8320,9 @@ func (ec *executionContext) _UpdateEventState_event_status(ctx context.Context, 
 		}
 		return graphql.Null
 	}
-	res := resTmp.(int)
+	res := resTmp.(EventStatusOption)
 	fc.Result = res
-	return ec.marshalNInt2int(ctx, field.Selections, res)
+	return ec.marshalNEventStatusOption2githubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgraphqlᚐEventStatusOption(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _User_id(ctx context.Context, field graphql.CollectedField, obj *User) (ret graphql.Marshaler) {
@@ -8575,9 +8597,9 @@ func (ec *executionContext) _User_usertype(ctx context.Context, field graphql.Co
 		}
 		return graphql.Null
 	}
-	res := resTmp.(int)
+	res := resTmp.(UserRole)
 	fc.Result = res
-	return ec.marshalNInt2int(ctx, field.Selections, res)
+	return ec.marshalNUserRole2githubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgraphqlᚐUserRole(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _User_avatar(ctx context.Context, field graphql.CollectedField, obj *User) (ret graphql.Marshaler) {
@@ -8744,9 +8766,9 @@ func (ec *executionContext) _Usertype_description(ctx context.Context, field gra
 		}
 		return graphql.Null
 	}
-	res := resTmp.(string)
+	res := resTmp.(UserRole)
 	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
+	return ec.marshalNUserRole2githubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgraphqlᚐUserRole(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Usertype_status(ctx context.Context, field graphql.CollectedField, obj *Usertype) (ret graphql.Marshaler) {
@@ -10618,7 +10640,7 @@ func (ec *executionContext) unmarshalInputGetEvent(ctx context.Context, obj inte
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("category"))
-			it.Category, err = ec.unmarshalNInt2int(ctx, v)
+			it.Category, err = ec.unmarshalOInt2ᚖint(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -10922,7 +10944,7 @@ func (ec *executionContext) unmarshalInputNewEvent(ctx context.Context, obj inte
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("status"))
-			it.Status, err = ec.unmarshalNInt2int(ctx, v)
+			it.Status, err = ec.unmarshalNEventStatusOption2githubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgraphqlᚐEventStatusOption(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -11810,7 +11832,7 @@ func (ec *executionContext) unmarshalInputUpdateEvent(ctx context.Context, obj i
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("status"))
-			it.Status, err = ec.unmarshalOInt2ᚖint(ctx, v)
+			it.Status, err = ec.unmarshalOEventStatusOption2ᚖgithubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgraphqlᚐEventStatusOption(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -11854,7 +11876,7 @@ func (ec *executionContext) unmarshalInputUpdateEventStatus(ctx context.Context,
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("event_status"))
-			it.EventStatus, err = ec.unmarshalNInt2int(ctx, v)
+			it.EventStatus, err = ec.unmarshalNEventStatusOption2githubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgraphqlᚐEventStatusOption(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -13145,7 +13167,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 				res = ec._Query_getUsers(ctx, field)
 				return res
 			})
-		case "getEvents":
+		case "getAllEvents":
 			field := field
 			out.Concurrently(i, func() (res graphql.Marshaler) {
 				defer func() {
@@ -13153,7 +13175,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
-				res = ec._Query_getEvents(ctx, field)
+				res = ec._Query_getAllEvents(ctx, field)
 				return res
 			})
 		case "getEventsByLocation":
@@ -14120,6 +14142,26 @@ func (ec *executionContext) marshalNEventFavorite2ᚖgithubᚗcomᚋBigListRyRy�
 	return ec._EventFavorite(ctx, sel, v)
 }
 
+func (ec *executionContext) unmarshalNEventStatusOption2githubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgraphqlᚐEventStatusOption(ctx context.Context, v interface{}) (EventStatusOption, error) {
+	var res EventStatusOption
+	err := res.UnmarshalGQL(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNEventStatusOption2githubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgraphqlᚐEventStatusOption(ctx context.Context, sel ast.SelectionSet, v EventStatusOption) graphql.Marshaler {
+	return v
+}
+
+func (ec *executionContext) unmarshalNEventTypeOption2githubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgraphqlᚐEventTypeOption(ctx context.Context, v interface{}) (EventTypeOption, error) {
+	var res EventTypeOption
+	err := res.UnmarshalGQL(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNEventTypeOption2githubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgraphqlᚐEventTypeOption(ctx context.Context, sel ast.SelectionSet, v EventTypeOption) graphql.Marshaler {
+	return v
+}
+
 func (ec *executionContext) marshalNEventView2githubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgraphqlᚐEventView(ctx context.Context, sel ast.SelectionSet, v EventView) graphql.Marshaler {
 	return ec._EventView(ctx, sel, &v)
 }
@@ -14468,6 +14510,16 @@ func (ec *executionContext) marshalNUser2ᚖgithubᚗcomᚋBigListRyRyᚋharbour
 		return graphql.Null
 	}
 	return ec._User(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalNUserRole2githubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgraphqlᚐUserRole(ctx context.Context, v interface{}) (UserRole, error) {
+	var res UserRole
+	err := res.UnmarshalGQL(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNUserRole2githubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgraphqlᚐUserRole(ctx context.Context, sel ast.SelectionSet, v UserRole) graphql.Marshaler {
+	return v
 }
 
 func (ec *executionContext) marshalNVenue2githubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgraphqlᚐVenue(ctx context.Context, sel ast.SelectionSet, v Venue) graphql.Marshaler {
@@ -14906,6 +14958,22 @@ func (ec *executionContext) marshalOEvent2ᚖgithubᚗcomᚋBigListRyRyᚋharbou
 		return graphql.Null
 	}
 	return ec._Event(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalOEventStatusOption2ᚖgithubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgraphqlᚐEventStatusOption(ctx context.Context, v interface{}) (*EventStatusOption, error) {
+	if v == nil {
+		return nil, nil
+	}
+	var res = new(EventStatusOption)
+	err := res.UnmarshalGQL(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalOEventStatusOption2ᚖgithubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgraphqlᚐEventStatusOption(ctx context.Context, sel ast.SelectionSet, v *EventStatusOption) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return v
 }
 
 func (ec *executionContext) unmarshalOFloat2ᚖfloat64(ctx context.Context, v interface{}) (*float64, error) {

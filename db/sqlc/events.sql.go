@@ -161,18 +161,17 @@ func (q *Queries) GetEvent(ctx context.Context, id int32) (Event, error) {
 const getEvents = `-- name: GetEvents :many
 SELECT e.id, title, description, e.banner_image, start_date, end_date, venue, type, user_id, category, ticket_id, recurring, e.status, e.created_at, v.id, name, address, postal_code, city, province, country_code, venue_owner, v.banner_image, rating, longitude, latitude, v.status, v.created_at FROM events e
 inner join venues v on  e.venue = v.id
-WHERE category = $1 AND 
-e.status = $2 AND e.end_date >= CURRENT_DATE
+WHERE e.status = $1 AND
+e.end_date >= CURRENT_DATE
 ORDER BY e.id desc
-LIMIT $3
-OFFSET $4 ROWS
+LIMIT $2
+OFFSET $3 ROWS
 `
 
 type GetEventsParams struct {
-	Category int32 `json:"category"`
-	Status   int32 `json:"status"`
-	Limit    int32 `json:"limit"`
-	Offset   int32 `json:"offset"`
+	Status int32 `json:"status"`
+	Limit  int32 `json:"limit"`
+	Offset int32 `json:"offset"`
 }
 
 type GetEventsRow struct {
@@ -207,12 +206,7 @@ type GetEventsRow struct {
 }
 
 func (q *Queries) GetEvents(ctx context.Context, arg GetEventsParams) ([]GetEventsRow, error) {
-	rows, err := q.db.QueryContext(ctx, getEvents,
-		arg.Category,
-		arg.Status,
-		arg.Limit,
-		arg.Offset,
-	)
+	rows, err := q.db.QueryContext(ctx, getEvents, arg.Status, arg.Limit, arg.Offset)
 	if err != nil {
 		return nil, err
 	}

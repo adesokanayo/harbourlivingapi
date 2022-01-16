@@ -109,7 +109,6 @@ func TestGetAllEvents(t *testing.T) {
 	arg := GetEventsParams{
 		Limit:    1,
 		Offset:   1,
-		Category: 1,
 	}
 	events, err := testQueries.GetEvents(context.Background(), arg)
 	require.NoError(t, err)

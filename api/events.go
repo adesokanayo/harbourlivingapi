@@ -2,10 +2,11 @@ package api
 
 import (
 	"database/sql"
+	"net/http"
+
 	db "github.com/BigListRyRy/harbourlivingapi/db/sqlc"
 	"github.com/BigListRyRy/harbourlivingapi/util"
 	"github.com/gin-gonic/gin"
-	"net/http"
 )
 
 type CreateEventRequest struct {
@@ -46,12 +47,12 @@ func (s *Server) CreateEvent(ctx *gin.Context) {
 		return
 	}
 
-	startDate, err := util.ProcessDateTime("rfc",req.StartDate)
+	startDate, err := util.ProcessDateTime("rfc", req.StartDate)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
 		return
 	}
-	endDate, err := util.ProcessDateTime("rfc",req.EndDate)
+	endDate, err := util.ProcessDateTime("rfc", req.EndDate)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
 		return
@@ -84,10 +85,11 @@ func (s *Server) ListEvents(ctx *gin.Context) {
 		return
 	}
 
+	// get events that are approved.
 	arg := db.GetEventsParams{
-		Category:    req.Category,
-		Limit:       req.PageSize,
-		Offset:      (req.PageID - 1) * req.PageSize,
+		Status: 3,
+		Limit:  req.PageSize,
+		Offset: (req.PageID - 1) * req.PageSize,
 	}
 	events, err := s.store.GetEvents(ctx, arg)
 	if err != nil {
