@@ -150,7 +150,7 @@ input NewVenue {
         longitude: Float
         latitude: Float
         rating : Int
-        status :StatusOptions!
+        status :StatusOptions
 }
 
 input GetEvent{
@@ -175,7 +175,7 @@ input NewEvent {
         type: Int!
         user_id: ID!
         category: Int!
-        status: StatusOptions!
+        status: StatusOptions
         images: [NewImage]
         videos: [NewVideo]   
         tickets : [NewTicket]     

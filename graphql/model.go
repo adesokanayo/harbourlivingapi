@@ -135,19 +135,19 @@ type NewDayPlan struct {
 }
 
 type NewEvent struct {
-	Title       string        `json:"title"`
-	Description string        `json:"description"`
-	BannerImage string        `json:"banner_image"`
-	StartDate   string        `json:"startDate"`
-	EndDate     string        `json:"endDate"`
-	Venue       int           `json:"venue"`
-	Type        int           `json:"type"`
-	UserID      int32         `json:"user_id"`
-	Category    int           `json:"category"`
-	Status      StatusOptions `json:"status"`
-	Images      []*NewImage   `json:"images"`
-	Videos      []*NewVideo   `json:"videos"`
-	Tickets     []*NewTicket  `json:"tickets"`
+	Title       string         `json:"title"`
+	Description string         `json:"description"`
+	BannerImage string         `json:"banner_image"`
+	StartDate   string         `json:"startDate"`
+	EndDate     string         `json:"endDate"`
+	Venue       int            `json:"venue"`
+	Type        int            `json:"type"`
+	UserID      int32          `json:"user_id"`
+	Category    int            `json:"category"`
+	Status      *StatusOptions `json:"status"`
+	Images      []*NewImage    `json:"images"`
+	Videos      []*NewVideo    `json:"videos"`
+	Tickets     []*NewTicket   `json:"tickets"`
 }
 
 type NewEventFavorite struct {
@@ -228,18 +228,18 @@ type NewUser struct {
 }
 
 type NewVenue struct {
-	Name        string        `json:"name"`
-	Address     *string       `json:"address"`
-	PostalCode  *string       `json:"postal_code"`
-	City        *string       `json:"city"`
-	Province    *string       `json:"province"`
-	CountryCode *string       `json:"country_code"`
-	VenueOwner  int           `json:"venue_owner"`
-	BannerImage *string       `json:"banner_image"`
-	Longitude   *float64      `json:"longitude"`
-	Latitude    *float64      `json:"latitude"`
-	Rating      *int          `json:"rating"`
-	Status      StatusOptions `json:"status"`
+	Name        string         `json:"name"`
+	Address     *string        `json:"address"`
+	PostalCode  *string        `json:"postal_code"`
+	City        *string        `json:"city"`
+	Province    *string        `json:"province"`
+	CountryCode *string        `json:"country_code"`
+	VenueOwner  int            `json:"venue_owner"`
+	BannerImage *string        `json:"banner_image"`
+	Longitude   *float64       `json:"longitude"`
+	Latitude    *float64       `json:"latitude"`
+	Rating      *int           `json:"rating"`
+	Status      *StatusOptions `json:"status"`
 }
 
 type NewVenueFavorite struct {

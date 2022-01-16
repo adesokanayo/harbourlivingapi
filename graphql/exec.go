@@ -2030,7 +2030,7 @@ input NewVenue {
         longitude: Float
         latitude: Float
         rating : Int
-        status :StatusOptions!
+        status :StatusOptions
 }
 
 input GetEvent{
@@ -2055,7 +2055,7 @@ input NewEvent {
         type: Int!
         user_id: ID!
         category: Int!
-        status: StatusOptions!
+        status: StatusOptions
         images: [NewImage]
         videos: [NewVideo]   
         tickets : [NewTicket]     
@@ -10935,7 +10935,7 @@ func (ec *executionContext) unmarshalInputNewEvent(ctx context.Context, obj inte
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("status"))
-			it.Status, err = ec.unmarshalNStatusOptions2githubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgraphqlᚐStatusOptions(ctx, v)
+			it.Status, err = ec.unmarshalOStatusOptions2ᚖgithubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgraphqlᚐStatusOptions(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -11551,7 +11551,7 @@ func (ec *executionContext) unmarshalInputNewVenue(ctx context.Context, obj inte
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("status"))
-			it.Status, err = ec.unmarshalNStatusOptions2githubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgraphqlᚐStatusOptions(ctx, v)
+			it.Status, err = ec.unmarshalOStatusOptions2ᚖgithubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgraphqlᚐStatusOptions(ctx, v)
 			if err != nil {
 				return it, err
 			}

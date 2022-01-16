@@ -104,7 +104,7 @@ func (r *mutationResolver) CreateVenue(ctx context.Context, input NewVenue) (*Ve
 			Valid:   true,
 		}
 	}
-	createVenueReq.Status = int32(ConvertStatusOptionsToDb(input.Status))
+	createVenueReq.Status = int32(ConvertStatusOptionsToDb(StatusOptionsDraft))
 	createVenueReq.VenueOwner = int32(input.VenueOwner)
 
 	venue, err := store.CreateVenue(ctx, createVenueReq)
@@ -243,7 +243,7 @@ func (r *mutationResolver) CreateEvent(ctx context.Context, input NewEvent) (*Ev
 		Type:        int32(input.Type),
 		UserID:      int32(input.UserID),
 		Category:    int32(input.Category),
-		Status:      int32(ConvertStatusOptionsToDb(input.Status)),
+		Status:      int32(ConvertStatusOptionsToDb(StatusOptionsCompleted)),
 	}
 
 	//Use Transaction
