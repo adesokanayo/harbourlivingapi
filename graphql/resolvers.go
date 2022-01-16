@@ -243,7 +243,7 @@ func (r *mutationResolver) CreateEvent(ctx context.Context, input NewEvent) (*Ev
 		Type:        int32(input.Type),
 		UserID:      int32(input.UserID),
 		Category:    int32(input.Category),
-		Status:      int32(ConvertStatusOptionsToDb(StatusOptionsCompleted)),
+		Status:      int32(ConvertStatusOptionsToDb(StatusOptionsDraft)),
 	}
 
 	//Use Transaction
