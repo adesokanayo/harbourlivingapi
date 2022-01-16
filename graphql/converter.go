@@ -10,95 +10,96 @@ const (
 
 type UserTypes int
 
-func ConvertDbToUserRole(v int32) UserRole {
+func ConvertDbToUserRole(v int32) UserTypeOptions {
 	switch v {
 	case 1:
-		return UserRoleAttendee
+		return UserTypeOptionsAttendee
+
 	case 2:
-		return UserRoleHost
+		return UserTypeOptionsHost
 
 	case 3:
-		return UserRoleSponsor
+		return UserTypeOptionsSponsor
 
 	case 4:
-		return UserRoleAdmin
+		return UserTypeOptionsAdmin
 	}
 
 	return "invalid usertype"
 }
 
-func ConvertUserRoleToDb(v UserRole) int {
+func ConvertUserTypeOptionsToDb(v UserTypeOptions) int {
 	switch v {
-	case UserRoleAttendee:
+	case UserTypeOptionsAttendee:
 		return 1
 
-	case UserRoleHost:
+	case UserTypeOptionsHost:
 		return 2
 
-	case UserRoleSponsor:
+	case UserTypeOptionsSponsor:
 		return 3
 
-	case UserRoleAdmin:
+	case UserTypeOptionsAdmin:
 		return 4
 	}
 	return 0
 }
 
-func ConvertDbToEventTypeOption(v int32) EventTypeOption {
+func ConvertDbToEventTypeOptions(v int32) EventTypeOptions {
 	switch v {
 	case 1:
-		return EventTypeOptionFree
+		return EventTypeOptionsFree
 	case 2:
-		return EventTypeOptionPaid
+		return EventTypeOptionsPaid
 	}
 	return "invalid eventype"
 
 }
 
-func ConvertEventTypeOptionToDb(v EventTypeOption) int {
+func ConvertEventTypeOptionsToDb(v EventTypeOptions) int {
 	switch v {
-	case EventTypeOptionFree:
+	case EventTypeOptionsFree:
 		return 1
 
-	case EventTypeOptionPaid:
+	case EventTypeOptionsPaid:
 		return 2
 	}
 	return 0
 }
 
-func ConvertDbToEventStatusOption(v int32) EventStatusOption {
+func ConvertDbToStatusOptions(v int32) StatusOptions {
 	switch v {
 	case 1:
-		return EventStatusOptionDraft
+		return StatusOptionsDraft
 	case 2:
-		return EventStatusOptionPublished
+		return StatusOptionsPublished
 
 	case 3:
-		return EventStatusOptionApproved
+		return StatusOptionsApproved
 
 	case 4:
-		return EventStatusOptionRejected
+		return StatusOptionsRejected
 
 	case 5:
-		return EventStatusOptionCompleted
+		return StatusOptionsCompleted
 	}
 	return "invalid usertype"
 
 }
 
-func ConvertEventStatusOptionToDb(v EventStatusOption) int {
+func ConvertStatusOptionsToDb(v StatusOptions) int {
 	switch v {
-	case EventStatusOptionDraft:
+	case StatusOptionsDraft:
 		return 1
 
-	case EventStatusOptionPublished:
+	case StatusOptionsPublished:
 		return 2
 
-	case EventStatusOptionApproved:
+	case StatusOptionsApproved:
 		return 3
-	case EventStatusOptionRejected:
+	case StatusOptionsRejected:
 		return 4
-	case EventStatusOptionCompleted:
+	case StatusOptionsCompleted:
 		return 5
 	}
 	return 0

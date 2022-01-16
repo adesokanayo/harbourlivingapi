@@ -104,7 +104,7 @@ func (r *mutationResolver) CreateVenue(ctx context.Context, input NewVenue) (*Ve
 			Valid:   true,
 		}
 	}
-	createVenueReq.Status = int32(input.Status)
+	createVenueReq.Status = int32(ConvertStatusOptionsToDb(input.Status))
 	createVenueReq.VenueOwner = int32(input.VenueOwner)
 
 	venue, err := store.CreateVenue(ctx, createVenueReq)
@@ -142,7 +142,7 @@ func (r *mutationResolver) CreateVenue(ctx context.Context, input NewVenue) (*Ve
 		result.Latitude = &venue.Latitude.Float64
 	}
 
-	result.Status = int(venue.Status)
+	result.Status = ConvertDbToStatusOptions(venue.Status)
 
 	return &result, nil
 }
@@ -198,7 +198,7 @@ func (r *mutationResolver) CreateUser(ctx context.Context, input NewUser) (*User
 func (r *mutationResolver) CreateCategory(ctx context.Context, input NewCategory) (*Category, error) {
 
 	userinfo := middleware.CtxValue(ctx)
-	if userinfo.UserType != ConvertUserRoleToDb(UserRoleAdmin) {
+	if userinfo.UserType != ConvertUserTypeOptionsToDb(UserTypeOptionsAdmin) {
 		return nil, errors.New(util.ErrPermissionDenied)
 	}
 	arg := db.CreateCategoryParams{}
@@ -243,7 +243,7 @@ func (r *mutationResolver) CreateEvent(ctx context.Context, input NewEvent) (*Ev
 		Type:        int32(input.Type),
 		UserID:      int32(input.UserID),
 		Category:    int32(input.Category),
-		Status:      int32(ConvertEventStatusOptionToDb(input.Status)),
+		Status:      int32(ConvertStatusOptionsToDb(input.Status)),
 	}
 
 	//Use Transaction
@@ -391,7 +391,7 @@ func (r *mutationResolver) CreateEvent(ctx context.Context, input NewEvent) (*Ev
 			HostID:      int(linkedEventHost.HostID),
 			Images:      images,
 			Videos:      videos,
-			Status:      ConvertDbToEventStatusOption(event.Status),
+			Status:      ConvertDbToStatusOptions(event.Status),
 			Tickets:     tickets,
 		}
 		return nil
@@ -465,7 +465,7 @@ func (r *mutationResolver) UpdateEvent(ctx context.Context, input UpdateEvent) (
 	}
 
 	if input.Status != nil {
-		arg.Status = int32(ConvertEventStatusOptionToDb(*input.Status))
+		arg.Status = int32(ConvertStatusOptionsToDb(*input.Status))
 		arg.StatusToUpdate = true
 	}
 
@@ -566,7 +566,7 @@ func (r *mutationResolver) UpdateEvent(ctx context.Context, input UpdateEvent) (
 			Images:      images,
 			Videos:      videos,
 			Venue:       int(event.Venue),
-			Status:      ConvertDbToEventStatusOption(event.Status),
+			Status:      ConvertDbToStatusOptions(event.Status),
 		}
 		return nil
 	})
@@ -846,11 +846,11 @@ func (r *queryResolver) GetEvent(ctx context.Context, input int32) (*Event, erro
 		StartDate:   event.StartDate.String(),
 		EndDate:     event.EndDate.String(),
 		Venue:       int(event.Venue),
-		Type:        ConvertDbToEventTypeOption(event.Type),
+		Type:        ConvertDbToEventTypeOptions(event.Type),
 		UserID:      event.UserID,
 		Category:    int(event.Category),
 		Sponsors:    sponsors,
-		Status:      ConvertDbToEventStatusOption(event.Status),
+		Status:      ConvertDbToStatusOptions(event.Status),
 		Images:      images,
 		Videos:      videos,
 		Tickets:     tickets,
@@ -870,16 +870,13 @@ func (r *queryResolver) GetAllEvents(ctx context.Context, input GetEvent) ([]Eve
 	var eventSponsors []*Sponsor
 	var promoted bool
 
+	//fetch only approved events
 	arg := db.GetEventsParams{
-		Status: int32(input.Status),
-		Limit:  int32(input.PageNumber),
+		Status: int32(ConvertStatusOptionsToDb(StatusOptionsApproved)),
+		Limit:  int32(input.Limit),
 		Offset: int32((input.PageNumber * input.Limit) - input.Limit),
 	}
-/*
-	if input.Category != nil {
-		arg.Category = int32(*input.Category)
-	}
-*/
+
 	events, err := store.GetEvents(ctx, arg)
 	if err != nil {
 		return nil, err
@@ -942,7 +939,7 @@ func (r *queryResolver) GetAllEvents(ctx context.Context, input GetEvent) ([]Eve
 			StartDate:   event.StartDate.String(),
 			EndDate:     event.EndDate.String(),
 			Category:    int(event.Category),
-			Type:        ConvertDbToEventTypeOption(event.Type),
+			Type:        ConvertDbToEventTypeOptions(event.Type),
 			UserID:      event.UserID,
 			Venue:       int(event.Venue),
 			BannerImage: event.BannerImage,
@@ -992,7 +989,7 @@ func (r *queryResolver) GetEventsByLocation(ctx context.Context, input GetEventB
 			StartDate:   event.StartDate.String(),
 			EndDate:     event.EndDate.String(),
 			Category:    int(event.Category),
-			Type:        ConvertDbToEventTypeOption(event.Type),
+			Type:        ConvertDbToEventTypeOptions(event.Type),
 			UserID:      event.UserID,
 			Venue:       int(event.Venue),
 			//BannerImage: *event.BannerImage,
@@ -1090,7 +1087,7 @@ func (r *mutationResolver) CreateSponsorForEvent(ctx context.Context, input NewS
 func (r *mutationResolver) UpdateEventStatus(ctx context.Context, input UpdateEventStatus) (*UpdateEventState, error) {
 	arg := db.UpdateEventStatusParams{
 		ID:     int32(input.EventID),
-		Status: int32(ConvertEventStatusOptionToDb(input.EventStatus)),
+		Status: int32(ConvertStatusOptionsToDb(input.EventStatus)),
 	}
 	result, err := store.UpdateEventStatus(ctx, arg)
 	if err != nil {
@@ -1098,7 +1095,7 @@ func (r *mutationResolver) UpdateEventStatus(ctx context.Context, input UpdateEv
 	}
 	return &UpdateEventState{
 		EventID:     int(result.ID),
-		EventStatus: ConvertDbToEventStatusOption(result.Status),
+		EventStatus: ConvertDbToStatusOptions(result.Status),
 	}, nil
 }
 
@@ -1353,11 +1350,11 @@ func GetEventHelper(ctx context.Context, input int32) (*Event, error) {
 		StartDate:   event.StartDate.String(),
 		EndDate:     event.EndDate.String(),
 		Venue:       int(event.Venue),
-		Type:        ConvertDbToEventTypeOption(event.Type),
+		Type:        ConvertDbToEventTypeOptions(event.Type),
 		UserID:      event.UserID,
 		Category:    int(event.Category),
 		Sponsors:    sponsors,
-		Status:      ConvertDbToEventStatusOption(event.Status),
+		Status:      ConvertDbToStatusOptions(event.Status),
 		Images:      images,
 		Videos:      videos,
 		Tickets:     tickets,
@@ -1444,7 +1441,7 @@ func (r *mutationResolver) UpdateVenue(ctx context.Context, input UpdateVenue) (
 	}
 
 	if input.Status != nil {
-		arg.Status = int32(*input.Status)
+		arg.Status = int32(ConvertStatusOptionsToDb(*input.Status))
 		arg.StatusToUpdate = true
 	}
 
@@ -1603,7 +1600,7 @@ func (r *mutationResolver) CreateNews(ctx context.Context, input NewNews) (*News
 			String: *input.Tags,
 			Valid:  true,
 		},
-		Status: int32(input.Status),
+		Status: int32(ConvertStatusOptionsToDb(input.Status)),
 	}
 
 	news, err := store.CreateNews(ctx, arg)
@@ -1618,7 +1615,7 @@ func (r *mutationResolver) CreateNews(ctx context.Context, input NewNews) (*News
 		Body:         news.Body,
 		PublishDate:  news.PublishDate.String(),
 		Tags:         &news.Tags.String,
-		Status:       int(news.Status),
+		Status:       ConvertDbToStatusOptions(news.Status),
 	}, nil
 }
 
@@ -1661,7 +1658,7 @@ func (r *mutationResolver) UpdateNews(ctx context.Context, input UpdateNews) (*N
 	}
 
 	if input.Status != nil {
-		arg.Status = int32(*input.Status)
+		arg.Status = int32(ConvertStatusOptionsToDb(*input.Status))
 		arg.StatusToUpdate = true
 	}
 
@@ -1677,7 +1674,7 @@ func (r *mutationResolver) UpdateNews(ctx context.Context, input UpdateNews) (*N
 		Body:         news.Body,
 		PublishDate:  news.PublishDate.String(),
 		Tags:         &news.Tags.String,
-		Status:       int(news.Status),
+		Status:       ConvertDbToStatusOptions(news.Status),
 	}, nil
 }
 
@@ -1786,7 +1783,7 @@ func (r *queryResolver) GetNews(ctx context.Context, input int32) (*News, error)
 		Body:         news.Body,
 		PublishDate:  news.PublishDate.String(),
 		Tags:         &news.Tags.String,
-		Status:       int(news.Status),
+		Status:       ConvertDbToStatusOptions(news.Status),
 	}, nil
 
 }

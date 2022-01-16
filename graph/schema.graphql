@@ -5,7 +5,7 @@ scalar Time
 scalar DateTime
 scalar Date
 
-enum UserRole {
+enum UserTypeOptions {
 ATTENDEE
 HOST
 SPONSOR
@@ -13,12 +13,12 @@ ADMIN
 
 }
 
-enum EventTypeOption {
+enum EventTypeOptions {
 FREE
 PAID
 }
 
-enum EventStatusOption {
+enum StatusOptions {
 DRAFT
 PUBLISHED
 APPROVED
@@ -35,7 +35,7 @@ type User {
         email: String!
         username: String!
         password: String!
-        usertype: UserRole!
+        usertype: UserTypeOptions!
         avatar : String!
         favorites_venues: [Venue] 
         favorites_events: [Event]  
@@ -43,7 +43,7 @@ type User {
 
 type Usertype {
         id: ID!
-        description: UserRole!
+        description: UserTypeOptions!
         status: Int
         }
 
@@ -74,13 +74,13 @@ type Event {
         startDate:   DateTime!
         endDate:     DateTime!
         venue: Int!
-        type: EventTypeOption!
+        type: EventTypeOptions!
         user_id: ID!
         category: Int!
         sponsors : [Sponsor]
         hostID: Int!
         tickets : [Ticket]
-        status: EventStatusOption!
+        status: StatusOptions!
         images: [Image]
         videos: [Video]
         meta: metadata
@@ -100,7 +100,7 @@ type Venue {
         banner_image: String
         venue_owner: Int!
         rating: Int
-        status: Int!
+        status: StatusOptions!
         }
 
 input Login {
@@ -150,14 +150,13 @@ input NewVenue {
         longitude: Float
         latitude: Float
         rating : Int
-        status :Int!
+        status :StatusOptions!
 }
 
 input GetEvent{
         category: Int
         pageNumber: Int!
         limit: Int!
-        status: Int!
 }
 
 input GetEventByLocation{
@@ -176,7 +175,7 @@ input NewEvent {
         type: Int!
         user_id: ID!
         category: Int!
-        status: EventStatusOption!
+        status: StatusOptions!
         images: [NewImage]
         videos: [NewVideo]   
         tickets : [NewTicket]     
@@ -192,7 +191,7 @@ input UpdateEvent {
         venue: Int
         type: Int
         category: Int
-        status: EventStatusOption
+        status: StatusOptions
         images: [NewImage]
         videos: [NewVideo]        
 }
@@ -209,7 +208,7 @@ input UpdateVenue {
         longitude: Float
         latitude: Float 
         rating: Int 
-        status: Int   
+        status: StatusOptions   
 }
 
 input RefreshTokenInput{
@@ -272,7 +271,7 @@ input NewArtist {
 
 type UpdateEventState{
         event_id: Int!
-        event_status: EventStatusOption!
+        event_status: StatusOptions!
 }
 
 type Ticket {
@@ -321,7 +320,7 @@ type News {
         user_id : ID!
         publish_date: DateTime!
         tags : String
-        status: Int!
+        status: StatusOptions!
 }
 
 type Schedule {
@@ -352,7 +351,7 @@ input NewTicket {
 
 input UpdateEventStatus{
     event_id: Int!
-    event_status: EventStatusOption!
+    event_status: StatusOptions!
 }
 
 input UpdateHost{
@@ -425,7 +424,7 @@ input NewNews {
         user_id : ID!
         publish_date: DateTime!
         tags : String
-        status: Int!
+        status: StatusOptions!
 }
 
 input UpdateNews {
@@ -436,7 +435,7 @@ input UpdateNews {
         body : String
         publish_date: DateTime
         tags : String
-        status: Int
+        status: StatusOptions
 }
 
 type metadata {

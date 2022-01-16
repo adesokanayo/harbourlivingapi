@@ -432,10 +432,20 @@ VALUES
 (
   '08067648635','demofirstname','demolastname','demouser','$2a$10$cutZ4yVSagcNMjD8ofqP3eTT4iaOFu1MlZjM977E4ZJLdSrXkV48q','demouser@gmail.com','1','2022-01-01T14:00:12-00:00');
 
+INSERT INTO users ("phone", "first_name", "last_name","username","password", "email","usertype","date_of_birth")
+VALUES
+(
+  '08067648636','demofirstname','demolastname','demouser2','$2a$10$cutZ4yVSagcNMjD8ofqP3eTT4iaOFu1MlZjM977E4ZJLdSrXkV48q','demouser2@gmail.com','1','2022-01-01T14:00:12-00:00');
+
 INSERT INTO events ("title", "description", "banner_image","start_date","end_date", "venue","type","user_id","category","status")
 VALUES
 (
-  'demoTitle','demo description','https://demobannerurl','2022-01-01T14:00:12-00:00','2022-01-01T14:00:12-00:00','1','1','1','1','1');
+  'demoTitle2','demo description2','https://demobannerurl2','2022-01-01T14:00:12-00:00','2022-09-09T14:00:12-00:00','1','1','1','1','3');
+
+INSERT INTO events ("title", "description", "banner_image","start_date","end_date", "venue","type","user_id","category","status")
+VALUES
+(
+  'demoTitle','demo description','https://demobannerurl','2022-01-01T14:00:12-00:00','2022-09-09T14:00:12-00:00','1','1','1','1','3');
 
 INSERT INTO plans ("name", "description", "price", "no_of_days")
 VALUES(

@@ -36,24 +36,24 @@ type DayPlan struct {
 }
 
 type Event struct {
-	ID          int32             `json:"id"`
-	Title       string            `json:"title"`
-	Description string            `json:"description"`
-	BannerImage string            `json:"banner_image"`
-	StartDate   string            `json:"startDate"`
-	EndDate     string            `json:"endDate"`
-	Venue       int               `json:"venue"`
-	Type        EventTypeOption   `json:"type"`
-	UserID      int32             `json:"user_id"`
-	Category    int               `json:"category"`
-	Sponsors    []*Sponsor        `json:"sponsors"`
-	HostID      int               `json:"hostID"`
-	Tickets     []*Ticket         `json:"tickets"`
-	Status      EventStatusOption `json:"status"`
-	Images      []*Image          `json:"images"`
-	Videos      []*Video          `json:"videos"`
-	Meta        *Metadata         `json:"meta"`
-	Promoted    bool              `json:"promoted"`
+	ID          int32            `json:"id"`
+	Title       string           `json:"title"`
+	Description string           `json:"description"`
+	BannerImage string           `json:"banner_image"`
+	StartDate   string           `json:"startDate"`
+	EndDate     string           `json:"endDate"`
+	Venue       int              `json:"venue"`
+	Type        EventTypeOptions `json:"type"`
+	UserID      int32            `json:"user_id"`
+	Category    int              `json:"category"`
+	Sponsors    []*Sponsor       `json:"sponsors"`
+	HostID      int              `json:"hostID"`
+	Tickets     []*Ticket        `json:"tickets"`
+	Status      StatusOptions    `json:"status"`
+	Images      []*Image         `json:"images"`
+	Videos      []*Video         `json:"videos"`
+	Meta        *Metadata        `json:"meta"`
+	Promoted    bool             `json:"promoted"`
 }
 
 type EventFavorite struct {
@@ -78,7 +78,6 @@ type GetEvent struct {
 	Category   *int `json:"category"`
 	PageNumber int  `json:"pageNumber"`
 	Limit      int  `json:"limit"`
-	Status     int  `json:"status"`
 }
 
 type GetEventByLocation struct {
@@ -136,19 +135,19 @@ type NewDayPlan struct {
 }
 
 type NewEvent struct {
-	Title       string            `json:"title"`
-	Description string            `json:"description"`
-	BannerImage string            `json:"banner_image"`
-	StartDate   string            `json:"startDate"`
-	EndDate     string            `json:"endDate"`
-	Venue       int               `json:"venue"`
-	Type        int               `json:"type"`
-	UserID      int32             `json:"user_id"`
-	Category    int               `json:"category"`
-	Status      EventStatusOption `json:"status"`
-	Images      []*NewImage       `json:"images"`
-	Videos      []*NewVideo       `json:"videos"`
-	Tickets     []*NewTicket      `json:"tickets"`
+	Title       string        `json:"title"`
+	Description string        `json:"description"`
+	BannerImage string        `json:"banner_image"`
+	StartDate   string        `json:"startDate"`
+	EndDate     string        `json:"endDate"`
+	Venue       int           `json:"venue"`
+	Type        int           `json:"type"`
+	UserID      int32         `json:"user_id"`
+	Category    int           `json:"category"`
+	Status      StatusOptions `json:"status"`
+	Images      []*NewImage   `json:"images"`
+	Videos      []*NewVideo   `json:"videos"`
+	Tickets     []*NewTicket  `json:"tickets"`
 }
 
 type NewEventFavorite struct {
@@ -172,14 +171,14 @@ type NewImage struct {
 }
 
 type NewNews struct {
-	Title        string  `json:"title"`
-	Description  string  `json:"description"`
-	FeatureImage string  `json:"feature_image"`
-	Body         string  `json:"body"`
-	UserID       int32   `json:"user_id"`
-	PublishDate  string  `json:"publish_date"`
-	Tags         *string `json:"tags"`
-	Status       int     `json:"status"`
+	Title        string        `json:"title"`
+	Description  string        `json:"description"`
+	FeatureImage string        `json:"feature_image"`
+	Body         string        `json:"body"`
+	UserID       int32         `json:"user_id"`
+	PublishDate  string        `json:"publish_date"`
+	Tags         *string       `json:"tags"`
+	Status       StatusOptions `json:"status"`
 }
 
 type NewPlan struct {
@@ -229,18 +228,18 @@ type NewUser struct {
 }
 
 type NewVenue struct {
-	Name        string   `json:"name"`
-	Address     *string  `json:"address"`
-	PostalCode  *string  `json:"postal_code"`
-	City        *string  `json:"city"`
-	Province    *string  `json:"province"`
-	CountryCode *string  `json:"country_code"`
-	VenueOwner  int      `json:"venue_owner"`
-	BannerImage *string  `json:"banner_image"`
-	Longitude   *float64 `json:"longitude"`
-	Latitude    *float64 `json:"latitude"`
-	Rating      *int     `json:"rating"`
-	Status      int      `json:"status"`
+	Name        string        `json:"name"`
+	Address     *string       `json:"address"`
+	PostalCode  *string       `json:"postal_code"`
+	City        *string       `json:"city"`
+	Province    *string       `json:"province"`
+	CountryCode *string       `json:"country_code"`
+	VenueOwner  int           `json:"venue_owner"`
+	BannerImage *string       `json:"banner_image"`
+	Longitude   *float64      `json:"longitude"`
+	Latitude    *float64      `json:"latitude"`
+	Rating      *int          `json:"rating"`
+	Status      StatusOptions `json:"status"`
 }
 
 type NewVenueFavorite struct {
@@ -254,15 +253,15 @@ type NewVideo struct {
 }
 
 type News struct {
-	ID           int32   `json:"id"`
-	Title        string  `json:"title"`
-	Description  string  `json:"description"`
-	FeatureImage string  `json:"feature_image"`
-	Body         string  `json:"body"`
-	UserID       int32   `json:"user_id"`
-	PublishDate  string  `json:"publish_date"`
-	Tags         *string `json:"tags"`
-	Status       int     `json:"status"`
+	ID           int32         `json:"id"`
+	Title        string        `json:"title"`
+	Description  string        `json:"description"`
+	FeatureImage string        `json:"feature_image"`
+	Body         string        `json:"body"`
+	UserID       int32         `json:"user_id"`
+	PublishDate  string        `json:"publish_date"`
+	Tags         *string       `json:"tags"`
+	Status       StatusOptions `json:"status"`
 }
 
 type Plan struct {
@@ -328,28 +327,28 @@ type UpdateDayPlan struct {
 }
 
 type UpdateEvent struct {
-	ID          int                `json:"id"`
-	Title       *string            `json:"title"`
-	Description *string            `json:"description"`
-	BannerImage *string            `json:"banner_image"`
-	StartDate   *string            `json:"startDate"`
-	EndDate     *string            `json:"endDate"`
-	Venue       *int               `json:"venue"`
-	Type        *int               `json:"type"`
-	Category    *int               `json:"category"`
-	Status      *EventStatusOption `json:"status"`
-	Images      []*NewImage        `json:"images"`
-	Videos      []*NewVideo        `json:"videos"`
+	ID          int            `json:"id"`
+	Title       *string        `json:"title"`
+	Description *string        `json:"description"`
+	BannerImage *string        `json:"banner_image"`
+	StartDate   *string        `json:"startDate"`
+	EndDate     *string        `json:"endDate"`
+	Venue       *int           `json:"venue"`
+	Type        *int           `json:"type"`
+	Category    *int           `json:"category"`
+	Status      *StatusOptions `json:"status"`
+	Images      []*NewImage    `json:"images"`
+	Videos      []*NewVideo    `json:"videos"`
 }
 
 type UpdateEventState struct {
-	EventID     int               `json:"event_id"`
-	EventStatus EventStatusOption `json:"event_status"`
+	EventID     int           `json:"event_id"`
+	EventStatus StatusOptions `json:"event_status"`
 }
 
 type UpdateEventStatus struct {
-	EventID     int               `json:"event_id"`
-	EventStatus EventStatusOption `json:"event_status"`
+	EventID     int           `json:"event_id"`
+	EventStatus StatusOptions `json:"event_status"`
 }
 
 type UpdateHost struct {
@@ -360,14 +359,14 @@ type UpdateHost struct {
 }
 
 type UpdateNews struct {
-	ID           int32   `json:"id"`
-	Title        *string `json:"title"`
-	Description  *string `json:"description"`
-	FeatureImage *string `json:"feature_image"`
-	Body         *string `json:"body"`
-	PublishDate  *string `json:"publish_date"`
-	Tags         *string `json:"tags"`
-	Status       *int    `json:"status"`
+	ID           int32          `json:"id"`
+	Title        *string        `json:"title"`
+	Description  *string        `json:"description"`
+	FeatureImage *string        `json:"feature_image"`
+	Body         *string        `json:"body"`
+	PublishDate  *string        `json:"publish_date"`
+	Tags         *string        `json:"tags"`
+	Status       *StatusOptions `json:"status"`
 }
 
 type UpdatePlan struct {
@@ -401,54 +400,54 @@ type UpdateSponsor struct {
 }
 
 type UpdateVenue struct {
-	ID          int      `json:"id"`
-	Name        *string  `json:"name"`
-	Address     *string  `json:"address"`
-	PostalCode  *string  `json:"postal_code"`
-	City        *string  `json:"city"`
-	Province    *string  `json:"province"`
-	CountryCode *string  `json:"country_code"`
-	URL         *string  `json:"url"`
-	Longitude   *float64 `json:"longitude"`
-	Latitude    *float64 `json:"latitude"`
-	Rating      *int     `json:"rating"`
-	Status      *int     `json:"status"`
+	ID          int            `json:"id"`
+	Name        *string        `json:"name"`
+	Address     *string        `json:"address"`
+	PostalCode  *string        `json:"postal_code"`
+	City        *string        `json:"city"`
+	Province    *string        `json:"province"`
+	CountryCode *string        `json:"country_code"`
+	URL         *string        `json:"url"`
+	Longitude   *float64       `json:"longitude"`
+	Latitude    *float64       `json:"latitude"`
+	Rating      *int           `json:"rating"`
+	Status      *StatusOptions `json:"status"`
 }
 
 type User struct {
-	ID              int32    `json:"id"`
-	Phone           *string  `json:"phone"`
-	FirstName       string   `json:"first_name"`
-	LastName        string   `json:"last_name"`
-	Email           string   `json:"email"`
-	Username        string   `json:"username"`
-	Password        string   `json:"password"`
-	Usertype        UserRole `json:"usertype"`
-	Avatar          string   `json:"avatar"`
-	FavoritesVenues []*Venue `json:"favorites_venues"`
-	FavoritesEvents []*Event `json:"favorites_events"`
+	ID              int32           `json:"id"`
+	Phone           *string         `json:"phone"`
+	FirstName       string          `json:"first_name"`
+	LastName        string          `json:"last_name"`
+	Email           string          `json:"email"`
+	Username        string          `json:"username"`
+	Password        string          `json:"password"`
+	Usertype        UserTypeOptions `json:"usertype"`
+	Avatar          string          `json:"avatar"`
+	FavoritesVenues []*Venue        `json:"favorites_venues"`
+	FavoritesEvents []*Event        `json:"favorites_events"`
 }
 
 type Usertype struct {
-	ID          int32    `json:"id"`
-	Description UserRole `json:"description"`
-	Status      *int     `json:"status"`
+	ID          int32           `json:"id"`
+	Description UserTypeOptions `json:"description"`
+	Status      *int            `json:"status"`
 }
 
 type Venue struct {
-	ID          int32    `json:"id"`
-	Name        string   `json:"name"`
-	Address     *string  `json:"address"`
-	PostalCode  *string  `json:"postal_code"`
-	City        *string  `json:"city"`
-	Province    *string  `json:"province"`
-	CountryCode *string  `json:"country_code"`
-	Longitude   *float64 `json:"Longitude"`
-	Latitude    *float64 `json:"Latitude"`
-	BannerImage *string  `json:"banner_image"`
-	VenueOwner  int      `json:"venue_owner"`
-	Rating      *int     `json:"rating"`
-	Status      int      `json:"status"`
+	ID          int32         `json:"id"`
+	Name        string        `json:"name"`
+	Address     *string       `json:"address"`
+	PostalCode  *string       `json:"postal_code"`
+	City        *string       `json:"city"`
+	Province    *string       `json:"province"`
+	CountryCode *string       `json:"country_code"`
+	Longitude   *float64      `json:"Longitude"`
+	Latitude    *float64      `json:"Latitude"`
+	BannerImage *string       `json:"banner_image"`
+	VenueOwner  int           `json:"venue_owner"`
+	Rating      *int          `json:"rating"`
+	Status      StatusOptions `json:"status"`
 }
 
 type VenueFavorite struct {
@@ -469,135 +468,135 @@ type Metadata struct {
 	TotalFavorite int32 `json:"total_favorite"`
 }
 
-type EventStatusOption string
+type EventTypeOptions string
 
 const (
-	EventStatusOptionDraft     EventStatusOption = "DRAFT"
-	EventStatusOptionPublished EventStatusOption = "PUBLISHED"
-	EventStatusOptionApproved  EventStatusOption = "APPROVED"
-	EventStatusOptionRejected  EventStatusOption = "REJECTED"
-	EventStatusOptionCompleted EventStatusOption = "COMPLETED"
+	EventTypeOptionsFree EventTypeOptions = "FREE"
+	EventTypeOptionsPaid EventTypeOptions = "PAID"
 )
 
-var AllEventStatusOption = []EventStatusOption{
-	EventStatusOptionDraft,
-	EventStatusOptionPublished,
-	EventStatusOptionApproved,
-	EventStatusOptionRejected,
-	EventStatusOptionCompleted,
+var AllEventTypeOptions = []EventTypeOptions{
+	EventTypeOptionsFree,
+	EventTypeOptionsPaid,
 }
 
-func (e EventStatusOption) IsValid() bool {
+func (e EventTypeOptions) IsValid() bool {
 	switch e {
-	case EventStatusOptionDraft, EventStatusOptionPublished, EventStatusOptionApproved, EventStatusOptionRejected, EventStatusOptionCompleted:
+	case EventTypeOptionsFree, EventTypeOptionsPaid:
 		return true
 	}
 	return false
 }
 
-func (e EventStatusOption) String() string {
+func (e EventTypeOptions) String() string {
 	return string(e)
 }
 
-func (e *EventStatusOption) UnmarshalGQL(v interface{}) error {
+func (e *EventTypeOptions) UnmarshalGQL(v interface{}) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
 	}
 
-	*e = EventStatusOption(str)
+	*e = EventTypeOptions(str)
 	if !e.IsValid() {
-		return fmt.Errorf("%s is not a valid EventStatusOption", str)
+		return fmt.Errorf("%s is not a valid EventTypeOptions", str)
 	}
 	return nil
 }
 
-func (e EventStatusOption) MarshalGQL(w io.Writer) {
+func (e EventTypeOptions) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
-type EventTypeOption string
+type StatusOptions string
 
 const (
-	EventTypeOptionFree EventTypeOption = "FREE"
-	EventTypeOptionPaid EventTypeOption = "PAID"
+	StatusOptionsDraft     StatusOptions = "DRAFT"
+	StatusOptionsPublished StatusOptions = "PUBLISHED"
+	StatusOptionsApproved  StatusOptions = "APPROVED"
+	StatusOptionsRejected  StatusOptions = "REJECTED"
+	StatusOptionsCompleted StatusOptions = "COMPLETED"
 )
 
-var AllEventTypeOption = []EventTypeOption{
-	EventTypeOptionFree,
-	EventTypeOptionPaid,
+var AllStatusOptions = []StatusOptions{
+	StatusOptionsDraft,
+	StatusOptionsPublished,
+	StatusOptionsApproved,
+	StatusOptionsRejected,
+	StatusOptionsCompleted,
 }
 
-func (e EventTypeOption) IsValid() bool {
+func (e StatusOptions) IsValid() bool {
 	switch e {
-	case EventTypeOptionFree, EventTypeOptionPaid:
+	case StatusOptionsDraft, StatusOptionsPublished, StatusOptionsApproved, StatusOptionsRejected, StatusOptionsCompleted:
 		return true
 	}
 	return false
 }
 
-func (e EventTypeOption) String() string {
+func (e StatusOptions) String() string {
 	return string(e)
 }
 
-func (e *EventTypeOption) UnmarshalGQL(v interface{}) error {
+func (e *StatusOptions) UnmarshalGQL(v interface{}) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
 	}
 
-	*e = EventTypeOption(str)
+	*e = StatusOptions(str)
 	if !e.IsValid() {
-		return fmt.Errorf("%s is not a valid EventTypeOption", str)
+		return fmt.Errorf("%s is not a valid StatusOptions", str)
 	}
 	return nil
 }
 
-func (e EventTypeOption) MarshalGQL(w io.Writer) {
+func (e StatusOptions) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
-type UserRole string
+type UserTypeOptions string
 
 const (
-	UserRoleAttendee UserRole = "ATTENDEE"
-	UserRoleHost     UserRole = "HOST"
-	UserRoleSponsor  UserRole = "SPONSOR"
-	UserRoleAdmin    UserRole = "ADMIN"
+	UserTypeOptionsAttendee UserTypeOptions = "ATTENDEE"
+	UserTypeOptionsHost     UserTypeOptions = "HOST"
+	UserTypeOptionsSponsor  UserTypeOptions = "SPONSOR"
+	UserTypeOptionsAdmin    UserTypeOptions = "ADMIN"
 )
 
-var AllUserRole = []UserRole{
-	UserRoleAttendee,
-	UserRoleHost,
-	UserRoleSponsor,
-	UserRoleAdmin,
+var AllUserTypeOptions = []UserTypeOptions{
+	UserTypeOptionsAttendee,
+	UserTypeOptionsHost,
+	UserTypeOptionsSponsor,
+	UserTypeOptionsAdmin,
 }
 
-func (e UserRole) IsValid() bool {
+func (e UserTypeOptions) IsValid() bool {
 	switch e {
-	case UserRoleAttendee, UserRoleHost, UserRoleSponsor, UserRoleAdmin:
+	case UserTypeOptionsAttendee, UserTypeOptionsHost, UserTypeOptionsSponsor, UserTypeOptionsAdmin:
 		return true
 	}
 	return false
 }
 
-func (e UserRole) String() string {
+func (e UserTypeOptions) String() string {
 	return string(e)
 }
 
-func (e *UserRole) UnmarshalGQL(v interface{}) error {
+func (e *UserTypeOptions) UnmarshalGQL(v interface{}) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
 	}
 
-	*e = UserRole(str)
+	*e = UserTypeOptions(str)
 	if !e.IsValid() {
-		return fmt.Errorf("%s is not a valid UserRole", str)
+		return fmt.Errorf("%s is not a valid UserTypeOptions", str)
 	}
 	return nil
 }
 
-func (e UserRole) MarshalGQL(w io.Writer) {
+func (e UserTypeOptions) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }

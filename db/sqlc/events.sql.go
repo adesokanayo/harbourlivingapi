@@ -159,10 +159,9 @@ func (q *Queries) GetEvent(ctx context.Context, id int32) (Event, error) {
 }
 
 const getEvents = `-- name: GetEvents :many
-SELECT e.id, title, description, e.banner_image, start_date, end_date, venue, type, user_id, category, ticket_id, recurring, e.status, e.created_at, v.id, name, address, postal_code, city, province, country_code, venue_owner, v.banner_image, rating, longitude, latitude, v.status, v.created_at FROM events e
-inner join venues v on  e.venue = v.id
+SELECT id, title, description, banner_image, start_date, end_date, venue, type, user_id, category, ticket_id, recurring, status, created_at FROM events e
 WHERE e.status = $1 AND
-e.end_date >= CURRENT_DATE
+ e.end_date >= CURRENT_DATE
 ORDER BY e.id desc
 LIMIT $2
 OFFSET $3 ROWS
@@ -174,46 +173,15 @@ type GetEventsParams struct {
 	Offset int32 `json:"offset"`
 }
 
-type GetEventsRow struct {
-	ID            int32           `json:"id"`
-	Title         string          `json:"title"`
-	Description   string          `json:"description"`
-	BannerImage   string          `json:"banner_image"`
-	StartDate     time.Time       `json:"start_date"`
-	EndDate       time.Time       `json:"end_date"`
-	Venue         int32           `json:"venue"`
-	Type          int32           `json:"type"`
-	UserID        int32           `json:"user_id"`
-	Category      int32           `json:"category"`
-	TicketID      sql.NullInt32   `json:"ticket_id"`
-	Recurring     sql.NullBool    `json:"recurring"`
-	Status        int32           `json:"status"`
-	CreatedAt     sql.NullTime    `json:"created_at"`
-	ID_2          int32           `json:"id_2"`
-	Name          string          `json:"name"`
-	Address       sql.NullString  `json:"address"`
-	PostalCode    sql.NullString  `json:"postal_code"`
-	City          sql.NullString  `json:"city"`
-	Province      sql.NullString  `json:"province"`
-	CountryCode   sql.NullString  `json:"country_code"`
-	VenueOwner    int32           `json:"venue_owner"`
-	BannerImage_2 sql.NullString  `json:"banner_image_2"`
-	Rating        sql.NullFloat64 `json:"rating"`
-	Longitude     sql.NullFloat64 `json:"longitude"`
-	Latitude      sql.NullFloat64 `json:"latitude"`
-	Status_2      int32           `json:"status_2"`
-	CreatedAt_2   sql.NullTime    `json:"created_at_2"`
-}
-
-func (q *Queries) GetEvents(ctx context.Context, arg GetEventsParams) ([]GetEventsRow, error) {
+func (q *Queries) GetEvents(ctx context.Context, arg GetEventsParams) ([]Event, error) {
 	rows, err := q.db.QueryContext(ctx, getEvents, arg.Status, arg.Limit, arg.Offset)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	items := []GetEventsRow{}
+	items := []Event{}
 	for rows.Next() {
-		var i GetEventsRow
+		var i Event
 		if err := rows.Scan(
 			&i.ID,
 			&i.Title,
@@ -229,20 +197,6 @@ func (q *Queries) GetEvents(ctx context.Context, arg GetEventsParams) ([]GetEven
 			&i.Recurring,
 			&i.Status,
 			&i.CreatedAt,
-			&i.ID_2,
-			&i.Name,
-			&i.Address,
-			&i.PostalCode,
-			&i.City,
-			&i.Province,
-			&i.CountryCode,
-			&i.VenueOwner,
-			&i.BannerImage_2,
-			&i.Rating,
-			&i.Longitude,
-			&i.Latitude,
-			&i.Status_2,
-			&i.CreatedAt_2,
 		); err != nil {
 			return nil, err
 		}
@@ -341,6 +295,66 @@ func (q *Queries) GetEventsByLocation(ctx context.Context, arg GetEventsByLocati
 			&i.Status_2,
 			&i.CreatedAt_2,
 			&i.Distance,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getEventsFilter = `-- name: GetEventsFilter :many
+SELECT id, title, description, banner_image, start_date, end_date, venue, type, user_id, category, ticket_id, recurring, status, created_at FROM events e
+WHERE e.status = $1 AND
+e.category = $2 AND
+e.end_date >= CURRENT_DATE
+ORDER BY e.id desc
+LIMIT $3
+OFFSET $4 ROWS
+`
+
+type GetEventsFilterParams struct {
+	Status   int32 `json:"status"`
+	Category int32 `json:"category"`
+	Limit    int32 `json:"limit"`
+	Offset   int32 `json:"offset"`
+}
+
+func (q *Queries) GetEventsFilter(ctx context.Context, arg GetEventsFilterParams) ([]Event, error) {
+	rows, err := q.db.QueryContext(ctx, getEventsFilter,
+		arg.Status,
+		arg.Category,
+		arg.Limit,
+		arg.Offset,
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []Event{}
+	for rows.Next() {
+		var i Event
+		if err := rows.Scan(
+			&i.ID,
+			&i.Title,
+			&i.Description,
+			&i.BannerImage,
+			&i.StartDate,
+			&i.EndDate,
+			&i.Venue,
+			&i.Type,
+			&i.UserID,
+			&i.Category,
+			&i.TicketID,
+			&i.Recurring,
+			&i.Status,
+			&i.CreatedAt,
 		); err != nil {
 			return nil, err
 		}

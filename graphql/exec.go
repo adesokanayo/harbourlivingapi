@@ -1885,7 +1885,7 @@ scalar Time
 scalar DateTime
 scalar Date
 
-enum UserRole {
+enum UserTypeOptions {
 ATTENDEE
 HOST
 SPONSOR
@@ -1893,12 +1893,12 @@ ADMIN
 
 }
 
-enum EventTypeOption {
+enum EventTypeOptions {
 FREE
 PAID
 }
 
-enum EventStatusOption {
+enum StatusOptions {
 DRAFT
 PUBLISHED
 APPROVED
@@ -1915,7 +1915,7 @@ type User {
         email: String!
         username: String!
         password: String!
-        usertype: UserRole!
+        usertype: UserTypeOptions!
         avatar : String!
         favorites_venues: [Venue] 
         favorites_events: [Event]  
@@ -1923,7 +1923,7 @@ type User {
 
 type Usertype {
         id: ID!
-        description: UserRole!
+        description: UserTypeOptions!
         status: Int
         }
 
@@ -1954,13 +1954,13 @@ type Event {
         startDate:   DateTime!
         endDate:     DateTime!
         venue: Int!
-        type: EventTypeOption!
+        type: EventTypeOptions!
         user_id: ID!
         category: Int!
         sponsors : [Sponsor]
         hostID: Int!
         tickets : [Ticket]
-        status: EventStatusOption!
+        status: StatusOptions!
         images: [Image]
         videos: [Video]
         meta: metadata
@@ -1980,7 +1980,7 @@ type Venue {
         banner_image: String
         venue_owner: Int!
         rating: Int
-        status: Int!
+        status: StatusOptions!
         }
 
 input Login {
@@ -2030,14 +2030,13 @@ input NewVenue {
         longitude: Float
         latitude: Float
         rating : Int
-        status :Int!
+        status :StatusOptions!
 }
 
 input GetEvent{
         category: Int
         pageNumber: Int!
         limit: Int!
-        status: Int!
 }
 
 input GetEventByLocation{
@@ -2056,7 +2055,7 @@ input NewEvent {
         type: Int!
         user_id: ID!
         category: Int!
-        status: EventStatusOption!
+        status: StatusOptions!
         images: [NewImage]
         videos: [NewVideo]   
         tickets : [NewTicket]     
@@ -2072,7 +2071,7 @@ input UpdateEvent {
         venue: Int
         type: Int
         category: Int
-        status: EventStatusOption
+        status: StatusOptions
         images: [NewImage]
         videos: [NewVideo]        
 }
@@ -2089,7 +2088,7 @@ input UpdateVenue {
         longitude: Float
         latitude: Float 
         rating: Int 
-        status: Int   
+        status: StatusOptions   
 }
 
 input RefreshTokenInput{
@@ -2152,7 +2151,7 @@ input NewArtist {
 
 type UpdateEventState{
         event_id: Int!
-        event_status: EventStatusOption!
+        event_status: StatusOptions!
 }
 
 type Ticket {
@@ -2201,7 +2200,7 @@ type News {
         user_id : ID!
         publish_date: DateTime!
         tags : String
-        status: Int!
+        status: StatusOptions!
 }
 
 type Schedule {
@@ -2232,7 +2231,7 @@ input NewTicket {
 
 input UpdateEventStatus{
     event_id: Int!
-    event_status: EventStatusOption!
+    event_status: StatusOptions!
 }
 
 input UpdateHost{
@@ -2305,7 +2304,7 @@ input NewNews {
         user_id : ID!
         publish_date: DateTime!
         tags : String
-        status: Int!
+        status: StatusOptions!
 }
 
 input UpdateNews {
@@ -2316,7 +2315,7 @@ input UpdateNews {
         body : String
         publish_date: DateTime
         tags : String
-        status: Int
+        status: StatusOptions
 }
 
 type metadata {
@@ -3954,9 +3953,9 @@ func (ec *executionContext) _Event_type(ctx context.Context, field graphql.Colle
 		}
 		return graphql.Null
 	}
-	res := resTmp.(EventTypeOption)
+	res := resTmp.(EventTypeOptions)
 	fc.Result = res
-	return ec.marshalNEventTypeOption2githubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgraphqlᚐEventTypeOption(ctx, field.Selections, res)
+	return ec.marshalNEventTypeOptions2githubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgraphqlᚐEventTypeOptions(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Event_user_id(ctx context.Context, field graphql.CollectedField, obj *Event) (ret graphql.Marshaler) {
@@ -4158,9 +4157,9 @@ func (ec *executionContext) _Event_status(ctx context.Context, field graphql.Col
 		}
 		return graphql.Null
 	}
-	res := resTmp.(EventStatusOption)
+	res := resTmp.(StatusOptions)
 	fc.Result = res
-	return ec.marshalNEventStatusOption2githubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgraphqlᚐEventStatusOption(ctx, field.Selections, res)
+	return ec.marshalNStatusOptions2githubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgraphqlᚐStatusOptions(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Event_images(ctx context.Context, field graphql.CollectedField, obj *Event) (ret graphql.Marshaler) {
@@ -6723,9 +6722,9 @@ func (ec *executionContext) _News_status(ctx context.Context, field graphql.Coll
 		}
 		return graphql.Null
 	}
-	res := resTmp.(int)
+	res := resTmp.(StatusOptions)
 	fc.Result = res
-	return ec.marshalNInt2int(ctx, field.Selections, res)
+	return ec.marshalNStatusOptions2githubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgraphqlᚐStatusOptions(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Plan_id(ctx context.Context, field graphql.CollectedField, obj *Plan) (ret graphql.Marshaler) {
@@ -8320,9 +8319,9 @@ func (ec *executionContext) _UpdateEventState_event_status(ctx context.Context, 
 		}
 		return graphql.Null
 	}
-	res := resTmp.(EventStatusOption)
+	res := resTmp.(StatusOptions)
 	fc.Result = res
-	return ec.marshalNEventStatusOption2githubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgraphqlᚐEventStatusOption(ctx, field.Selections, res)
+	return ec.marshalNStatusOptions2githubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgraphqlᚐStatusOptions(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _User_id(ctx context.Context, field graphql.CollectedField, obj *User) (ret graphql.Marshaler) {
@@ -8597,9 +8596,9 @@ func (ec *executionContext) _User_usertype(ctx context.Context, field graphql.Co
 		}
 		return graphql.Null
 	}
-	res := resTmp.(UserRole)
+	res := resTmp.(UserTypeOptions)
 	fc.Result = res
-	return ec.marshalNUserRole2githubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgraphqlᚐUserRole(ctx, field.Selections, res)
+	return ec.marshalNUserTypeOptions2githubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgraphqlᚐUserTypeOptions(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _User_avatar(ctx context.Context, field graphql.CollectedField, obj *User) (ret graphql.Marshaler) {
@@ -8766,9 +8765,9 @@ func (ec *executionContext) _Usertype_description(ctx context.Context, field gra
 		}
 		return graphql.Null
 	}
-	res := resTmp.(UserRole)
+	res := resTmp.(UserTypeOptions)
 	fc.Result = res
-	return ec.marshalNUserRole2githubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgraphqlᚐUserRole(ctx, field.Selections, res)
+	return ec.marshalNUserTypeOptions2githubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgraphqlᚐUserTypeOptions(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Usertype_status(ctx context.Context, field graphql.CollectedField, obj *Usertype) (ret graphql.Marshaler) {
@@ -9226,9 +9225,9 @@ func (ec *executionContext) _Venue_status(ctx context.Context, field graphql.Col
 		}
 		return graphql.Null
 	}
-	res := resTmp.(int)
+	res := resTmp.(StatusOptions)
 	fc.Result = res
-	return ec.marshalNInt2int(ctx, field.Selections, res)
+	return ec.marshalNStatusOptions2githubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgraphqlᚐStatusOptions(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _VenueFavorite_id(ctx context.Context, field graphql.CollectedField, obj *VenueFavorite) (ret graphql.Marshaler) {
@@ -10660,14 +10659,6 @@ func (ec *executionContext) unmarshalInputGetEvent(ctx context.Context, obj inte
 			if err != nil {
 				return it, err
 			}
-		case "status":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("status"))
-			it.Status, err = ec.unmarshalNInt2int(ctx, v)
-			if err != nil {
-				return it, err
-			}
 		}
 	}
 
@@ -10944,7 +10935,7 @@ func (ec *executionContext) unmarshalInputNewEvent(ctx context.Context, obj inte
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("status"))
-			it.Status, err = ec.unmarshalNEventStatusOption2githubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgraphqlᚐEventStatusOption(ctx, v)
+			it.Status, err = ec.unmarshalNStatusOptions2githubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgraphqlᚐStatusOptions(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -11156,7 +11147,7 @@ func (ec *executionContext) unmarshalInputNewNews(ctx context.Context, obj inter
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("status"))
-			it.Status, err = ec.unmarshalNInt2int(ctx, v)
+			it.Status, err = ec.unmarshalNStatusOptions2githubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgraphqlᚐStatusOptions(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -11560,7 +11551,7 @@ func (ec *executionContext) unmarshalInputNewVenue(ctx context.Context, obj inte
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("status"))
-			it.Status, err = ec.unmarshalNInt2int(ctx, v)
+			it.Status, err = ec.unmarshalNStatusOptions2githubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgraphqlᚐStatusOptions(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -11832,7 +11823,7 @@ func (ec *executionContext) unmarshalInputUpdateEvent(ctx context.Context, obj i
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("status"))
-			it.Status, err = ec.unmarshalOEventStatusOption2ᚖgithubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgraphqlᚐEventStatusOption(ctx, v)
+			it.Status, err = ec.unmarshalOStatusOptions2ᚖgithubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgraphqlᚐStatusOptions(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -11876,7 +11867,7 @@ func (ec *executionContext) unmarshalInputUpdateEventStatus(ctx context.Context,
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("event_status"))
-			it.EventStatus, err = ec.unmarshalNEventStatusOption2githubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgraphqlᚐEventStatusOption(ctx, v)
+			it.EventStatus, err = ec.unmarshalNStatusOptions2githubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgraphqlᚐStatusOptions(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -11996,7 +11987,7 @@ func (ec *executionContext) unmarshalInputUpdateNews(ctx context.Context, obj in
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("status"))
-			it.Status, err = ec.unmarshalOInt2ᚖint(ctx, v)
+			it.Status, err = ec.unmarshalOStatusOptions2ᚖgithubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgraphqlᚐStatusOptions(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -12296,7 +12287,7 @@ func (ec *executionContext) unmarshalInputUpdateVenue(ctx context.Context, obj i
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("status"))
-			it.Status, err = ec.unmarshalOInt2ᚖint(ctx, v)
+			it.Status, err = ec.unmarshalOStatusOptions2ᚖgithubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgraphqlᚐStatusOptions(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -14142,23 +14133,13 @@ func (ec *executionContext) marshalNEventFavorite2ᚖgithubᚗcomᚋBigListRyRy�
 	return ec._EventFavorite(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalNEventStatusOption2githubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgraphqlᚐEventStatusOption(ctx context.Context, v interface{}) (EventStatusOption, error) {
-	var res EventStatusOption
+func (ec *executionContext) unmarshalNEventTypeOptions2githubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgraphqlᚐEventTypeOptions(ctx context.Context, v interface{}) (EventTypeOptions, error) {
+	var res EventTypeOptions
 	err := res.UnmarshalGQL(v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalNEventStatusOption2githubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgraphqlᚐEventStatusOption(ctx context.Context, sel ast.SelectionSet, v EventStatusOption) graphql.Marshaler {
-	return v
-}
-
-func (ec *executionContext) unmarshalNEventTypeOption2githubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgraphqlᚐEventTypeOption(ctx context.Context, v interface{}) (EventTypeOption, error) {
-	var res EventTypeOption
-	err := res.UnmarshalGQL(v)
-	return res, graphql.ErrorOnPath(ctx, err)
-}
-
-func (ec *executionContext) marshalNEventTypeOption2githubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgraphqlᚐEventTypeOption(ctx context.Context, sel ast.SelectionSet, v EventTypeOption) graphql.Marshaler {
+func (ec *executionContext) marshalNEventTypeOptions2githubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgraphqlᚐEventTypeOptions(ctx context.Context, sel ast.SelectionSet, v EventTypeOptions) graphql.Marshaler {
 	return v
 }
 
@@ -14395,6 +14376,16 @@ func (ec *executionContext) marshalNSponsor2ᚖgithubᚗcomᚋBigListRyRyᚋharb
 	return ec._Sponsor(ctx, sel, v)
 }
 
+func (ec *executionContext) unmarshalNStatusOptions2githubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgraphqlᚐStatusOptions(ctx context.Context, v interface{}) (StatusOptions, error) {
+	var res StatusOptions
+	err := res.UnmarshalGQL(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNStatusOptions2githubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgraphqlᚐStatusOptions(ctx context.Context, sel ast.SelectionSet, v StatusOptions) graphql.Marshaler {
+	return v
+}
+
 func (ec *executionContext) unmarshalNString2string(ctx context.Context, v interface{}) (string, error) {
 	res, err := graphql.UnmarshalString(v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -14512,13 +14503,13 @@ func (ec *executionContext) marshalNUser2ᚖgithubᚗcomᚋBigListRyRyᚋharbour
 	return ec._User(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalNUserRole2githubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgraphqlᚐUserRole(ctx context.Context, v interface{}) (UserRole, error) {
-	var res UserRole
+func (ec *executionContext) unmarshalNUserTypeOptions2githubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgraphqlᚐUserTypeOptions(ctx context.Context, v interface{}) (UserTypeOptions, error) {
+	var res UserTypeOptions
 	err := res.UnmarshalGQL(v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalNUserRole2githubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgraphqlᚐUserRole(ctx context.Context, sel ast.SelectionSet, v UserRole) graphql.Marshaler {
+func (ec *executionContext) marshalNUserTypeOptions2githubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgraphqlᚐUserTypeOptions(ctx context.Context, sel ast.SelectionSet, v UserTypeOptions) graphql.Marshaler {
 	return v
 }
 
@@ -14960,22 +14951,6 @@ func (ec *executionContext) marshalOEvent2ᚖgithubᚗcomᚋBigListRyRyᚋharbou
 	return ec._Event(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalOEventStatusOption2ᚖgithubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgraphqlᚐEventStatusOption(ctx context.Context, v interface{}) (*EventStatusOption, error) {
-	if v == nil {
-		return nil, nil
-	}
-	var res = new(EventStatusOption)
-	err := res.UnmarshalGQL(v)
-	return res, graphql.ErrorOnPath(ctx, err)
-}
-
-func (ec *executionContext) marshalOEventStatusOption2ᚖgithubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgraphqlᚐEventStatusOption(ctx context.Context, sel ast.SelectionSet, v *EventStatusOption) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	return v
-}
-
 func (ec *executionContext) unmarshalOFloat2ᚖfloat64(ctx context.Context, v interface{}) (*float64, error) {
 	if v == nil {
 		return nil, nil
@@ -15336,6 +15311,22 @@ func (ec *executionContext) marshalOSponsor2ᚖgithubᚗcomᚋBigListRyRyᚋharb
 		return graphql.Null
 	}
 	return ec._Sponsor(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalOStatusOptions2ᚖgithubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgraphqlᚐStatusOptions(ctx context.Context, v interface{}) (*StatusOptions, error) {
+	if v == nil {
+		return nil, nil
+	}
+	var res = new(StatusOptions)
+	err := res.UnmarshalGQL(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalOStatusOptions2ᚖgithubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgraphqlᚐStatusOptions(ctx context.Context, sel ast.SelectionSet, v *StatusOptions) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return v
 }
 
 func (ec *executionContext) unmarshalOString2string(ctx context.Context, v interface{}) (string, error) {

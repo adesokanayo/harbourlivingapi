@@ -4,12 +4,20 @@ WHERE id = $1 LIMIT 1;
 
 -- name: GetEvents :many
 SELECT * FROM events e
-inner join venues v on  e.venue = v.id
 WHERE e.status = $1 AND
-e.end_date >= CURRENT_DATE
+ e.end_date >= CURRENT_DATE
 ORDER BY e.id desc
 LIMIT $2
 OFFSET $3 ROWS;
+
+-- name: GetEventsFilter :many
+SELECT * FROM events e
+WHERE e.status = $1 AND
+e.category = $2 AND
+e.end_date >= CURRENT_DATE
+ORDER BY e.id desc
+LIMIT $3
+OFFSET $4 ROWS;
 
 -- name: DeleteEvent :exec
 DELETE FROM events

@@ -85,6 +85,7 @@ func (s *Server) ListEvents(ctx *gin.Context) {
 		return
 	}
 
+
 	// get events that are approved.
 	arg := db.GetEventsParams{
 		Status: 3,
