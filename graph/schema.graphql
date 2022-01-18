@@ -99,7 +99,7 @@ type Venue {
         Latitude : Float
         banner_image: String
         venue_owner: Int!
-        rating: Int
+        rating: Float
         status: StatusOptions!
         }
 
@@ -155,6 +155,11 @@ input NewVenue {
 
 input GetEvent{
         category: Int
+        pageNumber: Int!
+        limit: Int!
+}
+
+input GetVenue{
         pageNumber: Int!
         limit: Int!
 }
@@ -535,6 +540,7 @@ type Query {
         getVenue(input: ID!): Venue
         getUsers : [User!]
         getAllEvents(input: GetEvent!): [Event!]
+        getAllVenues: [Venue!]
         getEventsByLocation(input: GetEventByLocation!): [Event!]
         getCategory( input: ID!): Category!
         getCategories: [Category!]

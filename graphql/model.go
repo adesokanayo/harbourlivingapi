@@ -86,6 +86,11 @@ type GetEventByLocation struct {
 	Miles     int     `json:"miles"`
 }
 
+type GetVenue struct {
+	PageNumber int `json:"pageNumber"`
+	Limit      int `json:"limit"`
+}
+
 type Host struct {
 	ID          int32    `json:"id"`
 	UserID      int      `json:"user_id"`
@@ -446,7 +451,7 @@ type Venue struct {
 	Latitude    *float64      `json:"Latitude"`
 	BannerImage *string       `json:"banner_image"`
 	VenueOwner  int           `json:"venue_owner"`
-	Rating      *int          `json:"rating"`
+	Rating      *float64      `json:"rating"`
 	Status      StatusOptions `json:"status"`
 }
 

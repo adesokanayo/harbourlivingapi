@@ -2046,6 +2046,36 @@ func (r *mutationResolver) DeleteDayPlan(ctx context.Context, input int32) (bool
 	return true, nil
 }
 
+func (r *queryResolver) GetAllVenues(ctx context.Context) ([]Venue, error) {
+
+	var venues []Venue
+	allVenues, err := store.GetAllVenues(ctx)
+
+	if err != nil {
+		return nil, err
+	}
+
+	for _, venue := range allVenues {
+		venues = append(venues, Venue{
+			ID:          venue.ID,
+			Name:        venue.Name,
+			Address:     &venue.Address.String,
+			City:        &venue.City.String,
+			PostalCode:  &venue.PostalCode.String,
+			Province:    &venue.PostalCode.String,
+			CountryCode: &venue.CountryCode.String,
+			Longitude:   &venue.Longitude.Float64,
+			Latitude:    &venue.Latitude.Float64,
+			BannerImage: &venue.BannerImage.String,
+			VenueOwner:  int(venue.VenueOwner),
+			Rating:      &venue.Rating.Float64,
+			Status:      ConvertDbToStatusOptions(venue.Status),
+		})
+	}
+	return venues, nil
+
+}
+
 // Mutation returns MutationResolver implementation.
 func (r *Resolver) Mutation() MutationResolver { return &mutationResolver{r} }
 

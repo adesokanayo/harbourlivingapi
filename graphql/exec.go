@@ -199,6 +199,7 @@ type ComplexityRoot struct {
 		GetAllNews          func(childComplexity int) int
 		GetAllPlans         func(childComplexity int) int
 		GetAllPromotions    func(childComplexity int) int
+		GetAllVenues        func(childComplexity int) int
 		GetCategories       func(childComplexity int) int
 		GetCategory         func(childComplexity int, input int32) int
 		GetEvent            func(childComplexity int, input int32) int
@@ -337,6 +338,7 @@ type QueryResolver interface {
 	GetVenue(ctx context.Context, input int32) (*Venue, error)
 	GetUsers(ctx context.Context) ([]User, error)
 	GetAllEvents(ctx context.Context, input GetEvent) ([]Event, error)
+	GetAllVenues(ctx context.Context) ([]Venue, error)
 	GetEventsByLocation(ctx context.Context, input GetEventByLocation) ([]Event, error)
 	GetCategory(ctx context.Context, input int32) (*Category, error)
 	GetCategories(ctx context.Context) ([]Category, error)
@@ -1319,6 +1321,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.GetAllPromotions(childComplexity), true
 
+	case "Query.getAllVenues":
+		if e.complexity.Query.GetAllVenues == nil {
+			break
+		}
+
+		return e.complexity.Query.GetAllVenues(childComplexity), true
+
 	case "Query.getCategories":
 		if e.complexity.Query.GetCategories == nil {
 			break
@@ -1979,7 +1988,7 @@ type Venue {
         Latitude : Float
         banner_image: String
         venue_owner: Int!
-        rating: Int
+        rating: Float
         status: StatusOptions!
         }
 
@@ -2035,6 +2044,11 @@ input NewVenue {
 
 input GetEvent{
         category: Int
+        pageNumber: Int!
+        limit: Int!
+}
+
+input GetVenue{
         pageNumber: Int!
         limit: Int!
 }
@@ -2415,6 +2429,7 @@ type Query {
         getVenue(input: ID!): Venue
         getUsers : [User!]
         getAllEvents(input: GetEvent!): [Event!]
+        getAllVenues: [Venue!]
         getEventsByLocation(input: GetEventByLocation!): [Event!]
         getCategory( input: ID!): Category!
         getCategories: [Category!]
@@ -7265,6 +7280,38 @@ func (ec *executionContext) _Query_getAllEvents(ctx context.Context, field graph
 	return ec.marshalOEvent2ᚕgithubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgraphqlᚐEventᚄ(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _Query_getAllVenues(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().GetAllVenues(rctx)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]Venue)
+	fc.Result = res
+	return ec.marshalOVenue2ᚕgithubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgraphqlᚐVenueᚄ(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _Query_getEventsByLocation(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -9190,9 +9237,9 @@ func (ec *executionContext) _Venue_rating(ctx context.Context, field graphql.Col
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*int)
+	res := resTmp.(*float64)
 	fc.Result = res
-	return ec.marshalOInt2ᚖint(ctx, field.Selections, res)
+	return ec.marshalOFloat2ᚖfloat64(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Venue_status(ctx context.Context, field graphql.CollectedField, obj *Venue) (ret graphql.Marshaler) {
@@ -10692,6 +10739,34 @@ func (ec *executionContext) unmarshalInputGetEventByLocation(ctx context.Context
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("miles"))
 			it.Miles, err = ec.unmarshalNInt2int(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputGetVenue(ctx context.Context, obj interface{}) (GetVenue, error) {
+	var it GetVenue
+	var asMap = obj.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "pageNumber":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("pageNumber"))
+			it.PageNumber, err = ec.unmarshalNInt2int(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "limit":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("limit"))
+			it.Limit, err = ec.unmarshalNInt2int(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -13169,6 +13244,17 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 				res = ec._Query_getAllEvents(ctx, field)
 				return res
 			})
+		case "getAllVenues":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_getAllVenues(ctx, field)
+				return res
+			})
 		case "getEventsByLocation":
 			field := field
 			out.Concurrently(i, func() (res graphql.Marshaler) {
@@ -15460,6 +15546,46 @@ func (ec *executionContext) marshalOUser2ᚖgithubᚗcomᚋBigListRyRyᚋharbour
 		return graphql.Null
 	}
 	return ec._User(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalOVenue2ᚕgithubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgraphqlᚐVenueᚄ(ctx context.Context, sel ast.SelectionSet, v []Venue) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNVenue2githubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgraphqlᚐVenue(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+	return ret
 }
 
 func (ec *executionContext) marshalOVenue2ᚕᚖgithubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgraphqlᚐVenue(ctx context.Context, sel ast.SelectionSet, v []*Venue) graphql.Marshaler {
