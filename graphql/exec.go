@@ -1987,7 +1987,7 @@ type Event {
         banner_image: String!
         startDate:   DateTime!
         endDate:     DateTime!
-        venue: Int!
+        venue: Venue!
         type: EventTypeOptions!
         user_id: ID!
         category: Int!
@@ -3975,9 +3975,9 @@ func (ec *executionContext) _Event_venue(ctx context.Context, field graphql.Coll
 		}
 		return graphql.Null
 	}
-	res := resTmp.(int)
+	res := resTmp.(*Venue)
 	fc.Result = res
-	return ec.marshalNInt2int(ctx, field.Selections, res)
+	return ec.marshalNVenue2ᚖgithubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgraphqlᚐVenue(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Event_type(ctx context.Context, field graphql.CollectedField, obj *Event) (ret graphql.Marshaler) {

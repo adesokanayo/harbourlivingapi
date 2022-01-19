@@ -614,6 +614,25 @@ func (r *mutationResolver) UpdateEvent(ctx context.Context, input UpdateEvent) (
 			}
 		}
 
+		//get venue info
+		venueinfo, err := store.GetVenue(ctx, event.Venue)
+
+		venue := &Venue{
+			ID:          venueinfo.ID,
+			Name:        venueinfo.Name,
+			Address:     &venueinfo.Address.String,
+			PostalCode:  &venueinfo.PostalCode.String,
+			City:        &venueinfo.City.String,
+			Province:    &venueinfo.Province.String,
+			CountryCode: &venueinfo.CountryCode.String,
+			Longitude:   &venueinfo.Longitude.Float64,
+			Latitude:    &venueinfo.Latitude.Float64,
+			BannerImage: &venueinfo.BannerImage.String,
+			VenueOwner:  int(venueinfo.VenueOwner),
+			Rating:      &venueinfo.Rating.Float64,
+			Status:      ConvertDbToStatusOptions(venueinfo.Status),
+		}
+
 		result = &Event{
 			ID:          event.ID,
 			Title:       event.Title,
@@ -624,7 +643,7 @@ func (r *mutationResolver) UpdateEvent(ctx context.Context, input UpdateEvent) (
 			Category:    int(event.Category),
 			Images:      images,
 			Videos:      videos,
-			Venue:       int(event.Venue),
+			Venue:       venue,
 			Status:      ConvertDbToStatusOptions(event.Status),
 		}
 		return nil
@@ -897,6 +916,25 @@ func (r *queryResolver) GetEvent(ctx context.Context, input int32) (*Event, erro
 		promoted = true
 	}
 
+	//get venue info
+	venueinfo, err := store.GetVenue(ctx, event.Venue)
+
+	venue := &Venue{
+		ID:          venueinfo.ID,
+		Name:        venueinfo.Name,
+		Address:     &venueinfo.Address.String,
+		PostalCode:  &venueinfo.PostalCode.String,
+		City:        &venueinfo.City.String,
+		Province:    &venueinfo.Province.String,
+		CountryCode: &venueinfo.CountryCode.String,
+		Longitude:   &venueinfo.Longitude.Float64,
+		Latitude:    &venueinfo.Latitude.Float64,
+		BannerImage: &venueinfo.BannerImage.String,
+		VenueOwner:  int(venueinfo.VenueOwner),
+		Rating:      &venueinfo.Rating.Float64,
+		Status:      ConvertDbToStatusOptions(venueinfo.Status),
+	}
+
 	return &Event{
 		ID:          event.ID,
 		Title:       event.Title,
@@ -904,7 +942,7 @@ func (r *queryResolver) GetEvent(ctx context.Context, input int32) (*Event, erro
 		BannerImage: event.BannerImage,
 		StartDate:   event.StartDate.String(),
 		EndDate:     event.EndDate.String(),
-		Venue:       int(event.Venue),
+		Venue:       venue,
 		Type:        ConvertDbToEventTypeOptions(event.Type),
 		UserID:      event.UserID,
 		Category:    int(event.Category),
@@ -991,6 +1029,25 @@ func (r *queryResolver) GetAllEvents(ctx context.Context, input GetEvent) ([]Eve
 			promoted = true
 		}
 
+		//get venue info
+		venueinfo, err := store.GetVenue(ctx, event.Venue)
+
+		venue := &Venue{
+			ID:          venueinfo.ID,
+			Name:        venueinfo.Name,
+			Address:     &venueinfo.Address.String,
+			PostalCode:  &venueinfo.PostalCode.String,
+			City:        &venueinfo.City.String,
+			Province:    &venueinfo.Province.String,
+			CountryCode: &venueinfo.CountryCode.String,
+			Longitude:   &venueinfo.Longitude.Float64,
+			Latitude:    &venueinfo.Latitude.Float64,
+			BannerImage: &venueinfo.BannerImage.String,
+			VenueOwner:  int(venueinfo.VenueOwner),
+			Rating:      &venueinfo.Rating.Float64,
+			Status:      ConvertDbToStatusOptions(venueinfo.Status),
+		}
+
 		result = append(result, Event{
 			ID:          event.ID,
 			Title:       event.Title,
@@ -1000,7 +1057,7 @@ func (r *queryResolver) GetAllEvents(ctx context.Context, input GetEvent) ([]Eve
 			Category:    int(event.Category),
 			Type:        ConvertDbToEventTypeOptions(event.Type),
 			UserID:      event.UserID,
-			Venue:       int(event.Venue),
+			Venue:       venue,
 			BannerImage: event.BannerImage,
 			Sponsors:    eventSponsors,
 			Images:      images,
@@ -1041,6 +1098,25 @@ func (r *queryResolver) GetEventsByLocation(ctx context.Context, input GetEventB
 				ID: v.ID})
 		}
 
+		//get venue info
+		venueinfo, err := store.GetVenue(ctx, event.Venue)
+
+		venue := &Venue{
+			ID:          venueinfo.ID,
+			Name:        venueinfo.Name,
+			Address:     &venueinfo.Address.String,
+			PostalCode:  &venueinfo.PostalCode.String,
+			City:        &venueinfo.City.String,
+			Province:    &venueinfo.Province.String,
+			CountryCode: &venueinfo.CountryCode.String,
+			Longitude:   &venueinfo.Longitude.Float64,
+			Latitude:    &venueinfo.Latitude.Float64,
+			BannerImage: &venueinfo.BannerImage.String,
+			VenueOwner:  int(venueinfo.VenueOwner),
+			Rating:      &venueinfo.Rating.Float64,
+			Status:      ConvertDbToStatusOptions(venueinfo.Status),
+		}
+
 		result = append(result, Event{
 			ID:          event.ID,
 			Title:       event.Title,
@@ -1050,7 +1126,7 @@ func (r *queryResolver) GetEventsByLocation(ctx context.Context, input GetEventB
 			Category:    int(event.Category),
 			Type:        ConvertDbToEventTypeOptions(event.Type),
 			UserID:      event.UserID,
-			Venue:       int(event.Venue),
+			Venue:       venue,
 			//BannerImage: *event.BannerImage,
 			Sponsors: eventSponsors,
 		})
@@ -1399,6 +1475,25 @@ func GetEventHelper(ctx context.Context, input int32) (*Event, error) {
 		})
 	}
 
+	//get venue info
+	venueinfo, err := store.GetVenue(ctx, event.Venue)
+
+	venue := &Venue{
+		ID:          venueinfo.ID,
+		Name:        venueinfo.Name,
+		Address:     &venueinfo.Address.String,
+		PostalCode:  &venueinfo.PostalCode.String,
+		City:        &venueinfo.City.String,
+		Province:    &venueinfo.Province.String,
+		CountryCode: &venueinfo.CountryCode.String,
+		Longitude:   &venueinfo.Longitude.Float64,
+		Latitude:    &venueinfo.Latitude.Float64,
+		BannerImage: &venueinfo.BannerImage.String,
+		VenueOwner:  int(venueinfo.VenueOwner),
+		Rating:      &venueinfo.Rating.Float64,
+		Status:      ConvertDbToStatusOptions(venueinfo.Status),
+	}
+
 	return &Event{
 		ID:          event.ID,
 		Title:       event.Title,
@@ -1406,7 +1501,7 @@ func GetEventHelper(ctx context.Context, input int32) (*Event, error) {
 		BannerImage: event.BannerImage,
 		StartDate:   event.StartDate.String(),
 		EndDate:     event.EndDate.String(),
-		Venue:       int(event.Venue),
+		Venue:       venue,
 		Type:        ConvertDbToEventTypeOptions(event.Type),
 		UserID:      event.UserID,
 		Category:    int(event.Category),

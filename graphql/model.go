@@ -42,7 +42,7 @@ type Event struct {
 	BannerImage string           `json:"banner_image"`
 	StartDate   string           `json:"startDate"`
 	EndDate     string           `json:"endDate"`
-	Venue       int              `json:"venue"`
+	Venue       *Venue           `json:"venue"`
 	Type        EventTypeOptions `json:"type"`
 	UserID      int32            `json:"user_id"`
 	Category    int              `json:"category"`

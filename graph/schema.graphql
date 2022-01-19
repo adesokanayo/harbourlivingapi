@@ -84,7 +84,7 @@ type Event {
         banner_image: String!
         startDate:   DateTime!
         endDate:     DateTime!
-        venue: Int!
+        venue: Venue!
         type: EventTypeOptions!
         user_id: ID!
         category: Int!
