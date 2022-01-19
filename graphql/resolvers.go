@@ -1293,11 +1293,9 @@ func (q *queryResolver) GetCategories(ctx context.Context) ([]Category, error) {
 
 func (r *mutationResolver) CreateEventFavorite(ctx context.Context, input NewEventFavorite) (*EventFavorite, error) {
 
-	userinfo := middleware.CtxValue(ctx)
-
 	arg := db.CreateFavoriteEventParams{
 		EventID: int32(input.EventID),
-		UserID:  int32(userinfo.UserID),
+		UserID:  int32(input.UserID),
 	}
 
 	eventFavorite, err := store.CreateFavoriteEvent(ctx, arg)
