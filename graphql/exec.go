@@ -164,6 +164,7 @@ type ComplexityRoot struct {
 		UpdatePromotion       func(childComplexity int, input UpdatePromotion) int
 		UpdateSchedule        func(childComplexity int, input UpdateSchedule) int
 		UpdateSponsor         func(childComplexity int, input UpdateSponsor) int
+		UpdateUser            func(childComplexity int, input UpdateUser) int
 	}
 
 	News struct {
@@ -313,6 +314,7 @@ type MutationResolver interface {
 	CreateEventView(ctx context.Context, input NewEventView) (*EventView, error)
 	CreateSchedule(ctx context.Context, input NewSchedule) (*Schedule, error)
 	CreateDayPlan(ctx context.Context, input NewDayPlan) (*DayPlan, error)
+	UpdateUser(ctx context.Context, input UpdateUser) (*User, error)
 	UpdateEvent(ctx context.Context, input UpdateEvent) (*Event, error)
 	UpdateEventStatus(ctx context.Context, input UpdateEventStatus) (*UpdateEventState, error)
 	UpdateArtist(ctx context.Context, input UpdateArtist) (*Artist, error)
@@ -1155,6 +1157,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.UpdateSponsor(childComplexity, args["input"].(UpdateSponsor)), true
 
+	case "Mutation.updateUser":
+		if e.complexity.Mutation.UpdateUser == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_updateUser_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.UpdateUser(childComplexity, args["input"].(UpdateUser)), true
+
 	case "News.body":
 		if e.complexity.News.Body == nil {
 			break
@@ -1936,6 +1950,17 @@ type Usertype {
         status: Int
         }
 
+input UpdateUser {
+        id: ID!
+        phone: String
+        first_name: String
+        last_name: String
+        email: String
+        username: String
+        password: String
+        avatar : String 
+}
+
 type EventType {
         id: ID!
         description: String!
@@ -2038,7 +2063,7 @@ input NewVenue {
         banner_image: String
         longitude: Float
         latitude: Float
-        rating : Int
+        rating : Float
         status :StatusOptions
 }
 
@@ -2101,7 +2126,7 @@ input UpdateVenue {
         url: String
         longitude: Float
         latitude: Float 
-        rating: Int 
+        rating: Float 
         status: StatusOptions   
 }
 
@@ -2117,8 +2142,9 @@ input NewUser {
         email: String!
         username: String!
         password: String!
-        usertype: Int!
+        usertype: UserTypeOptions!
         avatar: String
+
 }
 
 type Sponsor {
@@ -2399,6 +2425,7 @@ type Mutation {
         createDayPlan(input: NewDayPlan!): DayPlan!
     
         """ update """ 
+        updateUser(input: UpdateUser!): User!
         updateEvent(input: UpdateEvent!):Event!
         updateEventStatus(input: UpdateEventStatus!): UpdateEventState!
         updateArtist(input:UpdateArtist! ): Artist!
@@ -2920,6 +2947,21 @@ func (ec *executionContext) field_Mutation_updateSponsor_args(ctx context.Contex
 	if tmp, ok := rawArgs["input"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
 		arg0, err = ec.unmarshalNUpdateSponsor2githubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgraphqlᚐUpdateSponsor(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["input"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_updateUser_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 UpdateUser
+	if tmp, ok := rawArgs["input"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+		arg0, err = ec.unmarshalNUpdateUser2githubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgraphqlᚐUpdateUser(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -5678,6 +5720,48 @@ func (ec *executionContext) _Mutation_createDayPlan(ctx context.Context, field g
 	res := resTmp.(*DayPlan)
 	fc.Result = res
 	return ec.marshalNDayPlan2ᚖgithubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgraphqlᚐDayPlan(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Mutation_updateUser(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_updateUser_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().UpdateUser(rctx, args["input"].(UpdateUser))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*User)
+	fc.Result = res
+	return ec.marshalNUser2ᚖgithubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgraphqlᚐUser(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Mutation_updateEvent(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -11510,7 +11594,7 @@ func (ec *executionContext) unmarshalInputNewUser(ctx context.Context, obj inter
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("usertype"))
-			it.Usertype, err = ec.unmarshalNInt2int(ctx, v)
+			it.Usertype, err = ec.unmarshalNUserTypeOptions2githubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgraphqlᚐUserTypeOptions(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -11618,7 +11702,7 @@ func (ec *executionContext) unmarshalInputNewVenue(ctx context.Context, obj inte
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("rating"))
-			it.Rating, err = ec.unmarshalOInt2ᚖint(ctx, v)
+			it.Rating, err = ec.unmarshalOFloat2ᚖfloat64(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -12264,6 +12348,82 @@ func (ec *executionContext) unmarshalInputUpdateSponsor(ctx context.Context, obj
 	return it, nil
 }
 
+func (ec *executionContext) unmarshalInputUpdateUser(ctx context.Context, obj interface{}) (UpdateUser, error) {
+	var it UpdateUser
+	var asMap = obj.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "id":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
+			it.ID, err = ec.unmarshalNID2int32(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "phone":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("phone"))
+			it.Phone, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "first_name":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("first_name"))
+			it.FirstName, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "last_name":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("last_name"))
+			it.LastName, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "email":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("email"))
+			it.Email, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "username":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("username"))
+			it.Username, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "password":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("password"))
+			it.Password, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "avatar":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("avatar"))
+			it.Avatar, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputUpdateVenue(ctx context.Context, obj interface{}) (UpdateVenue, error) {
 	var it UpdateVenue
 	var asMap = obj.(map[string]interface{})
@@ -12354,7 +12514,7 @@ func (ec *executionContext) unmarshalInputUpdateVenue(ctx context.Context, obj i
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("rating"))
-			it.Rating, err = ec.unmarshalOInt2ᚖint(ctx, v)
+			it.Rating, err = ec.unmarshalOFloat2ᚖfloat64(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -12918,6 +13078,11 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			}
 		case "createDayPlan":
 			out.Values[i] = ec._Mutation_createDayPlan(ctx, field)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "updateUser":
+			out.Values[i] = ec._Mutation_updateUser(ctx, field)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
@@ -14572,6 +14737,11 @@ func (ec *executionContext) unmarshalNUpdateSchedule2githubᚗcomᚋBigListRyRy�
 
 func (ec *executionContext) unmarshalNUpdateSponsor2githubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgraphqlᚐUpdateSponsor(ctx context.Context, v interface{}) (UpdateSponsor, error) {
 	res, err := ec.unmarshalInputUpdateSponsor(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalNUpdateUser2githubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgraphqlᚐUpdateUser(ctx context.Context, v interface{}) (UpdateUser, error) {
+	res, err := ec.unmarshalInputUpdateUser(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 

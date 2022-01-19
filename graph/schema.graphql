@@ -47,6 +47,17 @@ type Usertype {
         status: Int
         }
 
+input UpdateUser {
+        id: ID!
+        phone: String
+        first_name: String
+        last_name: String
+        email: String
+        username: String
+        password: String
+        avatar : String 
+}
+
 type EventType {
         id: ID!
         description: String!
@@ -149,7 +160,7 @@ input NewVenue {
         banner_image: String
         longitude: Float
         latitude: Float
-        rating : Int
+        rating : Float
         status :StatusOptions
 }
 
@@ -212,7 +223,7 @@ input UpdateVenue {
         url: String
         longitude: Float
         latitude: Float 
-        rating: Int 
+        rating: Float 
         status: StatusOptions   
 }
 
@@ -228,8 +239,9 @@ input NewUser {
         email: String!
         username: String!
         password: String!
-        usertype: Int!
+        usertype: UserTypeOptions!
         avatar: String
+
 }
 
 type Sponsor {
@@ -510,6 +522,7 @@ type Mutation {
         createDayPlan(input: NewDayPlan!): DayPlan!
     
         """ update """ 
+        updateUser(input: UpdateUser!): User!
         updateEvent(input: UpdateEvent!):Event!
         updateEventStatus(input: UpdateEventStatus!): UpdateEventState!
         updateArtist(input:UpdateArtist! ): Artist!

@@ -174,11 +174,70 @@ func (r *mutationResolver) CreateUser(ctx context.Context, input NewUser) (*User
 		Email:     input.Email,
 		Password:  hashedPassword,
 		Username:  input.Username,
-		Usertype:  int32(input.Usertype),
+		Usertype:  int32(ConvertUserTypeOptionsToDb(input.Usertype)),
 		AvatarUrl: avatar,
 	}
 
 	user, err := store.CreateUser(context.Background(), arg)
+	if err != nil {
+		return nil, err
+	}
+	return &User{
+		ID:        user.ID,
+		Phone:     &user.Phone.String,
+		FirstName: user.FirstName,
+		LastName:  user.LastName,
+		Email:     user.Email,
+		Username:  user.Username,
+		Password:  user.Password,
+		Usertype:  ConvertDbToUserRole(user.Usertype),
+		Avatar:    user.AvatarUrl.String,
+	}, nil
+}
+
+func (r *mutationResolver) UpdateUser(ctx context.Context, input UpdateUser) (*User, error) {
+
+	arg := db.UpdateUserParams{
+		ID: input.ID,
+	}
+
+	if input.Phone != nil {
+		arg.Phone = *input.Phone
+		arg.PhoneToUpdate = true
+	}
+
+	if input.FirstName != nil {
+		arg.FirstName = *input.FirstName
+		arg.FirstNameToUpdate = true
+	}
+	if input.LastName != nil {
+		arg.LastName = *input.LastName
+		arg.LastNameToUpdate = true
+	}
+	if input.Email != nil {
+		arg.Email = *input.Email
+		arg.EmailToUpdate = true
+	}
+
+	if input.Password != nil {
+		hashedPassword, err := util.HashPassword(*input.Password)
+		if err != nil {
+			return nil, err
+		}
+		arg.Password = hashedPassword
+	}
+
+	if input.Username != nil {
+		arg.Username = *input.Username
+		arg.UsernameToUpdate = true
+	}
+
+	if input.Avatar != nil {
+		arg.AvatarUrl = *input.Avatar
+		arg.AvatarUrlToUpdate = true
+	}
+
+	user, err := store.UpdateUser(context.Background(), arg)
 	if err != nil {
 		return nil, err
 	}

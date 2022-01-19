@@ -34,3 +34,6 @@
 
 ### Build and Push Docker Image
 
+### Create new migration 
+ migrate create -ext sql -dir db/migration -seq rating
+

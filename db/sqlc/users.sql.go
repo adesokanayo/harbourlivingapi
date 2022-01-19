@@ -166,3 +166,82 @@ func (q *Queries) GetUsername(ctx context.Context, username string) (User, error
 	)
 	return i, err
 }
+
+const updateUser = `-- name: UpdateUser :one
+UPDATE users SET
+    phone = CASE WHEN $1::boolean
+        THEN $2::text ELSE phone END, 
+    first_name = CASE WHEN $3::boolean
+        THEN $4::text ELSE first_name END,
+    last_name = CASE WHEN $5::boolean
+        THEN $6::text ELSE last_name END,
+    email = CASE WHEN $7::boolean
+        THEN $8::text ELSE email END,
+    password =CASE WHEN $9::boolean
+        THEN $10::text ELSE password END,
+    username = CASE WHEN $11::boolean
+        THEN $12::text ELSE username END,
+    date_of_birth = CASE WHEN $13::boolean
+        THEN $14::timestamp ELSE date_of_birth END,
+    avatar_url = CASE WHEN $15::boolean
+        THEN $16::text ELSE avatar_url END
+    WHERE id= $17 RETURNING id, phone, first_name, last_name, email, username, password, password_changed_at, usertype, avatar_url, date_of_birth, created_at
+`
+
+type UpdateUserParams struct {
+	PhoneToUpdate       bool      `json:"phone_to_update"`
+	Phone               string    `json:"phone"`
+	FirstNameToUpdate   bool      `json:"first_name_to_update"`
+	FirstName           string    `json:"first_name"`
+	LastNameToUpdate    bool      `json:"last_name_to_update"`
+	LastName            string    `json:"last_name"`
+	EmailToUpdate       bool      `json:"email_to_update"`
+	Email               string    `json:"email"`
+	PasswordToUpdate    bool      `json:"password_to_update"`
+	Password            string    `json:"password"`
+	UsernameToUpdate    bool      `json:"username_to_update"`
+	Username            string    `json:"username"`
+	DateOfBirthToUpdate bool      `json:"date_of_birth_to_update"`
+	DateOfBirth         time.Time `json:"date_of_birth"`
+	AvatarUrlToUpdate   bool      `json:"avatar_url_to_update"`
+	AvatarUrl           string    `json:"avatar_url"`
+	ID                  int32     `json:"id"`
+}
+
+func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) (User, error) {
+	row := q.db.QueryRowContext(ctx, updateUser,
+		arg.PhoneToUpdate,
+		arg.Phone,
+		arg.FirstNameToUpdate,
+		arg.FirstName,
+		arg.LastNameToUpdate,
+		arg.LastName,
+		arg.EmailToUpdate,
+		arg.Email,
+		arg.PasswordToUpdate,
+		arg.Password,
+		arg.UsernameToUpdate,
+		arg.Username,
+		arg.DateOfBirthToUpdate,
+		arg.DateOfBirth,
+		arg.AvatarUrlToUpdate,
+		arg.AvatarUrl,
+		arg.ID,
+	)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.Phone,
+		&i.FirstName,
+		&i.LastName,
+		&i.Email,
+		&i.Username,
+		&i.Password,
+		&i.PasswordChangedAt,
+		&i.Usertype,
+		&i.AvatarUrl,
+		&i.DateOfBirth,
+		&i.CreatedAt,
+	)
+	return i, err
+}
