@@ -131,6 +131,22 @@ func (q *Queries) DeleteEvent(ctx context.Context, id int32) error {
 	return err
 }
 
+const deleteFavoriteEvent = `-- name: DeleteFavoriteEvent :exec
+DELETE FROM events_favorites 
+WHERE event_id = $1 
+AND user_id = $2
+`
+
+type DeleteFavoriteEventParams struct {
+	EventID int32 `json:"event_id"`
+	UserID  int32 `json:"user_id"`
+}
+
+func (q *Queries) DeleteFavoriteEvent(ctx context.Context, arg DeleteFavoriteEventParams) error {
+	_, err := q.db.ExecContext(ctx, deleteFavoriteEvent, arg.EventID, arg.UserID)
+	return err
+}
+
 const getEvent = `-- name: GetEvent :one
 SELECT id, title, description, banner_image, start_date, end_date, venue, type, user_id, category, ticket_id, recurring, status, created_at FROM events
 WHERE id = $1 LIMIT 1

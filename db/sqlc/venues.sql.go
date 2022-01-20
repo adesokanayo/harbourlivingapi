@@ -101,6 +101,22 @@ func (q *Queries) CreateVenueFavorite(ctx context.Context, arg CreateVenueFavori
 	return i, err
 }
 
+const deleteFavoriteVenue = `-- name: DeleteFavoriteVenue :exec
+DELETE FROM venues_favorites 
+WHERE venue_id = $1 
+AND user_id = $2
+`
+
+type DeleteFavoriteVenueParams struct {
+	VenueID int32 `json:"venue_id"`
+	UserID  int32 `json:"user_id"`
+}
+
+func (q *Queries) DeleteFavoriteVenue(ctx context.Context, arg DeleteFavoriteVenueParams) error {
+	_, err := q.db.ExecContext(ctx, deleteFavoriteVenue, arg.VenueID, arg.UserID)
+	return err
+}
+
 const deleteVenue = `-- name: DeleteVenue :exec
 DELETE FROM venues
 WHERE id = $1

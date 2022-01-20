@@ -108,7 +108,7 @@ type Image struct {
 }
 
 type Login struct {
-	Username string `json:"username"`
+	Email    string `json:"email"`
 	Password string `json:"password"`
 }
 
@@ -313,6 +313,16 @@ type Ticket struct {
 	EventID     int     `json:"event_id"`
 	Currency    string  `json:"currency"`
 	Description *string `json:"description"`
+}
+
+type UnfavoriteEvent struct {
+	EventID int32 `json:"event_id"`
+	UserID  int32 `json:"user_id"`
+}
+
+type UnfavoriteVenue struct {
+	VenueID int32 `json:"venue_id"`
+	UserID  int32 `json:"user_id"`
 }
 
 type UpdateArtist struct {

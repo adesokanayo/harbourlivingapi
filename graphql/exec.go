@@ -155,6 +155,8 @@ type ComplexityRoot struct {
 		DeleteTicket          func(childComplexity int, input int32) int
 		Login                 func(childComplexity int, input Login) int
 		RefreshToken          func(childComplexity int, input RefreshTokenInput) int
+		UnfavoriteEvent       func(childComplexity int, input UnfavoriteEvent) int
+		UnfavoriteVenue       func(childComplexity int, input UnfavoriteVenue) int
 		UpdateArtist          func(childComplexity int, input UpdateArtist) int
 		UpdateDayPlan         func(childComplexity int, input UpdateDayPlan) int
 		UpdateEvent           func(childComplexity int, input UpdateEvent) int
@@ -331,6 +333,8 @@ type MutationResolver interface {
 	DeleteTicket(ctx context.Context, input int32) (bool, error)
 	DeleteDayPlan(ctx context.Context, input int32) (bool, error)
 	DeleteSchedule(ctx context.Context, input int32) (bool, error)
+	UnfavoriteEvent(ctx context.Context, input UnfavoriteEvent) (bool, error)
+	UnfavoriteVenue(ctx context.Context, input UnfavoriteVenue) (bool, error)
 	Login(ctx context.Context, input Login) (*LoginResponse, error)
 	RefreshToken(ctx context.Context, input RefreshTokenInput) (*string, error)
 }
@@ -1048,6 +1052,30 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.RefreshToken(childComplexity, args["input"].(RefreshTokenInput)), true
+
+	case "Mutation.UnfavoriteEvent":
+		if e.complexity.Mutation.UnfavoriteEvent == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_UnfavoriteEvent_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.UnfavoriteEvent(childComplexity, args["input"].(UnfavoriteEvent)), true
+
+	case "Mutation.UnfavoriteVenue":
+		if e.complexity.Mutation.UnfavoriteVenue == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_UnfavoriteVenue_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.UnfavoriteVenue(childComplexity, args["input"].(UnfavoriteVenue)), true
 
 	case "Mutation.updateArtist":
 		if e.complexity.Mutation.UpdateArtist == nil {
@@ -2018,7 +2046,7 @@ type Venue {
         }
 
 input Login {
-        username: String!
+        email: String!
         password: String!
 }
 
@@ -2407,6 +2435,18 @@ input  UpdateDayPlan {
         description : String
         performer_name : String
 }
+input  UnfavoriteEvent {
+        event_id :ID!
+        user_id: ID!
+
+}
+
+input  UnfavoriteVenue {
+        venue_id :ID!
+        user_id:ID!
+
+}
+
 
 type Mutation {
         createCategory(input : NewCategory!): Category!
@@ -2444,6 +2484,8 @@ type Mutation {
         deleteTicket (input: ID!): Boolean!
         deleteDayPlan(input:ID!):Boolean!
         deleteSchedule(input: ID!):Boolean!
+        UnfavoriteEvent(input : UnfavoriteEvent!): Boolean!
+        UnfavoriteVenue(input : UnfavoriteVenue!): Boolean!
 
         """ operations """ 
         login(input: Login!): LoginResponse
@@ -2474,6 +2516,36 @@ var parsedSchema = gqlparser.MustLoadSchema(sources...)
 // endregion ************************** generated!.gotpl **************************
 
 // region    ***************************** args.gotpl *****************************
+
+func (ec *executionContext) field_Mutation_UnfavoriteEvent_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 UnfavoriteEvent
+	if tmp, ok := rawArgs["input"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+		arg0, err = ec.unmarshalNUnfavoriteEvent2githubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgraphqlᚐUnfavoriteEvent(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["input"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_UnfavoriteVenue_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 UnfavoriteVenue
+	if tmp, ok := rawArgs["input"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+		arg0, err = ec.unmarshalNUnfavoriteVenue2githubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgraphqlᚐUnfavoriteVenue(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["input"] = arg0
+	return args, nil
+}
 
 func (ec *executionContext) field_Mutation_createCategory_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
@@ -6420,6 +6492,90 @@ func (ec *executionContext) _Mutation_deleteSchedule(ctx context.Context, field 
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Mutation().DeleteSchedule(rctx, args["input"].(int32))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(bool)
+	fc.Result = res
+	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Mutation_UnfavoriteEvent(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_UnfavoriteEvent_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().UnfavoriteEvent(rctx, args["input"].(UnfavoriteEvent))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(bool)
+	fc.Result = res
+	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Mutation_UnfavoriteVenue(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_UnfavoriteVenue_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().UnfavoriteVenue(rctx, args["input"].(UnfavoriteVenue))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -10866,11 +11022,11 @@ func (ec *executionContext) unmarshalInputLogin(ctx context.Context, obj interfa
 
 	for k, v := range asMap {
 		switch k {
-		case "username":
+		case "email":
 			var err error
 
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("username"))
-			it.Username, err = ec.unmarshalNString2string(ctx, v)
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("email"))
+			it.Email, err = ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -11787,6 +11943,62 @@ func (ec *executionContext) unmarshalInputRefreshTokenInput(ctx context.Context,
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("token"))
 			it.Token, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputUnfavoriteEvent(ctx context.Context, obj interface{}) (UnfavoriteEvent, error) {
+	var it UnfavoriteEvent
+	var asMap = obj.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "event_id":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("event_id"))
+			it.EventID, err = ec.unmarshalNID2int32(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "user_id":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("user_id"))
+			it.UserID, err = ec.unmarshalNID2int32(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputUnfavoriteVenue(ctx context.Context, obj interface{}) (UnfavoriteVenue, error) {
+	var it UnfavoriteVenue
+	var asMap = obj.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "venue_id":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("venue_id"))
+			it.VenueID, err = ec.unmarshalNID2int32(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "user_id":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("user_id"))
+			it.UserID, err = ec.unmarshalNID2int32(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -13163,6 +13375,16 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			}
 		case "deleteSchedule":
 			out.Values[i] = ec._Mutation_deleteSchedule(ctx, field)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "UnfavoriteEvent":
+			out.Values[i] = ec._Mutation_UnfavoriteEvent(ctx, field)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "UnfavoriteVenue":
+			out.Values[i] = ec._Mutation_UnfavoriteVenue(ctx, field)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
@@ -14679,6 +14901,16 @@ func (ec *executionContext) marshalNTime2timeᚐTime(ctx context.Context, sel as
 		}
 	}
 	return res
+}
+
+func (ec *executionContext) unmarshalNUnfavoriteEvent2githubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgraphqlᚐUnfavoriteEvent(ctx context.Context, v interface{}) (UnfavoriteEvent, error) {
+	res, err := ec.unmarshalInputUnfavoriteEvent(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalNUnfavoriteVenue2githubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgraphqlᚐUnfavoriteVenue(ctx context.Context, v interface{}) (UnfavoriteVenue, error) {
+	res, err := ec.unmarshalInputUnfavoriteVenue(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) unmarshalNUpdateArtist2githubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgraphqlᚐUpdateArtist(ctx context.Context, v interface{}) (UpdateArtist, error) {

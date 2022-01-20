@@ -1,3 +1,6 @@
+CREATE EXTENSION cube;
+CREATE EXTENSION earthdistance;
+
 CREATE TABLE "users" (
                          "id" SERIAL PRIMARY KEY,
                          "phone" varchar,

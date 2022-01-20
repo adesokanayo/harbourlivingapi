@@ -19,6 +19,11 @@ WHERE id = $1 LIMIT 1;
 -- name: GetUsername :one
 SELECT * FROM users
 WHERE username = $1 LIMIT 1;
+
+-- name: GetEmail :one
+SELECT * FROM users
+WHERE email = $1 LIMIT 1;
+
 -- name: GetAllUsers :many
 SELECT * FROM users
 ORDER  by id;

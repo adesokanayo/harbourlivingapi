@@ -117,6 +117,31 @@ func (q *Queries) GetAllUsers(ctx context.Context) ([]User, error) {
 	return items, nil
 }
 
+const getEmail = `-- name: GetEmail :one
+SELECT id, phone, first_name, last_name, email, username, password, password_changed_at, usertype, avatar_url, date_of_birth, created_at FROM users
+WHERE email = $1 LIMIT 1
+`
+
+func (q *Queries) GetEmail(ctx context.Context, email string) (User, error) {
+	row := q.db.QueryRowContext(ctx, getEmail, email)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.Phone,
+		&i.FirstName,
+		&i.LastName,
+		&i.Email,
+		&i.Username,
+		&i.Password,
+		&i.PasswordChangedAt,
+		&i.Usertype,
+		&i.AvatarUrl,
+		&i.DateOfBirth,
+		&i.CreatedAt,
+	)
+	return i, err
+}
+
 const getUser = `-- name: GetUser :one
 SELECT id, phone, first_name, last_name, email, username, password, password_changed_at, usertype, avatar_url, date_of_birth, created_at FROM users
 WHERE id = $1 LIMIT 1

@@ -85,6 +85,12 @@ SELECT * FROM events_favorites
 where user_id = @user_id
 ORDER BY id desc;
 
+-- name: DeleteFavoriteEvent :exec
+DELETE FROM events_favorites 
+WHERE event_id = @event_id 
+AND user_id = @user_id;
+
+
 -- name: CreateViewEvent :one
 INSERT INTO events_views (
     event_id,

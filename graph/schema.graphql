@@ -115,7 +115,7 @@ type Venue {
         }
 
 input Login {
-        username: String!
+        email: String!
         password: String!
 }
 
@@ -504,6 +504,18 @@ input  UpdateDayPlan {
         description : String
         performer_name : String
 }
+input  UnfavoriteEvent {
+        event_id :ID!
+        user_id: ID!
+
+}
+
+input  UnfavoriteVenue {
+        venue_id :ID!
+        user_id:ID!
+
+}
+
 
 type Mutation {
         createCategory(input : NewCategory!): Category!
@@ -541,6 +553,8 @@ type Mutation {
         deleteTicket (input: ID!): Boolean!
         deleteDayPlan(input:ID!):Boolean!
         deleteSchedule(input: ID!):Boolean!
+        UnfavoriteEvent(input : UnfavoriteEvent!): Boolean!
+        UnfavoriteVenue(input : UnfavoriteVenue!): Boolean!
 
         """ operations """ 
         login(input: Login!): LoginResponse

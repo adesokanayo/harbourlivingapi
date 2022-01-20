@@ -43,6 +43,11 @@ SELECT * FROM venues_favorites
 where user_id = @user_id
 ORDER BY id desc;
   
+-- name: DeleteFavoriteVenue :exec
+DELETE FROM venues_favorites 
+WHERE venue_id = @venue_id 
+AND user_id = @user_id;
+
 -- name: UpdateVenue :one
 UPDATE venues SET
     name = CASE WHEN @name_to_update::boolean

@@ -671,7 +671,7 @@ func (r *mutationResolver) DeleteEvent(ctx context.Context, input int32) (bool, 
 
 func (r *mutationResolver) Login(ctx context.Context, input Login) (*LoginResponse, error) {
 
-	user, err := store.GetUsername(ctx, input.Username)
+	user, err := store.GetEmail(ctx, input.Email)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, errors.New("invalid user")
@@ -2226,6 +2226,34 @@ func (r *queryResolver) GetAllVenues(ctx context.Context) ([]Venue, error) {
 	}
 	return venues, nil
 
+}
+
+func (r *mutationResolver) UnfavoriteEvent(ctx context.Context, input UnfavoriteEvent) (bool, error) {
+
+	arg := db.DeleteFavoriteEventParams{
+		EventID: input.EventID,
+		UserID:  input.UserID,
+	}
+
+	err := store.DeleteFavoriteEvent(ctx, arg)
+	if err != nil {
+		return false, err
+	}
+	return true, nil
+}
+
+func (r *mutationResolver) UnfavoriteVenue(ctx context.Context, input UnfavoriteVenue) (bool, error) {
+
+	arg := db.DeleteFavoriteVenueParams{
+		VenueID: input.VenueID,
+		UserID:  input.UserID,
+	}
+
+	err := store.DeleteFavoriteVenue(ctx, arg)
+	if err != nil {
+		return false, err
+	}
+	return true, nil
 }
 
 // Mutation returns MutationResolver implementation.
