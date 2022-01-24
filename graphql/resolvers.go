@@ -18,12 +18,15 @@ import (
 )
 
 var (
-	store *db.Store
+	store      *db.Store
+	tokenMaker token.Maker
+	EmailSvc   *util.EmailService
+	config     *util.Config
 )
-var tokenMaker token.Maker
 
 func init() {
-	config, err := util.LoadConfig(".")
+	var err error
+	config, err = util.LoadConfig(".")
 	if err != nil {
 		log.Fatal("cannot find config ", err)
 	}
@@ -39,6 +42,22 @@ func init() {
 		log.Fatalln("cannot create a token maker ", err)
 	}
 
+	sendActualMail := true
+
+	if config.ENVIRONMENT == "DEV" {
+		sendActualMail = false
+	}
+
+	emailServiceOpts := util.EmailServiceOpts{
+		APIKey:     config.SibAPIKey,
+		PartnerKey: "partner_kay",
+		LiveEMail:  sendActualMail,
+	}
+
+	EmailSvc, err = util.NewEmailService(emailServiceOpts)
+	if err != nil {
+		log.Fatalln("cannot create emailSvc ", err)
+	}
 }
 
 type Resolver struct {
@@ -182,6 +201,32 @@ func (r *mutationResolver) CreateUser(ctx context.Context, input NewUser) (*User
 	if err != nil {
 		return nil, err
 	}
+
+	//Send Email
+	emailOpts := util.OutgoingEmailOpts{
+		Sender: util.Sender{
+			Email: "events@harbourliving.ca",
+			Name:  "Harbour Living",
+		},
+		To: []util.To{
+			{
+				Email: "adesokanayo@gmail.com",
+				Name:  "Ayo",
+			},
+		},
+		TemplateID: int(RegistrationEmail),
+		Params: util.Params{
+			FirstName: user.FirstName,
+			Lname:     user.LastName,
+		},
+	}
+
+	sent := EmailSvc.SendEmail(ctx, emailOpts)
+
+	if !sent {
+		log.Println("unable to send email", err)
+	}
+
 	return &User{
 		ID:        user.ID,
 		Phone:     &user.Phone.String,

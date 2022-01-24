@@ -7,7 +7,12 @@ const (
 	SponsorUserType
 	AdminUserType
 )
+const (
+	RegistrationEmail MailTemplate = 358
+	PasswordRecovery  MailTemplate = 166
+)
 
+type MailTemplate int
 type UserTypes int
 
 func ConvertDbToUserRole(v int32) UserTypeOptions {
