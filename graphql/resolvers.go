@@ -17,51 +17,11 @@ import (
 	"github.com/pkg/errors"
 )
 
-var (
-	store      *db.Store
-	tokenMaker token.Maker
-	EmailSvc   *util.EmailService
-	config     *util.Config
-)
-
-func init() {
-	var err error
-	config, err = util.LoadConfig(".")
-	if err != nil {
-		log.Fatal("cannot find config ", err)
-	}
-
-	conn, err := sql.Open(config.DBDriver, config.DBSource)
-	if err != nil {
-		log.Fatalln("cannot connect to database, ", err)
-	}
-
-	store = db.NewStore(conn)
-	tokenMaker, err = token.NewJWTMaker(config.TokenSymmetricKey)
-	if err != nil {
-		log.Fatalln("cannot create a token maker ", err)
-	}
-
-	sendActualMail := true
-
-	if config.ENVIRONMENT == "DEV" {
-		sendActualMail = false
-	}
-
-	emailServiceOpts := util.EmailServiceOpts{
-		APIKey:     config.SibAPIKey,
-		PartnerKey: "partner_kay",
-		LiveEMail:  sendActualMail,
-	}
-
-	EmailSvc, err = util.NewEmailService(emailServiceOpts)
-	if err != nil {
-		log.Fatalln("cannot create emailSvc ", err)
-	}
-}
-
 type Resolver struct {
-	repo *db.Store
+	Config       util.Config
+	Repo         *db.Store
+	EmailService *util.EmailService
+	TokenMaker   token.TokenService
 }
 
 func (r *mutationResolver) CreateVenue(ctx context.Context, input NewVenue) (*Venue, error) {
@@ -126,7 +86,7 @@ func (r *mutationResolver) CreateVenue(ctx context.Context, input NewVenue) (*Ve
 	createVenueReq.Status = int32(ConvertStatusOptionsToDb(StatusOptionsDraft))
 	createVenueReq.VenueOwner = int32(input.VenueOwner)
 
-	venue, err := store.CreateVenue(ctx, createVenueReq)
+	venue, err := r.Repo.CreateVenue(ctx, createVenueReq)
 	if err != nil {
 		return nil, err
 	}
@@ -197,7 +157,7 @@ func (r *mutationResolver) CreateUser(ctx context.Context, input NewUser) (*User
 		AvatarUrl: avatar,
 	}
 
-	user, err := store.CreateUser(context.Background(), arg)
+	user, err := r.Repo.CreateUser(context.Background(), arg)
 	if err != nil {
 		return nil, err
 	}
@@ -221,7 +181,7 @@ func (r *mutationResolver) CreateUser(ctx context.Context, input NewUser) (*User
 		},
 	}
 
-	sent := EmailSvc.SendEmail(ctx, emailOpts)
+	sent := r.EmailService.SendEmail(ctx, emailOpts)
 
 	if !sent {
 		log.Println("unable to send email", err)
@@ -282,7 +242,7 @@ func (r *mutationResolver) UpdateUser(ctx context.Context, input UpdateUser) (*U
 		arg.AvatarUrlToUpdate = true
 	}
 
-	user, err := store.UpdateUser(context.Background(), arg)
+	user, err := r.Repo.UpdateUser(context.Background(), arg)
 	if err != nil {
 		return nil, err
 	}
@@ -313,7 +273,7 @@ func (r *mutationResolver) CreateCategory(ctx context.Context, input NewCategory
 	arg.Description = input.Description
 	arg.Status = int32(input.Status)
 
-	category, err := store.CreateCategory(ctx, arg)
+	category, err := r.Repo.CreateCategory(ctx, arg)
 
 	if err != nil {
 		return nil, err
@@ -351,16 +311,16 @@ func (r *mutationResolver) CreateEvent(ctx context.Context, input NewEvent) (*Ev
 	}
 
 	//Use Transaction
-	err = store.ExecTx(ctx, func(q *db.Queries) error {
+	err = r.Repo.ExecTx(ctx, func(q *db.Queries) error {
 
 		//create event
-		event, err := store.CreateEvent(ctx, arg)
+		event, err := r.Repo.CreateEvent(ctx, arg)
 		if err != nil {
 			return err
 		}
 
 		//create host
-		host, err := store.CreateHost(ctx, input.UserID)
+		host, err := r.Repo.CreateHost(ctx, input.UserID)
 		if err != nil {
 			return err
 		}
@@ -371,7 +331,7 @@ func (r *mutationResolver) CreateEvent(ctx context.Context, input NewEvent) (*Ev
 			EventID: event.ID,
 		}
 
-		linkedEventHost, err := store.LinkHostToEvent(ctx, arg)
+		linkedEventHost, err := r.Repo.LinkHostToEvent(ctx, arg)
 		if err != nil {
 			return err
 		}
@@ -388,7 +348,7 @@ func (r *mutationResolver) CreateEvent(ctx context.Context, input NewEvent) (*Ev
 					Url: i.URL,
 				}
 
-				image, err := store.CreateImage(ctx, arg)
+				image, err := r.Repo.CreateImage(ctx, arg)
 				if err != nil {
 					return err
 				}
@@ -399,7 +359,7 @@ func (r *mutationResolver) CreateEvent(ctx context.Context, input NewEvent) (*Ev
 					ImageID: image.ID,
 				}
 
-				errs := store.LinkImageToEvent(ctx, argImageLink)
+				errs := r.Repo.LinkImageToEvent(ctx, argImageLink)
 				if errs != nil {
 					return errs
 				}
@@ -426,7 +386,7 @@ func (r *mutationResolver) CreateEvent(ctx context.Context, input NewEvent) (*Ev
 					Url: i.URL,
 				}
 
-				video, err := store.CreateVideo(ctx, arg)
+				video, err := r.Repo.CreateVideo(ctx, arg)
 				if err != nil {
 					return err
 				}
@@ -437,7 +397,7 @@ func (r *mutationResolver) CreateEvent(ctx context.Context, input NewEvent) (*Ev
 					VideoID: video.ID,
 				}
 
-				errs := store.LinkVideoToEvent(ctx, argVideoLink)
+				errs := r.Repo.LinkVideoToEvent(ctx, argVideoLink)
 				if errs != nil {
 					return errs
 				}
@@ -467,7 +427,7 @@ func (r *mutationResolver) CreateEvent(ctx context.Context, input NewEvent) (*Ev
 					},
 				}
 
-				ticket, err := store.CreateTicket(ctx, arg)
+				ticket, err := r.Repo.CreateTicket(ctx, arg)
 				if err != nil {
 					return err
 				}
@@ -514,7 +474,7 @@ func (r *mutationResolver) UpdateEvent(ctx context.Context, input UpdateEvent) (
 
 	arg := db.UpdateEventParams{}
 
-	event, err := store.GetEvent(ctx, int32(input.ID))
+	event, err := r.Repo.GetEvent(ctx, int32(input.ID))
 	if err != nil {
 		return nil, err
 	}
@@ -576,10 +536,10 @@ func (r *mutationResolver) UpdateEvent(ctx context.Context, input UpdateEvent) (
 	arg.ID = event.ID
 
 	//Use Transaction
-	err = store.ExecTx(ctx, func(q *db.Queries) error {
+	err = r.Repo.ExecTx(ctx, func(q *db.Queries) error {
 
 		//update event
-		event, err := store.UpdateEvent(ctx, arg)
+		event, err := r.Repo.UpdateEvent(ctx, arg)
 		if err != nil {
 			return err
 		}
@@ -596,7 +556,7 @@ func (r *mutationResolver) UpdateEvent(ctx context.Context, input UpdateEvent) (
 					Url: i.URL,
 				}
 
-				image, err := store.CreateImage(ctx, arg)
+				image, err := r.Repo.CreateImage(ctx, arg)
 				if err != nil {
 					return err
 				}
@@ -607,7 +567,7 @@ func (r *mutationResolver) UpdateEvent(ctx context.Context, input UpdateEvent) (
 					ImageID: image.ID,
 				}
 
-				errs := store.LinkImageToEvent(ctx, argImageLink)
+				errs := r.Repo.LinkImageToEvent(ctx, argImageLink)
 				if errs != nil {
 					return errs
 				}
@@ -634,7 +594,7 @@ func (r *mutationResolver) UpdateEvent(ctx context.Context, input UpdateEvent) (
 					Url: i.URL,
 				}
 
-				video, err := store.CreateVideo(ctx, arg)
+				video, err := r.Repo.CreateVideo(ctx, arg)
 				if err != nil {
 					return err
 				}
@@ -645,7 +605,7 @@ func (r *mutationResolver) UpdateEvent(ctx context.Context, input UpdateEvent) (
 					VideoID: video.ID,
 				}
 
-				errs := store.LinkVideoToEvent(ctx, argVideoLink)
+				errs := r.Repo.LinkVideoToEvent(ctx, argVideoLink)
 				if errs != nil {
 					return errs
 				}
@@ -660,7 +620,7 @@ func (r *mutationResolver) UpdateEvent(ctx context.Context, input UpdateEvent) (
 		}
 
 		//get venue info
-		venueinfo, err := store.GetVenue(ctx, event.Venue)
+		venueinfo, err := r.Repo.GetVenue(ctx, event.Venue)
 
 		venue := &Venue{
 			ID:          venueinfo.ID,
@@ -702,12 +662,12 @@ func (r *mutationResolver) UpdateEvent(ctx context.Context, input UpdateEvent) (
 
 func (r *mutationResolver) DeleteEvent(ctx context.Context, input int32) (bool, error) {
 
-	_, err := store.GetEvent(ctx, input)
+	_, err := r.Repo.GetEvent(ctx, input)
 	if err != nil {
 		return false, err
 	}
 
-	err = store.DeleteEvent(ctx, input)
+	err = r.Repo.DeleteEvent(ctx, input)
 	if err != nil {
 		return false, err
 	}
@@ -716,7 +676,7 @@ func (r *mutationResolver) DeleteEvent(ctx context.Context, input int32) (bool, 
 
 func (r *mutationResolver) Login(ctx context.Context, input Login) (*LoginResponse, error) {
 
-	user, err := store.GetEmail(ctx, input.Email)
+	user, err := r.Repo.GetEmail(ctx, input.Email)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, errors.New("invalid user")
@@ -736,7 +696,7 @@ func (r *mutationResolver) Login(ctx context.Context, input Login) (*LoginRespon
 		UserType: int(user.Usertype),
 	}
 
-	token, err := tokenMaker.CreateToken(userinfo, time.Hour*24)
+	token, err := r.TokenMaker.CreateToken(userinfo, time.Hour*24)
 	if err != nil {
 		return nil, errors.New("unable to create token")
 	}
@@ -756,12 +716,12 @@ func (r *mutationResolver) Login(ctx context.Context, input Login) (*LoginRespon
 }
 
 func (r *mutationResolver) RefreshToken(ctx context.Context, input RefreshTokenInput) (*string, error) {
-	username, err := tokenMaker.ParseToken(input.Token)
+	username, err := r.TokenMaker.ParseToken(input.Token)
 	if err != nil {
 		return nil, errors.New("invalid token")
 	}
 
-	user, err := store.GetUsername(ctx, username)
+	user, err := r.Repo.GetUsername(ctx, username)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, errors.New("invalid user")
@@ -776,7 +736,7 @@ func (r *mutationResolver) RefreshToken(ctx context.Context, input RefreshTokenI
 		UserType: int(user.Usertype),
 	}
 
-	token, err := tokenMaker.CreateToken(userinfo, time.Hour*24)
+	token, err := r.TokenMaker.CreateToken(userinfo, time.Hour*24)
 	if err != nil {
 		return nil, err
 	}
@@ -787,7 +747,7 @@ func (r *mutationResolver) RefreshToken(ctx context.Context, input RefreshTokenI
 func (r *queryResolver) GetUser(ctx context.Context, input int32) (*User, error) {
 	var events []*Event
 	var venues []*Venue
-	user, err := store.GetUser(ctx, input)
+	user, err := r.Repo.GetUser(ctx, input)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, errors.New("no record found")
@@ -796,26 +756,26 @@ func (r *queryResolver) GetUser(ctx context.Context, input int32) (*User, error)
 		return nil, errors.New("an error occured")
 	}
 
-	favEvents, err := store.GetFavoriteEvents(ctx, user.ID)
+	favEvents, err := r.Repo.GetFavoriteEvents(ctx, user.ID)
 	if err != nil {
 		return nil, err
 	}
 
 	for _, v := range favEvents {
-		f, err := GetEventHelper(ctx, v.EventID)
+		f, err := GetEventHelper(ctx, r.Repo, v.EventID)
 		if err != nil {
 			return nil, err
 		}
 		events = append(events, f)
 	}
 
-	favVenues, err := store.GetFavoriteVenues(ctx, user.ID)
+	favVenues, err := r.Repo.GetFavoriteVenues(ctx, user.ID)
 	if err != nil {
 		return nil, err
 	}
 
 	for _, v := range favVenues {
-		f, err := GetVenueHelper(ctx, v.VenueID)
+		f, err := GetVenueHelper(ctx, *r.Repo, v.VenueID)
 		if err != nil {
 			return nil, err
 		}
@@ -838,7 +798,7 @@ func (r *queryResolver) GetUser(ctx context.Context, input int32) (*User, error)
 
 func (r *queryResolver) GetVenue(ctx context.Context, input int32) (*Venue, error) {
 	var result Venue
-	venue, err := store.GetVenue(ctx, input)
+	venue, err := r.Repo.GetVenue(ctx, input)
 	if err != nil {
 		return nil, err
 	}
@@ -878,7 +838,7 @@ func (r *queryResolver) GetEvent(ctx context.Context, input int32) (*Event, erro
 	var tickets []*Ticket
 	var promoted bool
 
-	event, err := store.GetEvent(ctx, input)
+	event, err := r.Repo.GetEvent(ctx, input)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, errors.New("no record found")
@@ -887,7 +847,7 @@ func (r *queryResolver) GetEvent(ctx context.Context, input int32) (*Event, erro
 	}
 
 	//Fetch  Sponsors
-	eventSponsors, err := store.GetSponsorByEvent(ctx, input)
+	eventSponsors, err := r.Repo.GetSponsorByEvent(ctx, input)
 	if err != nil {
 		return nil, err
 	}
@@ -897,7 +857,7 @@ func (r *queryResolver) GetEvent(ctx context.Context, input int32) (*Event, erro
 	}
 
 	// fetch images
-	eventImages, err := store.GetImagesByEvent(ctx, input)
+	eventImages, err := r.Repo.GetImagesByEvent(ctx, input)
 	if err != nil {
 		return nil, err
 	}
@@ -911,7 +871,7 @@ func (r *queryResolver) GetEvent(ctx context.Context, input int32) (*Event, erro
 	}
 
 	// fetch videos
-	eventVideos, err := store.GetVideosByEvent(ctx, input)
+	eventVideos, err := r.Repo.GetVideosByEvent(ctx, input)
 	if err != nil {
 		return nil, err
 	}
@@ -925,7 +885,7 @@ func (r *queryResolver) GetEvent(ctx context.Context, input int32) (*Event, erro
 	}
 
 	// fetch tickets
-	eventTickets, err := store.GetTicketsByEventID(ctx, event.ID)
+	eventTickets, err := r.Repo.GetTicketsByEventID(ctx, event.ID)
 	if err != nil {
 		return nil, err
 	}
@@ -941,19 +901,19 @@ func (r *queryResolver) GetEvent(ctx context.Context, input int32) (*Event, erro
 	}
 
 	// determine favorites
-	eventsFavorites, err := store.GetFavoriteEvents(ctx, event.ID)
+	eventsFavorites, err := r.Repo.GetFavoriteEvents(ctx, event.ID)
 	if err != nil {
 		return nil, err
 	}
 
 	// get views
-	eventsViews, err := store.GetViewedEvents(ctx, event.ID)
+	eventsViews, err := r.Repo.GetViewedEvents(ctx, event.ID)
 	if err != nil {
 		return nil, err
 	}
 
 	// check if event is Promoted
-	promotions, err := store.GetPromotionsForEvent(ctx, event.ID)
+	promotions, err := r.Repo.GetPromotionsForEvent(ctx, event.ID)
 	if err != nil {
 		return nil, err
 	}
@@ -962,7 +922,7 @@ func (r *queryResolver) GetEvent(ctx context.Context, input int32) (*Event, erro
 	}
 
 	//get venue info
-	venueinfo, err := store.GetVenue(ctx, event.Venue)
+	venueinfo, err := r.Repo.GetVenue(ctx, event.Venue)
 
 	venue := &Venue{
 		ID:          venueinfo.ID,
@@ -1019,14 +979,14 @@ func (r *queryResolver) GetAllEvents(ctx context.Context, input GetEvent) ([]Eve
 		Offset: int32((input.PageNumber * input.Limit) - input.Limit),
 	}
 
-	events, err := store.GetEvents(ctx, arg)
+	events, err := r.Repo.GetEvents(ctx, arg)
 	if err != nil {
 		return nil, err
 	}
 
 	// Get all the Sponsors for these events
 	for _, event := range events {
-		sponsors, err := store.GetSponsorByEvent(ctx, event.ID)
+		sponsors, err := r.Repo.GetSponsorByEvent(ctx, event.ID)
 
 		if err != nil {
 			return nil, err
@@ -1038,7 +998,7 @@ func (r *queryResolver) GetAllEvents(ctx context.Context, input GetEvent) ([]Eve
 		}
 
 		// fetch images
-		eventImages, err := store.GetImagesByEvent(ctx, event.ID)
+		eventImages, err := r.Repo.GetImagesByEvent(ctx, event.ID)
 		if err != nil {
 			return nil, err
 		}
@@ -1052,7 +1012,7 @@ func (r *queryResolver) GetAllEvents(ctx context.Context, input GetEvent) ([]Eve
 		}
 
 		// fetch videos
-		eventVideos, err := store.GetVideosByEvent(ctx, event.ID)
+		eventVideos, err := r.Repo.GetVideosByEvent(ctx, event.ID)
 		if err != nil {
 			return nil, err
 		}
@@ -1066,7 +1026,7 @@ func (r *queryResolver) GetAllEvents(ctx context.Context, input GetEvent) ([]Eve
 		}
 
 		//check if event is promoted
-		promotions, err := store.GetPromotionsForEvent(ctx, event.ID)
+		promotions, err := r.Repo.GetPromotionsForEvent(ctx, event.ID)
 		if err != nil {
 			return nil, err
 		}
@@ -1075,7 +1035,7 @@ func (r *queryResolver) GetAllEvents(ctx context.Context, input GetEvent) ([]Eve
 		}
 
 		//get venue info
-		venueinfo, err := store.GetVenue(ctx, event.Venue)
+		venueinfo, err := r.Repo.GetVenue(ctx, event.Venue)
 
 		venue := &Venue{
 			ID:          venueinfo.ID,
@@ -1124,7 +1084,7 @@ func (r *queryResolver) GetEventsByLocation(ctx context.Context, input GetEventB
 		Point_2:   input.Longitude,
 		Longitude: sql.NullFloat64{Valid: true, Float64: float64(input.Miles)},
 	}
-	events, err := store.GetEventsByLocation(ctx, arg)
+	events, err := r.Repo.GetEventsByLocation(ctx, arg)
 	if err != nil {
 		return nil, err
 	}
@@ -1132,7 +1092,7 @@ func (r *queryResolver) GetEventsByLocation(ctx context.Context, input GetEventB
 	// Get all the Sponsors for these events
 
 	for _, event := range events {
-		sponsors, err := store.GetSponsorByEvent(ctx, event.ID)
+		sponsors, err := r.Repo.GetSponsorByEvent(ctx, event.ID)
 
 		if err != nil {
 			return nil, err
@@ -1144,7 +1104,7 @@ func (r *queryResolver) GetEventsByLocation(ctx context.Context, input GetEventB
 		}
 
 		//get venue info
-		venueinfo, err := store.GetVenue(ctx, event.Venue)
+		venueinfo, err := r.Repo.GetVenue(ctx, event.Venue)
 
 		venue := &Venue{
 			ID:          venueinfo.ID,
@@ -1181,7 +1141,7 @@ func (r *queryResolver) GetEventsByLocation(ctx context.Context, input GetEventB
 }
 func (r *queryResolver) GetUsers(ctx context.Context) ([]User, error) {
 	var AllUsers []User
-	users, err := store.GetAllUsers(ctx)
+	users, err := r.Repo.GetAllUsers(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -1214,7 +1174,7 @@ func (r *mutationResolver) CreateTicket(ctx context.Context, input NewTicket) (*
 		},
 	}
 
-	ticket, err := store.CreateTicket(ctx, arg)
+	ticket, err := r.Repo.CreateTicket(ctx, arg)
 	if err != nil {
 		return nil, err
 	}
@@ -1233,10 +1193,10 @@ func (r *mutationResolver) CreateSponsorForEvent(ctx context.Context, input NewS
 
 	var result *Sponsor
 
-	err := store.ExecTx(ctx, func(q *db.Queries) error {
+	err := r.Repo.ExecTx(ctx, func(q *db.Queries) error {
 
 		// Create a Sponsor based on the provided user
-		sponsor, err := store.CreateSponsor(ctx, int32(input.UserID))
+		sponsor, err := r.Repo.CreateSponsor(ctx, int32(input.UserID))
 		if err != nil {
 			return err
 		}
@@ -1247,7 +1207,7 @@ func (r *mutationResolver) CreateSponsorForEvent(ctx context.Context, input NewS
 			EventID:   int32(input.EventID),
 		}
 
-		linkedSponsor, err := store.LinkSponsorToEvent(ctx, arg)
+		linkedSponsor, err := r.Repo.LinkSponsorToEvent(ctx, arg)
 		if err != nil {
 			return err
 		}
@@ -1269,7 +1229,7 @@ func (r *mutationResolver) UpdateEventStatus(ctx context.Context, input UpdateEv
 		ID:     int32(input.EventID),
 		Status: int32(ConvertStatusOptionsToDb(input.EventStatus)),
 	}
-	result, err := store.UpdateEventStatus(ctx, arg)
+	result, err := r.Repo.UpdateEventStatus(ctx, arg)
 	if err != nil {
 		return nil, err
 	}
@@ -1298,7 +1258,7 @@ func (r *mutationResolver) UpdateHost(ctx context.Context, input UpdateHost) (*H
 		arg.ShortBio = *input.ShortBio
 	}
 
-	host, err := store.UpdateHost(ctx, arg)
+	host, err := r.Repo.UpdateHost(ctx, arg)
 	if err != nil {
 		return nil, err
 	}
@@ -1331,7 +1291,7 @@ func (r *mutationResolver) UpdateArtist(ctx context.Context, input UpdateArtist)
 		arg.ShortBio = *input.ShortBio
 	}
 
-	artist, err := store.UpdateArtist(ctx, arg)
+	artist, err := r.Repo.UpdateArtist(ctx, arg)
 	if err != nil {
 		return nil, err
 	}
@@ -1364,7 +1324,7 @@ func (r *mutationResolver) UpdateSponsor(ctx context.Context, input UpdateSponso
 		arg.ShortBio = *input.ShortBio
 	}
 
-	sponsor, err := store.UpdateSponsor(ctx, arg)
+	sponsor, err := r.Repo.UpdateSponsor(ctx, arg)
 	if err != nil {
 		return nil, err
 	}
@@ -1380,7 +1340,7 @@ func (r *mutationResolver) UpdateSponsor(ctx context.Context, input UpdateSponso
 
 func (q *queryResolver) GetCategory(ctx context.Context, id int32) (*Category, error) {
 
-	category, err := store.GetCategory(ctx, id)
+	category, err := q.Repo.GetCategory(ctx, id)
 
 	if err != nil {
 		return nil, err
@@ -1394,7 +1354,7 @@ func (q *queryResolver) GetCategory(ctx context.Context, id int32) (*Category, e
 func (q *queryResolver) GetCategories(ctx context.Context) ([]Category, error) {
 
 	var result []Category
-	categories, err := store.GetCategories(ctx)
+	categories, err := q.Repo.GetCategories(ctx)
 
 	if err != nil {
 		return nil, err
@@ -1419,7 +1379,7 @@ func (r *mutationResolver) CreateEventFavorite(ctx context.Context, input NewEve
 		UserID:  int32(input.UserID),
 	}
 
-	eventFavorite, err := store.CreateFavoriteEvent(ctx, arg)
+	eventFavorite, err := r.Repo.CreateFavoriteEvent(ctx, arg)
 	if err != nil {
 		return nil, err
 	}
@@ -1439,7 +1399,7 @@ func (r *mutationResolver) CreateVenueFavorite(ctx context.Context, input NewVen
 		UserID:  int32(userinfo.UserID),
 	}
 
-	venueFavorite, err := store.CreateVenueFavorite(ctx, arg)
+	venueFavorite, err := r.Repo.CreateVenueFavorite(ctx, arg)
 	if err != nil {
 		return nil, err
 	}
@@ -1451,14 +1411,14 @@ func (r *mutationResolver) CreateVenueFavorite(ctx context.Context, input NewVen
 	}, nil
 }
 
-func GetEventHelper(ctx context.Context, input int32) (*Event, error) {
+func GetEventHelper(ctx context.Context, Repo *db.Store, input int32) (*Event, error) {
 
 	var sponsors []*Sponsor
 	var images []*Image
 	var videos []*Video
 	var tickets []*Ticket
 
-	event, err := store.GetEvent(ctx, input)
+	event, err := Repo.GetEvent(ctx, input)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, errors.New("no record found")
@@ -1467,7 +1427,7 @@ func GetEventHelper(ctx context.Context, input int32) (*Event, error) {
 	}
 
 	//Fetch  Sponsors
-	eventSponsors, err := store.GetSponsorByEvent(ctx, input)
+	eventSponsors, err := Repo.GetSponsorByEvent(ctx, input)
 	if err != nil {
 		return nil, err
 	}
@@ -1477,7 +1437,7 @@ func GetEventHelper(ctx context.Context, input int32) (*Event, error) {
 	}
 
 	// fetch images
-	eventImages, err := store.GetImagesByEvent(ctx, input)
+	eventImages, err := Repo.GetImagesByEvent(ctx, input)
 	if err != nil {
 		return nil, err
 	}
@@ -1491,7 +1451,7 @@ func GetEventHelper(ctx context.Context, input int32) (*Event, error) {
 	}
 
 	// fetch videos
-	eventVideos, err := store.GetVideosByEvent(ctx, input)
+	eventVideos, err := Repo.GetVideosByEvent(ctx, input)
 	if err != nil {
 		return nil, err
 	}
@@ -1505,7 +1465,7 @@ func GetEventHelper(ctx context.Context, input int32) (*Event, error) {
 	}
 
 	// fetch tickets
-	eventTickets, err := store.GetTicketsByEventID(ctx, event.ID)
+	eventTickets, err := Repo.GetTicketsByEventID(ctx, event.ID)
 	if err != nil {
 		return nil, err
 	}
@@ -1521,7 +1481,7 @@ func GetEventHelper(ctx context.Context, input int32) (*Event, error) {
 	}
 
 	//get venue info
-	venueinfo, err := store.GetVenue(ctx, event.Venue)
+	venueinfo, err := Repo.GetVenue(ctx, event.Venue)
 
 	venue := &Venue{
 		ID:          venueinfo.ID,
@@ -1558,10 +1518,10 @@ func GetEventHelper(ctx context.Context, input int32) (*Event, error) {
 	}, nil
 }
 
-func GetVenueHelper(ctx context.Context, input int32) (*Venue, error) {
+func GetVenueHelper(ctx context.Context, Repo db.Store, input int32) (*Venue, error) {
 
 	var result Venue
-	venue, err := store.GetVenue(ctx, input)
+	venue, err := Repo.GetVenue(ctx, input)
 	if err != nil {
 		return nil, err
 	}
@@ -1642,7 +1602,7 @@ func (r *mutationResolver) UpdateVenue(ctx context.Context, input UpdateVenue) (
 		arg.StatusToUpdate = true
 	}
 
-	venue, err := store.UpdateVenue(ctx, arg)
+	venue, err := r.Repo.UpdateVenue(ctx, arg)
 	if err != nil {
 		return nil, err
 	}
@@ -1675,7 +1635,7 @@ func (r *mutationResolver) CreatePlan(ctx context.Context, input NewPlan) (*Plan
 		NoOfDays:    int32(input.NoOfDays),
 	}
 
-	plan, err := store.CreatePlan(ctx, arg)
+	plan, err := r.Repo.CreatePlan(ctx, arg)
 	if err != nil {
 		return nil, err
 	}
@@ -1702,7 +1662,7 @@ func (r *mutationResolver) CreatePromotion(ctx context.Context, input NewPromoti
 		EndDate:   *d2,
 	}
 
-	promotion, err := store.CreatePromotion(ctx, arg)
+	promotion, err := r.Repo.CreatePromotion(ctx, arg)
 	if err != nil {
 		return nil, err
 	}
@@ -1736,7 +1696,7 @@ func (r *mutationResolver) UpdatePlan(ctx context.Context, input UpdatePlan) (*P
 		arg.NoOfDaysToUpdate = true
 	}
 
-	plan, err := store.UpdatePlan(ctx, arg)
+	plan, err := r.Repo.UpdatePlan(ctx, arg)
 	if err != nil {
 		return nil, err
 	}
@@ -1766,7 +1726,7 @@ func (r *mutationResolver) UpdatePromotion(ctx context.Context, input UpdateProm
 		arg.EndDateToUpdate = true
 	}
 
-	promotion, err := store.UpdatePromotion(ctx, arg)
+	promotion, err := r.Repo.UpdatePromotion(ctx, arg)
 	if err != nil {
 		return nil, err
 	}
@@ -1800,7 +1760,7 @@ func (r *mutationResolver) CreateNews(ctx context.Context, input NewNews) (*News
 		Status: int32(ConvertStatusOptionsToDb(input.Status)),
 	}
 
-	news, err := store.CreateNews(ctx, arg)
+	news, err := r.Repo.CreateNews(ctx, arg)
 	if err != nil {
 		return nil, err
 	}
@@ -1859,7 +1819,7 @@ func (r *mutationResolver) UpdateNews(ctx context.Context, input UpdateNews) (*N
 		arg.StatusToUpdate = true
 	}
 
-	news, err := store.UpdateNews(ctx, arg)
+	news, err := r.Repo.UpdateNews(ctx, arg)
 	if err != nil {
 		return nil, err
 	}
@@ -1877,12 +1837,12 @@ func (r *mutationResolver) UpdateNews(ctx context.Context, input UpdateNews) (*N
 
 func (r *mutationResolver) DeleteNews(ctx context.Context, input int32) (bool, error) {
 
-	_, err := store.GetNews(ctx, input)
+	_, err := r.Repo.GetNews(ctx, input)
 	if err != nil {
 		return false, err
 	}
 
-	err = store.DeleteNews(ctx, input)
+	err = r.Repo.DeleteNews(ctx, input)
 	if err != nil {
 		return false, err
 	}
@@ -1891,12 +1851,12 @@ func (r *mutationResolver) DeleteNews(ctx context.Context, input int32) (bool, e
 
 func (r *mutationResolver) DeletePlan(ctx context.Context, input int32) (bool, error) {
 
-	_, err := store.GetNews(ctx, input)
+	_, err := r.Repo.GetNews(ctx, input)
 	if err != nil {
 		return false, err
 	}
 
-	err = store.DeleteNews(ctx, input)
+	err = r.Repo.DeleteNews(ctx, input)
 	if err != nil {
 		return false, err
 	}
@@ -1905,12 +1865,12 @@ func (r *mutationResolver) DeletePlan(ctx context.Context, input int32) (bool, e
 
 func (r *mutationResolver) DeletePromotion(ctx context.Context, input int32) (bool, error) {
 
-	_, err := store.GetPromotion(ctx, input)
+	_, err := r.Repo.GetPromotion(ctx, input)
 	if err != nil {
 		return false, err
 	}
 
-	err = store.DeletePromotion(ctx, input)
+	err = r.Repo.DeletePromotion(ctx, input)
 	if err != nil {
 		return false, err
 	}
@@ -1919,12 +1879,12 @@ func (r *mutationResolver) DeletePromotion(ctx context.Context, input int32) (bo
 
 func (r *mutationResolver) DeleteTicket(ctx context.Context, input int32) (bool, error) {
 
-	_, err := store.GetTicket(ctx, input)
+	_, err := r.Repo.GetTicket(ctx, input)
 	if err != nil {
 		return false, err
 	}
 
-	err = store.DeleteTicket(ctx, input)
+	err = r.Repo.DeleteTicket(ctx, input)
 	if err != nil {
 		return false, err
 	}
@@ -1933,7 +1893,7 @@ func (r *mutationResolver) DeleteTicket(ctx context.Context, input int32) (bool,
 
 func (r *queryResolver) GetPlan(ctx context.Context, input int32) (*Plan, error) {
 
-	plan, err := store.GetPlan(ctx, input)
+	plan, err := r.Repo.GetPlan(ctx, input)
 
 	if err != nil {
 		return nil, err
@@ -1950,7 +1910,7 @@ func (r *queryResolver) GetPlan(ctx context.Context, input int32) (*Plan, error)
 
 func (r *queryResolver) GetPromotion(ctx context.Context, input int32) (*Promotion, error) {
 
-	promotion, err := store.GetPromotion(ctx, input)
+	promotion, err := r.Repo.GetPromotion(ctx, input)
 
 	if err != nil {
 		return nil, err
@@ -1967,7 +1927,7 @@ func (r *queryResolver) GetPromotion(ctx context.Context, input int32) (*Promoti
 
 func (r *queryResolver) GetNews(ctx context.Context, input int32) (*News, error) {
 
-	news, err := store.GetNews(ctx, input)
+	news, err := r.Repo.GetNews(ctx, input)
 
 	if err != nil {
 		return nil, err
@@ -1988,7 +1948,7 @@ func (r *queryResolver) GetNews(ctx context.Context, input int32) (*News, error)
 func (r *queryResolver) GetAllPlans(ctx context.Context) ([]Plan, error) {
 
 	var plans []Plan
-	allPlans, err := store.GetAllPlans(ctx)
+	allPlans, err := r.Repo.GetAllPlans(ctx)
 
 	if err != nil {
 		return nil, err
@@ -2009,7 +1969,7 @@ func (r *queryResolver) GetAllPlans(ctx context.Context) ([]Plan, error) {
 
 func (r *queryResolver) GetAllPromotions(ctx context.Context) ([]Promotion, error) {
 	var promotions []Promotion
-	AllPromotions, err := store.GetAllPromotions(ctx)
+	AllPromotions, err := r.Repo.GetAllPromotions(ctx)
 
 	if err != nil {
 		return nil, err
@@ -2032,7 +1992,7 @@ func (r *queryResolver) GetAllPromotions(ctx context.Context) ([]Promotion, erro
 func (r *queryResolver) GetAllNews(ctx context.Context) ([]News, error) {
 	var allNews []News
 
-	dbNews, err := store.GetAllNews(ctx)
+	dbNews, err := r.Repo.GetAllNews(ctx)
 
 	if err != nil {
 		return nil, err
@@ -2059,7 +2019,7 @@ func (r *mutationResolver) CreateEventView(ctx context.Context, input NewEventVi
 		UserID:  int32(input.UserID),
 	}
 
-	eventView, err := store.CreateViewEvent(ctx, arg)
+	eventView, err := r.Repo.CreateViewEvent(ctx, arg)
 	if err != nil {
 		return nil, err
 	}
@@ -2085,7 +2045,7 @@ func (r *mutationResolver) CreateSchedule(ctx context.Context, input NewSchedule
 		EndTime:   input.EndTime,
 	}
 
-	schedule, err := store.CreateSchedule(ctx, arg)
+	schedule, err := r.Repo.CreateSchedule(ctx, arg)
 	if err != nil {
 		return nil, err
 	}
@@ -2124,7 +2084,7 @@ func (r *mutationResolver) UpdateSchedule(ctx context.Context, input UpdateSched
 		arg.EndTimeToUpdate = true
 	}
 
-	schedule, err := store.UpdateSchedule(ctx, arg)
+	schedule, err := r.Repo.UpdateSchedule(ctx, arg)
 	if err != nil {
 		return nil, err
 	}
@@ -2157,7 +2117,7 @@ func (r *mutationResolver) CreateDayPlan(ctx context.Context, input NewDayPlan) 
 		},
 	}
 
-	dayplan, err := store.CreateDayplan(ctx, arg)
+	dayplan, err := r.Repo.CreateDayplan(ctx, arg)
 	if err != nil {
 		return nil, err
 	}
@@ -2199,7 +2159,7 @@ func (r *mutationResolver) UpdateDayPlan(ctx context.Context, input UpdateDayPla
 		arg.PerformerNameToUpdate = true
 	}
 
-	dayplan, err := store.UpdateDayPlan(ctx, arg)
+	dayplan, err := r.Repo.UpdateDayPlan(ctx, arg)
 	if err != nil {
 		return nil, err
 	}
@@ -2217,12 +2177,12 @@ func (r *mutationResolver) UpdateDayPlan(ctx context.Context, input UpdateDayPla
 
 func (r *mutationResolver) DeleteSchedule(ctx context.Context, input int32) (bool, error) {
 
-	_, err := store.GetSchedule(ctx, input)
+	_, err := r.Repo.GetSchedule(ctx, input)
 	if err != nil {
 		return false, err
 	}
 
-	err = store.DeleteSchedule(ctx, input)
+	err = r.Repo.DeleteSchedule(ctx, input)
 	if err != nil {
 		return false, err
 	}
@@ -2231,12 +2191,12 @@ func (r *mutationResolver) DeleteSchedule(ctx context.Context, input int32) (boo
 
 func (r *mutationResolver) DeleteDayPlan(ctx context.Context, input int32) (bool, error) {
 
-	_, err := store.GetDayplan(ctx, input)
+	_, err := r.Repo.GetDayplan(ctx, input)
 	if err != nil {
 		return false, err
 	}
 
-	err = store.DeleteDayPlan(ctx, input)
+	err = r.Repo.DeleteDayPlan(ctx, input)
 	if err != nil {
 		return false, err
 	}
@@ -2246,7 +2206,7 @@ func (r *mutationResolver) DeleteDayPlan(ctx context.Context, input int32) (bool
 func (r *queryResolver) GetAllVenues(ctx context.Context) ([]Venue, error) {
 
 	var venues []Venue
-	allVenues, err := store.GetAllVenues(ctx)
+	allVenues, err := r.Repo.GetAllVenues(ctx)
 
 	if err != nil {
 		return nil, err
@@ -2280,7 +2240,7 @@ func (r *mutationResolver) UnfavoriteEvent(ctx context.Context, input Unfavorite
 		UserID:  input.UserID,
 	}
 
-	err := store.DeleteFavoriteEvent(ctx, arg)
+	err := r.Repo.DeleteFavoriteEvent(ctx, arg)
 	if err != nil {
 		return false, err
 	}
@@ -2294,7 +2254,7 @@ func (r *mutationResolver) UnfavoriteVenue(ctx context.Context, input Unfavorite
 		UserID:  input.UserID,
 	}
 
-	err := store.DeleteFavoriteVenue(ctx, arg)
+	err := r.Repo.DeleteFavoriteVenue(ctx, arg)
 	if err != nil {
 		return false, err
 	}

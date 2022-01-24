@@ -10,7 +10,7 @@ import (
 )
 
 func TestJWTMaker(t *testing.T) {
-	maker, err := NewJWTMaker(util.RandomString(32))
+	maker, err := NewJWTService(util.RandomString(32))
 	require.NoError(t, err)
 
 	duration := time.Minute
@@ -43,7 +43,7 @@ func TestJWTMaker(t *testing.T) {
 }
 
 func TestExpiredJWTToken(t *testing.T) {
-	maker, err := NewJWTMaker(util.RandomString(32))
+	maker, err := NewJWTService(util.RandomString(32))
 	require.NoError(t, err)
 
 	userinfo := UserInfo{
@@ -78,7 +78,7 @@ func TestInvalidJWTTokenAlgNone(t *testing.T) {
 	token, err := jwtToken.SignedString(jwt.UnsafeAllowNoneSignatureType)
 	require.NoError(t, err)
 
-	maker, err := NewJWTMaker(util.RandomString(32))
+	maker, err := NewJWTService(util.RandomString(32))
 	require.NoError(t, err)
 
 	payload, err = maker.VerifyToken(token)
@@ -89,7 +89,7 @@ func TestInvalidJWTTokenAlgNone(t *testing.T) {
 
 func TestParseToken(t *testing.T) {
 	secret := util.RandomString(32)
-	maker, err := NewJWTMaker(secret)
+	maker, err := NewJWTService(secret)
 	require.NoError(t, err)
 
 	userinfo := UserInfo{

@@ -12,20 +12,23 @@ import (
 type EmailService struct {
 	apiKey    string
 	parterKey string
-	LiveEMail bool
+	liveEmail bool
+	url       string
 }
 
 type EmailServiceOpts struct {
 	APIKey     string
 	PartnerKey string
 	LiveEMail  bool
+	URL        string
 }
 
 func NewEmailService(opts EmailServiceOpts) (*EmailService, error) {
 	return &EmailService{
 		apiKey:    opts.APIKey,
 		parterKey: opts.PartnerKey,
-		LiveEMail: opts.LiveEMail,
+		liveEmail: opts.LiveEMail,
+		url:       opts.URL,
 	}, nil
 
 }
@@ -51,7 +54,6 @@ type Params struct {
 
 func (svc EmailService) SendEmail(ctx context.Context, opts OutgoingEmailOpts) bool {
 
-	url := "https://api.sendinblue.com/v3/smtp/email"
 	method := "POST"
 
 	byteMessage, err := json.Marshal(opts)
@@ -61,7 +63,7 @@ func (svc EmailService) SendEmail(ctx context.Context, opts OutgoingEmailOpts) b
 	payload := strings.NewReader(string(byteMessage))
 
 	client := &http.Client{}
-	req, err := http.NewRequest(method, url, payload)
+	req, err := http.NewRequest(method, svc.url, payload)
 
 	if err != nil {
 		fmt.Println(err)

@@ -1,8 +1,6 @@
-package api
+package rest
 
 import (
-	"fmt"
-
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/playground"
 	db "github.com/BigListRyRy/harbourlivingapi/db/sqlc"
@@ -16,23 +14,27 @@ import (
 	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
-//Server defines our store and router field
-type Server struct {
-	store      *db.Store
-	tokenMaker token.Maker
-	router     *gin.Engine
+//HTTPServer defines our store and router field
+type HTTPServer struct {
+	store        *db.Store
+	tokenService token.TokenService
+	router       *gin.Engine
+	config       util.Config
 }
 
-//NewServer creates a server instance
-func NewServer(store *db.Store, config util.Config) (*Server, error) {
+type HttpServerOpts struct {
+	Store        *db.Store
+	Config       util.Config
+	TokenService token.TokenService
+}
 
-	tokenMaker, err := token.NewJWTMaker(config.TokenSymmetricKey)
-	if err != nil {
-		return nil, fmt.Errorf("cannot create token maker: %w", err)
-	}
-	server := &Server{
-		store:      store,
-		tokenMaker: tokenMaker,
+//NewHTTPServer creates a server instance
+func NewHTTPServer(opts HttpServerOpts) (*HTTPServer, error) {
+
+	server := &HTTPServer{
+		config:       opts.Config,
+		store:        opts.Store,
+		tokenService: opts.TokenService,
 	}
 	router := gin.Default()
 	router.POST("/api/v1/users", server.CreateUser)
@@ -48,6 +50,7 @@ func NewServer(store *db.Store, config util.Config) (*Server, error) {
 	router.POST("/api/v1/venues", server.CreateVenue)
 	router.GET("/api/v1/venues", server.ListVenues)
 	router.GET("/api/v1/venues/:id", server.GetVenue)
+
 	//server.router = router
 	router.GET("/swagger/*any", ginSwagger.DisablingWrapHandler(swaggerFiles.Handler, "NAME_OF_ENV_VARIABLE"))
 
@@ -62,7 +65,7 @@ func errorResponse(err error) gin.H {
 }
 
 //============ Start ================//
-func (s *Server) Start(address string) error {
+func (s *HTTPServer) Start(address string) error {
 	return s.router.Run(address)
 }
 

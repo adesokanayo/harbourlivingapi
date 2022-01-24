@@ -15,6 +15,7 @@ type Config struct {
 	AccessTokenDuration time.Duration `mapstructure:"ACCESS_TOKEN_DURATION"`
 	SibAPIKey           string        `mapstructure:"SIB_API_KEY"`
 	ENVIRONMENT         string        `mapstructure:"ENV"`
+	EmailURL            string        `mapstructure:"EMAIL_URL"`
 }
 
 const (

@@ -10,14 +10,14 @@ import (
 	"github.com/BigListRyRy/harbourlivingapi/util"
 )
 
-var tokenMaker token.Maker
+var tokenMaker token.TokenService
 
 func init() {
 	config, err := util.LoadConfig(".")
 	if err != nil {
 		log.Fatal("cannot find config ", err)
 	}
-	tokenMaker, err = token.NewJWTMaker(config.TokenSymmetricKey)
+	tokenMaker, err = token.NewJWTService(config.TokenSymmetricKey)
 	if err != nil {
 		log.Fatalln("cannot create a token maker ", err)
 	}

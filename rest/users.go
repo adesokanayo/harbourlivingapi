@@ -1,4 +1,4 @@
-package api
+package rest
 
 import (
 	"database/sql"
@@ -79,7 +79,7 @@ func newLoginResponse(user db.User, token string) loginUserResponse {
 // @Produce  json
 // @Success 200 {object} userResponse
 // @Router /users/ [post]
-func (s *Server) CreateUser(ctx *gin.Context) {
+func (s *HTTPServer) CreateUser(ctx *gin.Context) {
 	var req CreateUserRequest
 	err := ctx.ShouldBindJSON(&req)
 	if err != nil {
@@ -121,7 +121,7 @@ func (s *Server) CreateUser(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, newUserResponse(user))
 }
 
-func (s *Server) ListUsers(ctx *gin.Context) {
+func (s *HTTPServer) ListUsers(ctx *gin.Context) {
 	users, err := s.store.GetAllUsers(ctx)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
@@ -137,7 +137,7 @@ func (s *Server) ListUsers(ctx *gin.Context) {
 // @Produce  json
 // @Success 200 {object} loginUserResponse
 // @Router /login/ [post]
-func (s *Server) Login(ctx *gin.Context) {
+func (s *HTTPServer) Login(ctx *gin.Context) {
 	var req loginUserRequest
 	err := ctx.ShouldBindJSON(&req)
 	if err != nil {
@@ -167,7 +167,7 @@ func (s *Server) Login(ctx *gin.Context) {
 		UserType: int(user.Usertype),
 	}
 
-	token, err := s.tokenMaker.CreateToken(userinfo, time.Minute)
+	token, err := s.tokenService.CreateToken(userinfo, time.Minute)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return
@@ -175,7 +175,7 @@ func (s *Server) Login(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, newLoginResponse(user, token))
 }
 
-func (s *Server) GetUser(ctx *gin.Context) {
+func (s *HTTPServer) GetUser(ctx *gin.Context) {
 	var req GetUserRequest
 	err := ctx.ShouldBindUri(&req)
 	if err != nil {

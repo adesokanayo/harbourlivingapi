@@ -1,4 +1,4 @@
-package api
+package rest
 
 import (
 	"database/sql"
@@ -39,7 +39,7 @@ type GetEventsRequest struct {
 	SubCategory int32 `form:"subcategory"`
 }
 
-func (s *Server) CreateEvent(ctx *gin.Context) {
+func (s *HTTPServer) CreateEvent(ctx *gin.Context) {
 	var req CreateEventRequest
 	err := ctx.ShouldBindJSON(&req)
 	if err != nil {
@@ -76,7 +76,7 @@ func (s *Server) CreateEvent(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, event)
 }
 
-func (s *Server) ListEvents(ctx *gin.Context) {
+func (s *HTTPServer) ListEvents(ctx *gin.Context) {
 	var req GetEventsRequest
 
 	err := ctx.ShouldBindQuery(&req)
@@ -100,7 +100,7 @@ func (s *Server) ListEvents(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, events)
 }
 
-func (s *Server) GetEvent(ctx *gin.Context) {
+func (s *HTTPServer) GetEvent(ctx *gin.Context) {
 
 	var req GetEventRequest
 	err := ctx.ShouldBindUri(&req)
