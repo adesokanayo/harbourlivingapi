@@ -1,8 +1,9 @@
 package util
 
 import (
-	"github.com/spf13/viper"
 	"time"
+
+	"github.com/spf13/viper"
 )
 
 // Config stores all configuration items
@@ -12,6 +13,8 @@ type Config struct {
 	Port                string        `mapstructure:"PORT"`
 	TokenSymmetricKey   string        `mapstructure:"TOKEN_SYMMETRIC_KEY"`
 	AccessTokenDuration time.Duration `mapstructure:"ACCESS_TOKEN_DURATION"`
+	SibAPIKey           string        `mapstructure:"SIB_API_KEY"`
+	ENVIRONMENT         string        `mapstructure:"ENV"`
 }
 
 const (
