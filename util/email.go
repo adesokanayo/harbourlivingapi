@@ -48,8 +48,9 @@ type To struct {
 	Name  string `json:"name"`
 }
 type Params struct {
-	FirstName string `json:"first_name"`
-	Lname     string `json:"last_name"`
+	FirstName      string `json:"first_name"`
+	Lname          string `json:"last_name"`
+	ActivationCode string `json:"activation_code"`
 }
 
 func (svc EmailService) SendEmail(ctx context.Context, opts OutgoingEmailOpts) bool {

@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	db "github.com/BigListRyRy/harbourlivingapi/db/sqlc"
+	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
 )
 
@@ -68,8 +69,16 @@ func (s *HTTPServer) GetVenue(ctx *gin.Context) {
 }
 
 func (s *HTTPServer) VerifyEmail(w http.ResponseWriter, r *http.Request) {
+	q := r.URL.Query().Get("query")
+
+	email, err := jwt.DecodeSegment(q)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+	}
+	fmt.Println(email)
 	w.WriteHeader(http.StatusOK)
 	fmt.Fprintf(w, "Hello!")
+
 	/*
 		var req GetVenueRequest
 		err := ctx.ShouldBindUri(&req)

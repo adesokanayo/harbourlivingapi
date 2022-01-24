@@ -6,6 +6,7 @@ package graphql
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"log"
 	"time"
 
@@ -162,6 +163,9 @@ func (r *mutationResolver) CreateUser(ctx context.Context, input NewUser) (*User
 		return nil, err
 	}
 
+	activation_code := util.RandomInt(10000000, 99999999)
+	fmt.Println(activation_code)
+
 	//Send Email
 	emailOpts := util.OutgoingEmailOpts{
 		Sender: util.Sender{
@@ -176,8 +180,9 @@ func (r *mutationResolver) CreateUser(ctx context.Context, input NewUser) (*User
 		},
 		TemplateID: int(RegistrationEmail),
 		Params: util.Params{
-			FirstName: user.FirstName,
-			Lname:     user.LastName,
+			FirstName:      user.FirstName,
+			Lname:          user.LastName,
+			ActivationCode: fmt.Sprintf("%v", activation_code),
 		},
 	}
 
