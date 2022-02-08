@@ -113,7 +113,7 @@ func (r *mutationResolver) CreateVenue(ctx context.Context, input NewVenue) (*Ve
 	}
 
 	if venue.BannerImage.Valid {
-		result.Address = &venue.BannerImage.String
+		result.BannerImage = &venue.BannerImage.String
 	}
 	if venue.Longitude.Valid {
 		result.Longitude = &venue.Longitude.Float64
@@ -1587,6 +1587,11 @@ func (r *mutationResolver) UpdateVenue(ctx context.Context, input UpdateVenue) (
 		arg.CityToUpdate = true
 	}
 
+		if input.Province != nil {
+		arg.Province = *input.Province
+		arg.ProvinceToUpdate = true
+	}
+
 	if input.CountryCode != nil {
 		arg.CountryCode = *input.CountryCode
 		arg.CountryToUpdate = true
@@ -2234,7 +2239,7 @@ func (r *queryResolver) GetAllVenues(ctx context.Context) ([]Venue, error) {
 			Address:     &tmp.Address.String,
 			City:        &tmp.City.String,
 			PostalCode:  &tmp.PostalCode.String,
-			Province:    &tmp.PostalCode.String,
+			Province:    &tmp.Province.String,
 			CountryCode: &tmp.CountryCode.String,
 			Longitude:   &tmp.Longitude.Float64,
 			Latitude:    &tmp.Latitude.Float64,
