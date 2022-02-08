@@ -991,15 +991,17 @@ func (r *queryResolver) GetAllEvents(ctx context.Context, input GetEvent) ([]Eve
 
 	// Get all the Sponsors for these events
 	for _, event := range events {
-		sponsors, err := r.Repo.GetSponsorByEvent(ctx, event.ID)
+		tmp:= event
+		sponsors, err := r.Repo.GetSponsorByEvent(ctx, tmp.ID)
 
 		if err != nil {
 			return nil, err
 		}
 
 		for _, v := range sponsors {
+			tmp := v
 			eventSponsors = append(eventSponsors, &Sponsor{
-				ID: v.ID})
+				ID: tmp.ID})
 		}
 
 		// fetch images
@@ -1008,11 +1010,12 @@ func (r *queryResolver) GetAllEvents(ctx context.Context, input GetEvent) ([]Eve
 			return nil, err
 		}
 		for _, i := range eventImages {
+			tmp := i
 			images = append(images, &Image{
-				ID:      i.ID,
-				EventID: i.EventID,
-				Name:    &i.Name.String,
-				URL:     i.Url,
+				ID:      tmp.ID,
+				EventID: tmp.EventID,
+				Name:    &tmp.Name.String,
+				URL:     tmp.Url,
 			})
 		}
 
@@ -1022,11 +1025,12 @@ func (r *queryResolver) GetAllEvents(ctx context.Context, input GetEvent) ([]Eve
 			return nil, err
 		}
 		for _, i := range eventVideos {
+			tmp := i
 			videos = append(videos, &Video{
-				ID:      i.ID,
-				EventID: i.EventID,
-				Name:    &i.Name.String,
-				URL:     i.Url,
+				ID:      tmp.ID,
+				EventID: tmp.EventID,
+				Name:    &tmp.Name.String,
+				URL:     tmp.Url,
 			})
 		}
 
@@ -1366,11 +1370,12 @@ func (q *queryResolver) GetCategories(ctx context.Context) ([]Category, error) {
 	}
 
 	for _, v := range categories {
+		tmp := v
 		result = append(result, Category{
-			v.ID,
-			v.Description,
-			v.Image.String,
-			int(v.Status),
+			tmp.ID,
+			tmp.Description,
+			tmp.Image.String,
+			int(tmp.Status),
 		})
 	}
 
@@ -1960,12 +1965,13 @@ func (r *queryResolver) GetAllPlans(ctx context.Context) ([]Plan, error) {
 	}
 
 	for _, plan := range allPlans {
+		tmp := plan
 		plans = append(plans, Plan{
-			ID:          plan.ID,
-			Name:        plan.Name,
-			Description: plan.Description,
-			Price:       plan.Price,
-			NoOfDays:    int(plan.NoOfDays),
+			ID:          tmp.ID,
+			Name:        tmp.Name,
+			Description: tmp.Description,
+			Price:       tmp.Price,
+			NoOfDays:    int(tmp.NoOfDays),
 		})
 	}
 	return plans, nil
@@ -1981,13 +1987,13 @@ func (r *queryResolver) GetAllPromotions(ctx context.Context) ([]Promotion, erro
 	}
 
 	for _, promotion := range AllPromotions {
-
+   tmp := promotion
 		promotions = append(promotions, Promotion{
-			ID:        promotion.ID,
-			UserID:    promotion.EventID,
-			EventID:   promotion.EventID,
-			StartDate: promotion.StartDate.String(),
-			EndDate:   promotion.EndDate.String(),
+			ID:        tmp.ID,
+			UserID:    tmp.EventID,
+			EventID:   tmp.EventID,
+			StartDate: tmp.StartDate.String(),
+			EndDate:   tmp.EndDate.String(),
 		})
 	}
 	return promotions, nil
@@ -2003,14 +2009,15 @@ func (r *queryResolver) GetAllNews(ctx context.Context) ([]News, error) {
 		return nil, err
 	}
 	for _, news := range dbNews {
+		tmp := news
 		allNews = append(allNews, News{
-			ID:           news.ID,
-			Title:        news.Title,
-			Description:  news.Description,
-			FeatureImage: *&news.FeatureImage.String,
-			Body:         news.Body,
-			PublishDate:  news.PublishDate.String(),
-			Tags:         &news.Tags.String,
+			ID:           tmp.ID,
+			Title:        tmp.Title,
+			Description:  tmp.Description,
+			FeatureImage: *&tmp.FeatureImage.String,
+			Body:         tmp.Body,
+			PublishDate:  tmp.PublishDate.String(),
+			Tags:         &tmp.Tags.String,
 		})
 	}
 	return allNews, nil
@@ -2210,31 +2217,34 @@ func (r *mutationResolver) DeleteDayPlan(ctx context.Context, input int32) (bool
 
 func (r *queryResolver) GetAllVenues(ctx context.Context) ([]Venue, error) {
 
-	var venues []Venue
+	var result []Venue
+
 	allVenues, err := r.Repo.GetAllVenues(ctx)
 
 	if err != nil {
 		return nil, err
 	}
 
-	for _, venue := range allVenues {
-		venues = append(venues, Venue{
-			ID:          venue.ID,
-			Name:        venue.Name,
-			Address:     &venue.Address.String,
-			City:        &venue.City.String,
-			PostalCode:  &venue.PostalCode.String,
-			Province:    &venue.PostalCode.String,
-			CountryCode: &venue.CountryCode.String,
-			Longitude:   &venue.Longitude.Float64,
-			Latitude:    &venue.Latitude.Float64,
-			BannerImage: &venue.BannerImage.String,
-			VenueOwner:  int(venue.VenueOwner),
-			Rating:      &venue.Rating.Float64,
-			Status:      ConvertDbToStatusOptions(venue.Status),
+	for _, v := range allVenues {
+
+		tmp := v
+		result = append(result, Venue{
+			ID:          tmp.ID,
+			Name:        tmp.Name,
+			Address:     &tmp.Address.String,
+			City:        &tmp.City.String,
+			PostalCode:  &tmp.PostalCode.String,
+			Province:    &tmp.PostalCode.String,
+			CountryCode: &tmp.CountryCode.String,
+			Longitude:   &tmp.Longitude.Float64,
+			Latitude:    &tmp.Latitude.Float64,
+			BannerImage: &tmp.BannerImage.String,
+			VenueOwner:  int(tmp.VenueOwner),
+			Rating:      &tmp.Rating.Float64,
+			Status:      ConvertDbToStatusOptions(tmp.Status),
 		})
 	}
-	return venues, nil
+	return result, nil
 
 }
 

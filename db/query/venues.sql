@@ -21,7 +21,7 @@ WHERE id = $1 LIMIT 1;
 
 -- name: GetAllVenues :many
 SELECT * FROM venues
-ORDER  by id;
+ORDER  by id desc;
 
 -- name: DeleteVenue :exec
 DELETE FROM venues

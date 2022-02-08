@@ -129,7 +129,7 @@ func (q *Queries) DeleteVenue(ctx context.Context, id int32) error {
 
 const getAllVenues = `-- name: GetAllVenues :many
 SELECT id, name, address, postal_code, city, province, country_code, venue_owner, banner_image, rating, longitude, latitude, status, created_at FROM venues
-ORDER  by id
+ORDER  by id desc
 `
 
 func (q *Queries) GetAllVenues(ctx context.Context) ([]Venue, error) {
