@@ -74,13 +74,18 @@ type EventView struct {
 	UserID  int   `json:"user_id"`
 }
 
-type GetEvent struct {
-	Category   *int `json:"category"`
-	PageNumber int  `json:"pageNumber"`
-	Limit      int  `json:"limit"`
+type GetEvents struct {
+	Category      *int    `json:"category"`
+	Title         *string `json:"title"`
+	StartDateAsc  *bool   `json:"startDateAsc"`
+	StartDateDesc *bool   `json:"startDateDesc"`
+	EndDateAsc    *bool   `json:"endDateAsc"`
+	EndDateDesc   *bool   `json:"endDateDesc"`
+	PageNumber    int     `json:"pageNumber"`
+	Limit         int     `json:"limit"`
 }
 
-type GetEventByLocation struct {
+type GetEventsByLocation struct {
 	Latitude  float64 `json:"latitude"`
 	Longitude float64 `json:"longitude"`
 	Miles     int     `json:"miles"`

@@ -164,10 +164,16 @@ input NewVenue {
         status :StatusOptions
 }
 
-input GetEvent{
+input GetEvents{
         category: Int
+        title: String
+        startDateAsc: Boolean
+        startDateDesc: Boolean
+        endDateAsc: Boolean
+        endDateDesc: Boolean
         pageNumber: Int!
         limit: Int!
+
 }
 
 input GetVenue{
@@ -175,7 +181,7 @@ input GetVenue{
         limit: Int!
 }
 
-input GetEventByLocation{
+input GetEventsByLocation{
         latitude: Float!
         longitude: Float!,
         miles: Int!
@@ -566,9 +572,9 @@ type Query {
         getEvent(input: ID!): Event 
         getVenue(input: ID!): Venue
         getUsers : [User!]
-        getAllEvents(input: GetEvent!): [Event!]
+        getAllEvents(input: GetEvents!): [Event!]
         getAllVenues: [Venue!]
-        getEventsByLocation(input: GetEventByLocation!): [Event!]
+        getEventsByLocation(input: GetEventsByLocation!): [Event!]
         getCategory( input: ID!): Category!
         getCategories: [Category!]
         getAllNews: [News!]

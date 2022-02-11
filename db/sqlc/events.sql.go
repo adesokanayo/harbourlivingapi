@@ -175,22 +175,51 @@ func (q *Queries) GetEvent(ctx context.Context, id int32) (Event, error) {
 }
 
 const getEvents = `-- name: GetEvents :many
-SELECT id, title, description, banner_image, start_date, end_date, venue, type, user_id, category, ticket_id, recurring, status, created_at FROM events e
-WHERE e.status = $1 AND
- e.end_date >= CURRENT_DATE
-ORDER BY e.id desc
-LIMIT $2
-OFFSET $3 ROWS
+SELECT id, title, description, banner_image, start_date, end_date, venue, type, user_id, category, ticket_id, recurring, status, created_at FROM events
+WHERE status = $1 AND
+ end_date >= CURRENT_DATE
+  AND (CASE WHEN $2::bool THEN category = $3 ELSE TRUE END)
+  AND (CASE WHEN $4::bool THEN title ILIKE $5 ELSE TRUE END)
+ORDER BY 
+  CASE WHEN $6::bool THEN start_date END asc,
+  CASE WHEN $7::bool THEN start_date END desc,
+  CASE WHEN $8::bool THEN end_date END asc,
+  CASE WHEN $9::bool THEN end_date END desc,
+  CASE WHEN $10::bool THEN id END desc
+LIMIT $12
+OFFSET $11 ROWS
 `
 
 type GetEventsParams struct {
-	Status int32 `json:"status"`
-	Limit  int32 `json:"limit"`
-	Offset int32 `json:"offset"`
+	Status         int32  `json:"status"`
+	CategoryFilter bool   `json:"categoryFilter"`
+	Category       int32  `json:"category"`
+	TitleFilter    bool   `json:"titleFilter"`
+	Title          string `json:"title"`
+	StartDateAsc   bool   `json:"startDateAsc"`
+	StartDateDesc  bool   `json:"startDateDesc"`
+	EndDateAsc     bool   `json:"endDateAsc"`
+	EndDateDesc    bool   `json:"endDateDesc"`
+	DefaultOrder   bool   `json:"defaultOrder"`
+	Offset         int32  `json:"offset"`
+	Limit          int32  `json:"limit"`
 }
 
 func (q *Queries) GetEvents(ctx context.Context, arg GetEventsParams) ([]Event, error) {
-	rows, err := q.db.QueryContext(ctx, getEvents, arg.Status, arg.Limit, arg.Offset)
+	rows, err := q.db.QueryContext(ctx, getEvents,
+		arg.Status,
+		arg.CategoryFilter,
+		arg.Category,
+		arg.TitleFilter,
+		arg.Title,
+		arg.StartDateAsc,
+		arg.StartDateDesc,
+		arg.EndDateAsc,
+		arg.EndDateDesc,
+		arg.DefaultOrder,
+		arg.Offset,
+		arg.Limit,
+	)
 	if err != nil {
 		return nil, err
 	}

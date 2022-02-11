@@ -969,7 +969,7 @@ func (r *queryResolver) GetEvent(ctx context.Context, input int32) (*Event, erro
 	}, nil
 }
 
-func (r *queryResolver) GetAllEvents(ctx context.Context, input GetEvent) ([]Event, error) {
+func (r *queryResolver) GetAllEvents(ctx context.Context, input GetEvents) ([]Event, error) {
 
 	var result []Event
 	var images []*Image
@@ -984,6 +984,37 @@ func (r *queryResolver) GetAllEvents(ctx context.Context, input GetEvent) ([]Eve
 		Offset: int32((input.PageNumber * input.Limit) - input.Limit),
 	}
 
+	if input.Title != nil {
+		s := "%" + *input.Title + "%"
+		arg.TitleFilter = true
+		arg.Title = s
+	}
+
+	if input.Category != nil {
+		arg.CategoryFilter = true
+		arg.Category = int32(*input.Category)
+	}
+
+	if input.EndDateAsc == nil && input.EndDateDesc == nil && input.StartDateAsc == nil && input.StartDateDesc == nil {
+		arg.DefaultOrder = true
+	} else {
+		if input.EndDateAsc != nil {
+			arg.EndDateAsc = true
+		}
+
+		if input.StartDateAsc != nil {
+			arg.StartDateAsc = true
+		}
+
+		if input.StartDateDesc != nil {
+			arg.StartDateDesc = true
+		}
+
+		if input.EndDateDesc != nil {
+			arg.EndDateDesc = true
+		}
+	}
+
 	events, err := r.Repo.GetEvents(ctx, arg)
 	if err != nil {
 		return nil, err
@@ -991,7 +1022,7 @@ func (r *queryResolver) GetAllEvents(ctx context.Context, input GetEvent) ([]Eve
 
 	// Get all the Sponsors for these events
 	for _, event := range events {
-		tmp:= event
+		tmp := event
 		sponsors, err := r.Repo.GetSponsorByEvent(ctx, tmp.ID)
 
 		if err != nil {
@@ -1083,7 +1114,7 @@ func (r *queryResolver) GetAllEvents(ctx context.Context, input GetEvent) ([]Eve
 	return result, nil
 }
 
-func (r *queryResolver) GetEventsByLocation(ctx context.Context, input GetEventByLocation) ([]Event, error) {
+func (r *queryResolver) GetEventsByLocation(ctx context.Context, input GetEventsByLocation) ([]Event, error) {
 
 	var result []Event
 	var eventSponsors []*Sponsor
@@ -1587,7 +1618,7 @@ func (r *mutationResolver) UpdateVenue(ctx context.Context, input UpdateVenue) (
 		arg.CityToUpdate = true
 	}
 
-		if input.Province != nil {
+	if input.Province != nil {
 		arg.Province = *input.Province
 		arg.ProvinceToUpdate = true
 	}
@@ -1992,7 +2023,7 @@ func (r *queryResolver) GetAllPromotions(ctx context.Context) ([]Promotion, erro
 	}
 
 	for _, promotion := range AllPromotions {
-   tmp := promotion
+		tmp := promotion
 		promotions = append(promotions, Promotion{
 			ID:        tmp.ID,
 			UserID:    tmp.EventID,

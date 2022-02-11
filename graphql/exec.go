@@ -198,7 +198,7 @@ type ComplexityRoot struct {
 	}
 
 	Query struct {
-		GetAllEvents        func(childComplexity int, input GetEvent) int
+		GetAllEvents        func(childComplexity int, input GetEvents) int
 		GetAllNews          func(childComplexity int) int
 		GetAllPlans         func(childComplexity int) int
 		GetAllPromotions    func(childComplexity int) int
@@ -206,7 +206,7 @@ type ComplexityRoot struct {
 		GetCategories       func(childComplexity int) int
 		GetCategory         func(childComplexity int, input int32) int
 		GetEvent            func(childComplexity int, input int32) int
-		GetEventsByLocation func(childComplexity int, input GetEventByLocation) int
+		GetEventsByLocation func(childComplexity int, input GetEventsByLocation) int
 		GetNews             func(childComplexity int, input int32) int
 		GetPlan             func(childComplexity int, input int32) int
 		GetPromotion        func(childComplexity int, input int32) int
@@ -343,9 +343,9 @@ type QueryResolver interface {
 	GetEvent(ctx context.Context, input int32) (*Event, error)
 	GetVenue(ctx context.Context, input int32) (*Venue, error)
 	GetUsers(ctx context.Context) ([]User, error)
-	GetAllEvents(ctx context.Context, input GetEvent) ([]Event, error)
+	GetAllEvents(ctx context.Context, input GetEvents) ([]Event, error)
 	GetAllVenues(ctx context.Context) ([]Venue, error)
-	GetEventsByLocation(ctx context.Context, input GetEventByLocation) ([]Event, error)
+	GetEventsByLocation(ctx context.Context, input GetEventsByLocation) ([]Event, error)
 	GetCategory(ctx context.Context, input int32) (*Category, error)
 	GetCategories(ctx context.Context) ([]Category, error)
 	GetAllNews(ctx context.Context) ([]News, error)
@@ -1340,7 +1340,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.GetAllEvents(childComplexity, args["input"].(GetEvent)), true
+		return e.complexity.Query.GetAllEvents(childComplexity, args["input"].(GetEvents)), true
 
 	case "Query.getAllNews":
 		if e.complexity.Query.GetAllNews == nil {
@@ -1411,7 +1411,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.GetEventsByLocation(childComplexity, args["input"].(GetEventByLocation)), true
+		return e.complexity.Query.GetEventsByLocation(childComplexity, args["input"].(GetEventsByLocation)), true
 
 	case "Query.getNews":
 		if e.complexity.Query.GetNews == nil {
@@ -2095,10 +2095,16 @@ input NewVenue {
         status :StatusOptions
 }
 
-input GetEvent{
+input GetEvents{
         category: Int
+        title: String
+        startDateAsc: Boolean
+        startDateDesc: Boolean
+        endDateAsc: Boolean
+        endDateDesc: Boolean
         pageNumber: Int!
         limit: Int!
+
 }
 
 input GetVenue{
@@ -2106,7 +2112,7 @@ input GetVenue{
         limit: Int!
 }
 
-input GetEventByLocation{
+input GetEventsByLocation{
         latitude: Float!
         longitude: Float!,
         miles: Int!
@@ -2497,9 +2503,9 @@ type Query {
         getEvent(input: ID!): Event 
         getVenue(input: ID!): Venue
         getUsers : [User!]
-        getAllEvents(input: GetEvent!): [Event!]
+        getAllEvents(input: GetEvents!): [Event!]
         getAllVenues: [Venue!]
-        getEventsByLocation(input: GetEventByLocation!): [Event!]
+        getEventsByLocation(input: GetEventsByLocation!): [Event!]
         getCategory( input: ID!): Category!
         getCategories: [Category!]
         getAllNews: [News!]
@@ -3060,10 +3066,10 @@ func (ec *executionContext) field_Query___type_args(ctx context.Context, rawArgs
 func (ec *executionContext) field_Query_getAllEvents_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 GetEvent
+	var arg0 GetEvents
 	if tmp, ok := rawArgs["input"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-		arg0, err = ec.unmarshalNGetEvent2githubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgraphqlᚐGetEvent(ctx, tmp)
+		arg0, err = ec.unmarshalNGetEvents2githubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgraphqlᚐGetEvents(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -3105,10 +3111,10 @@ func (ec *executionContext) field_Query_getEvent_args(ctx context.Context, rawAr
 func (ec *executionContext) field_Query_getEventsByLocation_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 GetEventByLocation
+	var arg0 GetEventsByLocation
 	if tmp, ok := rawArgs["input"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-		arg0, err = ec.unmarshalNGetEventByLocation2githubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgraphqlᚐGetEventByLocation(ctx, tmp)
+		arg0, err = ec.unmarshalNGetEventsByLocation2githubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgraphqlᚐGetEventsByLocation(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -7506,7 +7512,7 @@ func (ec *executionContext) _Query_getAllEvents(ctx context.Context, field graph
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().GetAllEvents(rctx, args["input"].(GetEvent))
+		return ec.resolvers.Query().GetAllEvents(rctx, args["input"].(GetEvents))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -7577,7 +7583,7 @@ func (ec *executionContext) _Query_getEventsByLocation(ctx context.Context, fiel
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().GetEventsByLocation(rctx, args["input"].(GetEventByLocation))
+		return ec.resolvers.Query().GetEventsByLocation(rctx, args["input"].(GetEventsByLocation))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -10916,8 +10922,8 @@ func (ec *executionContext) _metadata_total_favorite(ctx context.Context, field 
 
 // region    **************************** input.gotpl *****************************
 
-func (ec *executionContext) unmarshalInputGetEvent(ctx context.Context, obj interface{}) (GetEvent, error) {
-	var it GetEvent
+func (ec *executionContext) unmarshalInputGetEvents(ctx context.Context, obj interface{}) (GetEvents, error) {
+	var it GetEvents
 	var asMap = obj.(map[string]interface{})
 
 	for k, v := range asMap {
@@ -10927,6 +10933,46 @@ func (ec *executionContext) unmarshalInputGetEvent(ctx context.Context, obj inte
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("category"))
 			it.Category, err = ec.unmarshalOInt2ᚖint(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "title":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("title"))
+			it.Title, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "startDateAsc":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("startDateAsc"))
+			it.StartDateAsc, err = ec.unmarshalOBoolean2ᚖbool(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "startDateDesc":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("startDateDesc"))
+			it.StartDateDesc, err = ec.unmarshalOBoolean2ᚖbool(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "endDateAsc":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("endDateAsc"))
+			it.EndDateAsc, err = ec.unmarshalOBoolean2ᚖbool(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "endDateDesc":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("endDateDesc"))
+			it.EndDateDesc, err = ec.unmarshalOBoolean2ᚖbool(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -10952,8 +10998,8 @@ func (ec *executionContext) unmarshalInputGetEvent(ctx context.Context, obj inte
 	return it, nil
 }
 
-func (ec *executionContext) unmarshalInputGetEventByLocation(ctx context.Context, obj interface{}) (GetEventByLocation, error) {
-	var it GetEventByLocation
+func (ec *executionContext) unmarshalInputGetEventsByLocation(ctx context.Context, obj interface{}) (GetEventsByLocation, error) {
+	var it GetEventsByLocation
 	var asMap = obj.(map[string]interface{})
 
 	for k, v := range asMap {
@@ -14645,13 +14691,13 @@ func (ec *executionContext) marshalNFloat2float64(ctx context.Context, sel ast.S
 	return res
 }
 
-func (ec *executionContext) unmarshalNGetEvent2githubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgraphqlᚐGetEvent(ctx context.Context, v interface{}) (GetEvent, error) {
-	res, err := ec.unmarshalInputGetEvent(ctx, v)
+func (ec *executionContext) unmarshalNGetEvents2githubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgraphqlᚐGetEvents(ctx context.Context, v interface{}) (GetEvents, error) {
+	res, err := ec.unmarshalInputGetEvents(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) unmarshalNGetEventByLocation2githubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgraphqlᚐGetEventByLocation(ctx context.Context, v interface{}) (GetEventByLocation, error) {
-	res, err := ec.unmarshalInputGetEventByLocation(ctx, v)
+func (ec *executionContext) unmarshalNGetEventsByLocation2githubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgraphqlᚐGetEventsByLocation(ctx context.Context, v interface{}) (GetEventsByLocation, error) {
+	res, err := ec.unmarshalInputGetEventsByLocation(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 

@@ -2,13 +2,21 @@
 SELECT * FROM events
 WHERE id = $1 LIMIT 1;
 
+
 -- name: GetEvents :many
-SELECT * FROM events e
-WHERE e.status = $1 AND
- e.end_date >= CURRENT_DATE
-ORDER BY e.id desc
-LIMIT $2
-OFFSET $3 ROWS;
+SELECT * FROM events
+WHERE status = sqlc.arg('status') AND
+ end_date >= CURRENT_DATE
+  AND (CASE WHEN sqlc.arg('categoryFilter')::bool THEN category = sqlc.arg('category') ELSE TRUE END)
+  AND (CASE WHEN sqlc.arg('titleFilter')::bool THEN title ILIKE sqlc.arg('title') ELSE TRUE END)
+ORDER BY 
+  CASE WHEN sqlc.arg('startDateAsc')::bool THEN start_date END asc,
+  CASE WHEN sqlc.arg('startDateDesc')::bool THEN start_date END desc,
+  CASE WHEN sqlc.arg('endDateAsc')::bool THEN end_date END asc,
+  CASE WHEN sqlc.arg('endDateDesc')::bool THEN end_date END desc,
+  CASE WHEN sqlc.arg('defaultOrder')::bool THEN id END desc
+LIMIT sqlc.arg('limit')
+OFFSET sqlc.arg('offset') ROWS;
 
 -- name: GetEventsFilter :many
 SELECT * FROM events e
