@@ -2098,6 +2098,8 @@ input NewVenue {
 input GetEvents{
         category: Int
         title: String
+        startDate: DateTime
+        endDate: DateTime
         startDateAsc: Boolean
         startDateDesc: Boolean
         endDateAsc: Boolean
@@ -10941,6 +10943,22 @@ func (ec *executionContext) unmarshalInputGetEvents(ctx context.Context, obj int
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("title"))
 			it.Title, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "startDate":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("startDate"))
+			it.StartDate, err = ec.unmarshalODateTime2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "endDate":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("endDate"))
+			it.EndDate, err = ec.unmarshalODateTime2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}

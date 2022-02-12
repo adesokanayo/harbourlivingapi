@@ -176,33 +176,37 @@ func (q *Queries) GetEvent(ctx context.Context, id int32) (Event, error) {
 
 const getEvents = `-- name: GetEvents :many
 SELECT id, title, description, banner_image, start_date, end_date, venue, type, user_id, category, ticket_id, recurring, status, created_at FROM events
-WHERE status = $1 AND
- end_date >= CURRENT_DATE
+WHERE status = $1
+AND end_date >= CURRENT_DATE
   AND (CASE WHEN $2::bool THEN category = $3 ELSE TRUE END)
   AND (CASE WHEN $4::bool THEN title ILIKE $5 ELSE TRUE END)
+  AND (CASE WHEN $6::bool THEN start_date >= $7 AND end_date <= $8 ELSE TRUE END)
 ORDER BY 
-  CASE WHEN $6::bool THEN start_date END asc,
-  CASE WHEN $7::bool THEN start_date END desc,
-  CASE WHEN $8::bool THEN end_date END asc,
-  CASE WHEN $9::bool THEN end_date END desc,
-  CASE WHEN $10::bool THEN id END desc
-LIMIT $12
-OFFSET $11 ROWS
+  CASE WHEN $9::bool THEN start_date END asc,
+  CASE WHEN $10::bool THEN start_date END desc,
+  CASE WHEN $11::bool THEN end_date END asc,
+  CASE WHEN $12::bool THEN end_date END desc,
+  CASE WHEN $13::bool THEN id END desc
+LIMIT $15
+OFFSET $14 ROWS
 `
 
 type GetEventsParams struct {
-	Status         int32  `json:"status"`
-	CategoryFilter bool   `json:"categoryFilter"`
-	Category       int32  `json:"category"`
-	TitleFilter    bool   `json:"titleFilter"`
-	Title          string `json:"title"`
-	StartDateAsc   bool   `json:"startDateAsc"`
-	StartDateDesc  bool   `json:"startDateDesc"`
-	EndDateAsc     bool   `json:"endDateAsc"`
-	EndDateDesc    bool   `json:"endDateDesc"`
-	DefaultOrder   bool   `json:"defaultOrder"`
-	Offset         int32  `json:"offset"`
-	Limit          int32  `json:"limit"`
+	Status         int32     `json:"status"`
+	CategoryFilter bool      `json:"categoryFilter"`
+	Category       int32     `json:"category"`
+	TitleFilter    bool      `json:"titleFilter"`
+	Title          string    `json:"title"`
+	DateFilter     bool      `json:"dateFilter"`
+	StartDate      time.Time `json:"start_date"`
+	EndDate        time.Time `json:"end_date"`
+	StartDateAsc   bool      `json:"startDateAsc"`
+	StartDateDesc  bool      `json:"startDateDesc"`
+	EndDateAsc     bool      `json:"endDateAsc"`
+	EndDateDesc    bool      `json:"endDateDesc"`
+	DefaultOrder   bool      `json:"defaultOrder"`
+	Offset         int32     `json:"offset"`
+	Limit          int32     `json:"limit"`
 }
 
 func (q *Queries) GetEvents(ctx context.Context, arg GetEventsParams) ([]Event, error) {
@@ -212,6 +216,9 @@ func (q *Queries) GetEvents(ctx context.Context, arg GetEventsParams) ([]Event, 
 		arg.Category,
 		arg.TitleFilter,
 		arg.Title,
+		arg.DateFilter,
+		arg.StartDate,
+		arg.EndDate,
 		arg.StartDateAsc,
 		arg.StartDateDesc,
 		arg.EndDateAsc,

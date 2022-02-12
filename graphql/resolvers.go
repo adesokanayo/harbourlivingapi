@@ -995,6 +995,22 @@ func (r *queryResolver) GetAllEvents(ctx context.Context, input GetEvents) ([]Ev
 		arg.Category = int32(*input.Category)
 	}
 
+	if input.StartDate != nil && input.EndDate != nil {
+		startDate, err := util.ProcessDateTime("rfc", *input.StartDate)
+		if err != nil {
+			return nil, err
+		}
+		endDate, err := util.ProcessDateTime("rfc", *input.EndDate)
+		if err != nil {
+			return nil, err
+		}
+
+		arg.DateFilter = true
+		arg.StartDate = *startDate
+		arg.EndDate = *endDate
+
+	}
+
 	if input.EndDateAsc == nil && input.EndDateDesc == nil && input.StartDateAsc == nil && input.StartDateDesc == nil {
 		arg.DefaultOrder = true
 	} else {
@@ -1108,6 +1124,7 @@ func (r *queryResolver) GetAllEvents(ctx context.Context, input GetEvents) ([]Ev
 			Images:      images,
 			Videos:      videos,
 			Promoted:    promoted,
+			Status:      ConvertDbToStatusOptions(event.Status),
 		})
 	}
 

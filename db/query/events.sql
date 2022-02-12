@@ -5,10 +5,11 @@ WHERE id = $1 LIMIT 1;
 
 -- name: GetEvents :many
 SELECT * FROM events
-WHERE status = sqlc.arg('status') AND
- end_date >= CURRENT_DATE
+WHERE status = sqlc.arg('status')
+AND end_date >= CURRENT_DATE
   AND (CASE WHEN sqlc.arg('categoryFilter')::bool THEN category = sqlc.arg('category') ELSE TRUE END)
   AND (CASE WHEN sqlc.arg('titleFilter')::bool THEN title ILIKE sqlc.arg('title') ELSE TRUE END)
+  AND (CASE WHEN sqlc.arg('dateFilter')::bool THEN start_date >= sqlc.arg('start_date') AND end_date <= sqlc.arg('end_date') ELSE TRUE END)
 ORDER BY 
   CASE WHEN sqlc.arg('startDateAsc')::bool THEN start_date END asc,
   CASE WHEN sqlc.arg('startDateDesc')::bool THEN start_date END desc,

@@ -19,8 +19,8 @@ type Config struct {
 }
 
 const (
-	LayoutISODOB = "2006-01-02"
-	Layout3      = "2015-09-15T14:00:12-00:00"
+	LayoutISODOB   = "2006-01-02"
+	LayoutDateTime = "2015-09-15T14:00:12-00:00"
 )
 
 func LoadConfig(path string) (config *Config, err error) {

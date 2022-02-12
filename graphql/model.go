@@ -77,6 +77,8 @@ type EventView struct {
 type GetEvents struct {
 	Category      *int    `json:"category"`
 	Title         *string `json:"title"`
+	StartDate     *string `json:"startDate"`
+	EndDate       *string `json:"endDate"`
 	StartDateAsc  *bool   `json:"startDateAsc"`
 	StartDateDesc *bool   `json:"startDateDesc"`
 	EndDateAsc    *bool   `json:"endDateAsc"`

@@ -167,6 +167,8 @@ input NewVenue {
 input GetEvents{
         category: Int
         title: String
+        startDate: DateTime
+        endDate: DateTime
         startDateAsc: Boolean
         startDateDesc: Boolean
         endDateAsc: Boolean
