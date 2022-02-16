@@ -984,6 +984,19 @@ func (r *queryResolver) GetAllEvents(ctx context.Context, input GetEvents) ([]Ev
 		Offset: int32((input.PageNumber * input.Limit) - input.Limit),
 	}
 
+	/*
+		if input.Longitude != nil && input.Latitude != nil && input.Miles != nil {
+			arg.LocationFilter = true
+			arg.Longitude = *input.Longitude
+			arg.Latitude = *input.Latitude
+			arg.Miles = sql.NullFloat64{
+				Valid:   true,
+				Float64: *input.Miles,
+			}
+			//arg.LocationAsc = true
+		}
+
+	*/
 	if input.Title != nil {
 		s := "%" + *input.Title + "%"
 		arg.TitleFilter = true
@@ -1029,6 +1042,7 @@ func (r *queryResolver) GetAllEvents(ctx context.Context, input GetEvents) ([]Ev
 		if input.EndDateDesc != nil {
 			arg.EndDateDesc = true
 		}
+
 	}
 
 	events, err := r.Repo.GetEvents(ctx, arg)
@@ -1140,6 +1154,9 @@ func (r *queryResolver) GetEventsByLocation(ctx context.Context, input GetEvents
 		Point:     input.Latitude,
 		Point_2:   input.Longitude,
 		Longitude: sql.NullFloat64{Valid: true, Float64: float64(input.Miles)},
+		Status:    int32(ConvertStatusOptionsToDb(StatusOptionsApproved)),
+		Limit:     int32(input.Limit),
+		Offset:    int32((input.PageNumber * input.Limit) - input.Limit),
 	}
 	events, err := r.Repo.GetEventsByLocation(ctx, arg)
 	if err != nil {
@@ -1149,19 +1166,21 @@ func (r *queryResolver) GetEventsByLocation(ctx context.Context, input GetEvents
 	// Get all the Sponsors for these events
 
 	for _, event := range events {
-		sponsors, err := r.Repo.GetSponsorByEvent(ctx, event.ID)
+		tmp := event
+		sponsors, err := r.Repo.GetSponsorByEvent(ctx, tmp.ID)
 
 		if err != nil {
 			return nil, err
 		}
 
 		for _, v := range sponsors {
+			t := v
 			eventSponsors = append(eventSponsors, &Sponsor{
-				ID: v.ID})
+				ID: t.ID})
 		}
 
 		//get venue info
-		venueinfo, err := r.Repo.GetVenue(ctx, event.Venue)
+		venueinfo, err := r.Repo.GetVenue(ctx, tmp.Venue)
 
 		venue := &Venue{
 			ID:          venueinfo.ID,
@@ -1180,15 +1199,16 @@ func (r *queryResolver) GetEventsByLocation(ctx context.Context, input GetEvents
 		}
 
 		result = append(result, Event{
-			ID:          event.ID,
-			Title:       event.Title,
-			Description: event.Description,
-			StartDate:   event.StartDate.String(),
-			EndDate:     event.EndDate.String(),
-			Category:    int(event.Category),
-			Type:        ConvertDbToEventTypeOptions(event.Type),
-			UserID:      event.UserID,
+			ID:          tmp.ID,
+			Title:       tmp.Title,
+			Description: tmp.Description,
+			StartDate:   tmp.StartDate.String(),
+			EndDate:     tmp.EndDate.String(),
+			Category:    int(tmp.Category),
+			Type:        ConvertDbToEventTypeOptions(tmp.Type),
+			UserID:      tmp.UserID,
 			Venue:       venue,
+			Status:      ConvertDbToStatusOptions(tmp.Status),
 			//BannerImage: *event.BannerImage,
 			Sponsors: eventSponsors,
 		})

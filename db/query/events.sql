@@ -19,6 +19,25 @@ ORDER BY
 LIMIT sqlc.arg('limit')
 OFFSET sqlc.arg('offset') ROWS;
 
+-- name: GetEventsNew :many
+SELECT e.*, point(sqlc.arg('longitude'),sqlc.arg('latitude')) <@>  (point(v.longitude, v.latitude)::point) as distance
+FROM venues v inner join events e  on e.venue = v.id
+WHERE e.status = sqlc.arg('status')
+AND e.end_date >= CURRENT_DATE
+AND (CASE WHEN sqlc.arg('categoryFilter')::bool THEN e.category = sqlc.arg('category') ELSE TRUE END)
+AND (CASE WHEN sqlc.arg('titleFilter')::bool THEN e.title ILIKE sqlc.arg('title') ELSE TRUE END)
+AND (CASE WHEN sqlc.arg('dateFilter')::bool THEN e.start_date >= sqlc.arg('start_date') AND e.end_date <= sqlc.arg('end_date') ELSE TRUE END)
+AND (CASE WHEN sqlc.arg('locationFilter')::bool THEN (point(sqlc.arg('longitude'), sqlc.arg('latitude')) <@> point(longitude,latitude)) < sqlc.arg('miles') ELSE TRUE END)
+ORDER BY
+  CASE WHEN sqlc.arg('startDateAsc')::bool THEN e.start_date END asc,
+  CASE WHEN sqlc.arg('startDateDesc')::bool THEN e.start_date END desc,
+  CASE WHEN sqlc.arg('endDateAsc')::bool THEN e.end_date END asc,
+  CASE WHEN sqlc.arg('endDateDesc')::bool THEN e.end_date END desc,
+  CASE WHEN sqlc.arg('locationAsc')::bool THEN e.id END desc,
+  CASE WHEN sqlc.arg('defaultOrder')::bool THEN e.id END desc
+LIMIT sqlc.arg('limit')
+OFFSET sqlc.arg('offset') ROWS;
+
 -- name: GetEventsFilter :many
 SELECT * FROM events e
 WHERE e.status = $1 AND
@@ -77,11 +96,14 @@ set status = $1
 where id = $2 RETURNING events.Id, events.status;
 
 -- name: GetEventsByLocation :many 
-SELECT *, point($1,$2) <@>  (point(v.longitude, v.latitude)::point) as distance
-FROM venues v, events e
+SELECT e.*, point($1,$2) <@>  (point(v.longitude, v.latitude)::point) as distance
+FROM venues v inner join events e  on e.venue = v.id
 WHERE (point($1,$2) <@> point(longitude, latitude)) < $3  
-ORDER BY distance desc;
-
+AND e.status = $4
+AND e.end_date >= CURRENT_DATE
+ORDER BY distance desc
+LIMIT $5
+OFFSET $6 ROWS;
 -- name: CreateFavoriteEvent :one
 INSERT INTO events_favorites (
     event_id,

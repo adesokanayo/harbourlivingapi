@@ -264,52 +264,52 @@ func (q *Queries) GetEvents(ctx context.Context, arg GetEventsParams) ([]Event, 
 }
 
 const getEventsByLocation = `-- name: GetEventsByLocation :many
-SELECT v.id, name, address, postal_code, city, province, country_code, venue_owner, v.banner_image, rating, longitude, latitude, v.status, v.created_at, e.id, title, description, e.banner_image, start_date, end_date, venue, type, user_id, category, ticket_id, recurring, e.status, e.created_at, point($1,$2) <@>  (point(v.longitude, v.latitude)::point) as distance
-FROM venues v, events e
+SELECT e.id, e.title, e.description, e.banner_image, e.start_date, e.end_date, e.venue, e.type, e.user_id, e.category, e.ticket_id, e.recurring, e.status, e.created_at, point($1,$2) <@>  (point(v.longitude, v.latitude)::point) as distance
+FROM venues v inner join events e  on e.venue = v.id
 WHERE (point($1,$2) <@> point(longitude, latitude)) < $3  
+AND e.status = $4
+AND e.end_date >= CURRENT_DATE
 ORDER BY distance desc
+LIMIT $5
+OFFSET $6 ROWS
 `
 
 type GetEventsByLocationParams struct {
 	Point     float64         `json:"point"`
 	Point_2   float64         `json:"point_2"`
 	Longitude sql.NullFloat64 `json:"longitude"`
+	Status    int32           `json:"status"`
+	Limit     int32           `json:"limit"`
+	Offset    int32           `json:"offset"`
 }
 
 type GetEventsByLocationRow struct {
-	ID            int32           `json:"id"`
-	Name          string          `json:"name"`
-	Address       sql.NullString  `json:"address"`
-	PostalCode    sql.NullString  `json:"postal_code"`
-	City          sql.NullString  `json:"city"`
-	Province      sql.NullString  `json:"province"`
-	CountryCode   sql.NullString  `json:"country_code"`
-	VenueOwner    int32           `json:"venue_owner"`
-	BannerImage   sql.NullString  `json:"banner_image"`
-	Rating        sql.NullFloat64 `json:"rating"`
-	Longitude     sql.NullFloat64 `json:"longitude"`
-	Latitude      sql.NullFloat64 `json:"latitude"`
-	Status        int32           `json:"status"`
-	CreatedAt     sql.NullTime    `json:"created_at"`
-	ID_2          int32           `json:"id_2"`
-	Title         string          `json:"title"`
-	Description   string          `json:"description"`
-	BannerImage_2 string          `json:"banner_image_2"`
-	StartDate     time.Time       `json:"start_date"`
-	EndDate       time.Time       `json:"end_date"`
-	Venue         int32           `json:"venue"`
-	Type          int32           `json:"type"`
-	UserID        int32           `json:"user_id"`
-	Category      int32           `json:"category"`
-	TicketID      sql.NullInt32   `json:"ticket_id"`
-	Recurring     sql.NullBool    `json:"recurring"`
-	Status_2      int32           `json:"status_2"`
-	CreatedAt_2   sql.NullTime    `json:"created_at_2"`
-	Distance      interface{}     `json:"distance"`
+	ID          int32         `json:"id"`
+	Title       string        `json:"title"`
+	Description string        `json:"description"`
+	BannerImage string        `json:"banner_image"`
+	StartDate   time.Time     `json:"start_date"`
+	EndDate     time.Time     `json:"end_date"`
+	Venue       int32         `json:"venue"`
+	Type        int32         `json:"type"`
+	UserID      int32         `json:"user_id"`
+	Category    int32         `json:"category"`
+	TicketID    sql.NullInt32 `json:"ticket_id"`
+	Recurring   sql.NullBool  `json:"recurring"`
+	Status      int32         `json:"status"`
+	CreatedAt   sql.NullTime  `json:"created_at"`
+	Distance    interface{}   `json:"distance"`
 }
 
 func (q *Queries) GetEventsByLocation(ctx context.Context, arg GetEventsByLocationParams) ([]GetEventsByLocationRow, error) {
-	rows, err := q.db.QueryContext(ctx, getEventsByLocation, arg.Point, arg.Point_2, arg.Longitude)
+	rows, err := q.db.QueryContext(ctx, getEventsByLocation,
+		arg.Point,
+		arg.Point_2,
+		arg.Longitude,
+		arg.Status,
+		arg.Limit,
+		arg.Offset,
+	)
 	if err != nil {
 		return nil, err
 	}
@@ -319,23 +319,9 @@ func (q *Queries) GetEventsByLocation(ctx context.Context, arg GetEventsByLocati
 		var i GetEventsByLocationRow
 		if err := rows.Scan(
 			&i.ID,
-			&i.Name,
-			&i.Address,
-			&i.PostalCode,
-			&i.City,
-			&i.Province,
-			&i.CountryCode,
-			&i.VenueOwner,
-			&i.BannerImage,
-			&i.Rating,
-			&i.Longitude,
-			&i.Latitude,
-			&i.Status,
-			&i.CreatedAt,
-			&i.ID_2,
 			&i.Title,
 			&i.Description,
-			&i.BannerImage_2,
+			&i.BannerImage,
 			&i.StartDate,
 			&i.EndDate,
 			&i.Venue,
@@ -344,8 +330,8 @@ func (q *Queries) GetEventsByLocation(ctx context.Context, arg GetEventsByLocati
 			&i.Category,
 			&i.TicketID,
 			&i.Recurring,
-			&i.Status_2,
-			&i.CreatedAt_2,
+			&i.Status,
+			&i.CreatedAt,
 			&i.Distance,
 		); err != nil {
 			return nil, err
@@ -407,6 +393,127 @@ func (q *Queries) GetEventsFilter(ctx context.Context, arg GetEventsFilterParams
 			&i.Recurring,
 			&i.Status,
 			&i.CreatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getEventsNew = `-- name: GetEventsNew :many
+SELECT e.id, e.title, e.description, e.banner_image, e.start_date, e.end_date, e.venue, e.type, e.user_id, e.category, e.ticket_id, e.recurring, e.status, e.created_at, point($1,$2) <@>  (point(v.longitude, v.latitude)::point) as distance
+FROM venues v inner join events e  on e.venue = v.id
+WHERE e.status = $3
+AND e.end_date >= CURRENT_DATE
+AND (CASE WHEN $4::bool THEN e.category = $5 ELSE TRUE END)
+AND (CASE WHEN $6::bool THEN e.title ILIKE $7 ELSE TRUE END)
+AND (CASE WHEN $8::bool THEN e.start_date >= $9 AND e.end_date <= $10 ELSE TRUE END)
+AND (CASE WHEN $11::bool THEN (point($1, $2) <@> point(longitude,latitude)) < $12 ELSE TRUE END)
+ORDER BY
+  CASE WHEN $13::bool THEN e.start_date END asc,
+  CASE WHEN $14::bool THEN e.start_date END desc,
+  CASE WHEN $15::bool THEN e.end_date END asc,
+  CASE WHEN $16::bool THEN e.end_date END desc,
+  CASE WHEN $17::bool THEN e.id END desc,
+  CASE WHEN $18::bool THEN e.id END desc
+LIMIT $20
+OFFSET $19 ROWS
+`
+
+type GetEventsNewParams struct {
+	Longitude      float64         `json:"longitude"`
+	Latitude       float64         `json:"latitude"`
+	Status         int32           `json:"status"`
+	CategoryFilter bool            `json:"categoryFilter"`
+	Category       int32           `json:"category"`
+	TitleFilter    bool            `json:"titleFilter"`
+	Title          string          `json:"title"`
+	DateFilter     bool            `json:"dateFilter"`
+	StartDate      time.Time       `json:"start_date"`
+	EndDate        time.Time       `json:"end_date"`
+	LocationFilter bool            `json:"locationFilter"`
+	Miles          sql.NullFloat64 `json:"miles"`
+	StartDateAsc   bool            `json:"startDateAsc"`
+	StartDateDesc  bool            `json:"startDateDesc"`
+	EndDateAsc     bool            `json:"endDateAsc"`
+	EndDateDesc    bool            `json:"endDateDesc"`
+	LocationAsc    bool            `json:"locationAsc"`
+	DefaultOrder   bool            `json:"defaultOrder"`
+	Offset         int32           `json:"offset"`
+	Limit          int32           `json:"limit"`
+}
+
+type GetEventsNewRow struct {
+	ID          int32         `json:"id"`
+	Title       string        `json:"title"`
+	Description string        `json:"description"`
+	BannerImage string        `json:"banner_image"`
+	StartDate   time.Time     `json:"start_date"`
+	EndDate     time.Time     `json:"end_date"`
+	Venue       int32         `json:"venue"`
+	Type        int32         `json:"type"`
+	UserID      int32         `json:"user_id"`
+	Category    int32         `json:"category"`
+	TicketID    sql.NullInt32 `json:"ticket_id"`
+	Recurring   sql.NullBool  `json:"recurring"`
+	Status      int32         `json:"status"`
+	CreatedAt   sql.NullTime  `json:"created_at"`
+	Distance    interface{}   `json:"distance"`
+}
+
+func (q *Queries) GetEventsNew(ctx context.Context, arg GetEventsNewParams) ([]GetEventsNewRow, error) {
+	rows, err := q.db.QueryContext(ctx, getEventsNew,
+		arg.Longitude,
+		arg.Latitude,
+		arg.Status,
+		arg.CategoryFilter,
+		arg.Category,
+		arg.TitleFilter,
+		arg.Title,
+		arg.DateFilter,
+		arg.StartDate,
+		arg.EndDate,
+		arg.LocationFilter,
+		arg.Miles,
+		arg.StartDateAsc,
+		arg.StartDateDesc,
+		arg.EndDateAsc,
+		arg.EndDateDesc,
+		arg.LocationAsc,
+		arg.DefaultOrder,
+		arg.Offset,
+		arg.Limit,
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []GetEventsNewRow{}
+	for rows.Next() {
+		var i GetEventsNewRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.Title,
+			&i.Description,
+			&i.BannerImage,
+			&i.StartDate,
+			&i.EndDate,
+			&i.Venue,
+			&i.Type,
+			&i.UserID,
+			&i.Category,
+			&i.TicketID,
+			&i.Recurring,
+			&i.Status,
+			&i.CreatedAt,
+			&i.Distance,
 		); err != nil {
 			return nil, err
 		}

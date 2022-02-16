@@ -37,3 +37,7 @@
 ### Create new migration 
  migrate create -ext sql -dir db/migration -seq rating
 
+###
+```     latitude: Float
+        longitude: Float
+        miles: Float  ```

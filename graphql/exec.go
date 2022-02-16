@@ -2118,6 +2118,8 @@ input GetEventsByLocation{
         latitude: Float!
         longitude: Float!,
         miles: Int!
+        pageNumber: Int!
+        limit: Int!
 }
 
 input NewEvent {
@@ -11043,6 +11045,22 @@ func (ec *executionContext) unmarshalInputGetEventsByLocation(ctx context.Contex
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("miles"))
 			it.Miles, err = ec.unmarshalNInt2int(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "pageNumber":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("pageNumber"))
+			it.PageNumber, err = ec.unmarshalNInt2int(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "limit":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("limit"))
+			it.Limit, err = ec.unmarshalNInt2int(ctx, v)
 			if err != nil {
 				return it, err
 			}

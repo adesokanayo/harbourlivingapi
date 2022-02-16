@@ -187,6 +187,8 @@ input GetEventsByLocation{
         latitude: Float!
         longitude: Float!,
         miles: Int!
+        pageNumber: Int!
+        limit: Int!
 }
 
 input NewEvent {

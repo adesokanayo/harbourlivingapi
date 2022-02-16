@@ -88,9 +88,11 @@ type GetEvents struct {
 }
 
 type GetEventsByLocation struct {
-	Latitude  float64 `json:"latitude"`
-	Longitude float64 `json:"longitude"`
-	Miles     int     `json:"miles"`
+	Latitude   float64 `json:"latitude"`
+	Longitude  float64 `json:"longitude"`
+	Miles      int     `json:"miles"`
+	PageNumber int     `json:"pageNumber"`
+	Limit      int     `json:"limit"`
 }
 
 type GetVenue struct {
