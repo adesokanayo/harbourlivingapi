@@ -54,6 +54,7 @@ type Event struct {
 	Videos      []*Video         `json:"videos"`
 	Meta        *Metadata        `json:"meta"`
 	Promoted    bool             `json:"promoted"`
+	Schedules   []*Schedule      `json:"schedules"`
 }
 
 type EventFavorite struct {
@@ -162,6 +163,7 @@ type NewEvent struct {
 	Images      []*NewImage    `json:"images"`
 	Videos      []*NewVideo    `json:"videos"`
 	Tickets     []*NewTicket   `json:"tickets"`
+	Schedules   []*NewSchedule `json:"schedules"`
 }
 
 type NewEventFavorite struct {
@@ -211,7 +213,7 @@ type NewPromotion struct {
 }
 
 type NewSchedule struct {
-	EventID   int32     `json:"event_id"`
+	EventID   *int32    `json:"event_id"`
 	Date      string    `json:"date"`
 	StartTime time.Time `json:"start_time"`
 	EndTime   time.Time `json:"end_time"`
@@ -225,7 +227,7 @@ type NewSponsor struct {
 type NewTicket struct {
 	Name        string  `json:"name"`
 	Price       float64 `json:"price"`
-	EventID     int     `json:"event_id"`
+	EventID     *int    `json:"event_id"`
 	Currency    string  `json:"currency"`
 	Description *string `json:"description"`
 }

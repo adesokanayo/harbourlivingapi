@@ -79,6 +79,7 @@ type ComplexityRoot struct {
 		Images      func(childComplexity int) int
 		Meta        func(childComplexity int) int
 		Promoted    func(childComplexity int) int
+		Schedules   func(childComplexity int) int
 		Sponsors    func(childComplexity int) int
 		StartDate   func(childComplexity int) int
 		Status      func(childComplexity int) int
@@ -552,6 +553,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Event.Promoted(childComplexity), true
+
+	case "Event.schedules":
+		if e.complexity.Event.Schedules == nil {
+			break
+		}
+
+		return e.complexity.Event.Schedules(childComplexity), true
 
 	case "Event.sponsors":
 		if e.complexity.Event.Sponsors == nil {
@@ -2027,6 +2035,7 @@ type Event {
         videos: [Video]
         meta: metadata
         promoted: Boolean!
+        schedules: [Schedule]
         }
 
 type Venue {
@@ -2135,7 +2144,8 @@ input NewEvent {
         status: StatusOptions
         images: [NewImage]
         videos: [NewVideo]   
-        tickets : [NewTicket]     
+        tickets : [NewTicket]  
+        schedules: [NewSchedule]   
 }
 
 input UpdateEvent {
@@ -2302,7 +2312,7 @@ type DayPlan {
 input NewTicket {
         name: String!
         price: Float!
-        event_id: Int!
+        event_id: Int
         currency: String!
         description: String 
 }
@@ -2414,7 +2424,7 @@ input NewEventView{
 
 
 input NewSchedule {
-        event_id: ID!
+        event_id: ID
         date : Date!
         start_time : Time!
         end_time : Time!
@@ -4430,6 +4440,38 @@ func (ec *executionContext) _Event_promoted(ctx context.Context, field graphql.C
 	res := resTmp.(bool)
 	fc.Result = res
 	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Event_schedules(ctx context.Context, field graphql.CollectedField, obj *Event) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Event",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Schedules, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]*Schedule)
+	fc.Result = res
+	return ec.marshalOSchedule2ᚕᚖgithubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgraphqlᚐSchedule(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _EventFavorite_id(ctx context.Context, field graphql.CollectedField, obj *EventFavorite) (ret graphql.Marshaler) {
@@ -11360,6 +11402,14 @@ func (ec *executionContext) unmarshalInputNewEvent(ctx context.Context, obj inte
 			if err != nil {
 				return it, err
 			}
+		case "schedules":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("schedules"))
+			it.Schedules, err = ec.unmarshalONewSchedule2ᚕᚖgithubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgraphqlᚐNewSchedule(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		}
 	}
 
@@ -11660,7 +11710,7 @@ func (ec *executionContext) unmarshalInputNewSchedule(ctx context.Context, obj i
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("event_id"))
-			it.EventID, err = ec.unmarshalNID2int32(ctx, v)
+			it.EventID, err = ec.unmarshalOID2ᚖint32(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -11748,7 +11798,7 @@ func (ec *executionContext) unmarshalInputNewTicket(ctx context.Context, obj int
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("event_id"))
-			it.EventID, err = ec.unmarshalNInt2int(ctx, v)
+			it.EventID, err = ec.unmarshalOInt2ᚖint(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -13053,6 +13103,8 @@ func (ec *executionContext) _Event(ctx context.Context, sel ast.SelectionSet, ob
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
+		case "schedules":
+			out.Values[i] = ec._Event_schedules(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -15652,6 +15704,38 @@ func (ec *executionContext) unmarshalONewImage2ᚖgithubᚗcomᚋBigListRyRyᚋh
 	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
+func (ec *executionContext) unmarshalONewSchedule2ᚕᚖgithubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgraphqlᚐNewSchedule(ctx context.Context, v interface{}) ([]*NewSchedule, error) {
+	if v == nil {
+		return nil, nil
+	}
+	var vSlice []interface{}
+	if v != nil {
+		if tmp1, ok := v.([]interface{}); ok {
+			vSlice = tmp1
+		} else {
+			vSlice = []interface{}{v}
+		}
+	}
+	var err error
+	res := make([]*NewSchedule, len(vSlice))
+	for i := range vSlice {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
+		res[i], err = ec.unmarshalONewSchedule2ᚖgithubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgraphqlᚐNewSchedule(ctx, vSlice[i])
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
+}
+
+func (ec *executionContext) unmarshalONewSchedule2ᚖgithubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgraphqlᚐNewSchedule(ctx context.Context, v interface{}) (*NewSchedule, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalInputNewSchedule(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
 func (ec *executionContext) unmarshalONewTicket2ᚕᚖgithubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgraphqlᚐNewTicket(ctx context.Context, v interface{}) ([]*NewTicket, error) {
 	if v == nil {
 		return nil, nil
@@ -15834,6 +15918,53 @@ func (ec *executionContext) marshalOPromotion2ᚕgithubᚗcomᚋBigListRyRyᚋha
 	}
 	wg.Wait()
 	return ret
+}
+
+func (ec *executionContext) marshalOSchedule2ᚕᚖgithubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgraphqlᚐSchedule(ctx context.Context, sel ast.SelectionSet, v []*Schedule) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalOSchedule2ᚖgithubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgraphqlᚐSchedule(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+	return ret
+}
+
+func (ec *executionContext) marshalOSchedule2ᚖgithubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgraphqlᚐSchedule(ctx context.Context, sel ast.SelectionSet, v *Schedule) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._Schedule(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalOSponsor2ᚕᚖgithubᚗcomᚋBigListRyRyᚋharbourlivingapiᚋgraphqlᚐSponsor(ctx context.Context, sel ast.SelectionSet, v []*Sponsor) graphql.Marshaler {

@@ -449,6 +449,35 @@ func (r *mutationResolver) CreateEvent(ctx context.Context, input NewEvent) (*Ev
 
 		}
 
+		//create schedule and link to event
+		var schedules []*Schedule
+		if input.Schedules != nil {
+			for _, i := range input.Schedules {
+
+				d, _ := util.ProcessDateTime(util.LayoutDateTime, i.Date)
+				arg := db.CreateScheduleParams{
+					EventID:   event.ID,
+					Date:      *d,
+					StartTime: i.StartTime,
+					EndTime:   i.EndTime,
+				}
+
+				schedule, err := r.Repo.CreateSchedule(ctx, arg)
+				if err != nil {
+					return err
+				}
+
+				schedules = append(schedules, &Schedule{
+					ID:        schedule.ID,
+					EventID:   schedule.EventID,
+					Date:      schedule.Date.String(),
+					StartTime: schedule.StartTime,
+					EndTime:   schedule.EndTime,
+				})
+
+			}
+		}
+
 		result = &Event{
 			ID:          event.ID,
 			Title:       event.Title,
@@ -462,6 +491,7 @@ func (r *mutationResolver) CreateEvent(ctx context.Context, input NewEvent) (*Ev
 			Videos:      videos,
 			Status:      ConvertDbToStatusOptions(event.Status),
 			Tickets:     tickets,
+			Schedules:   schedules,
 		}
 		return nil
 	})
@@ -1241,7 +1271,7 @@ func (r *queryResolver) GetUsers(ctx context.Context) ([]User, error) {
 
 func (r *mutationResolver) CreateTicket(ctx context.Context, input NewTicket) (*Ticket, error) {
 	arg := db.CreateTicketParams{
-		EventID:  int32(input.EventID),
+		EventID:  int32(*input.EventID),
 		Price:    float64(input.Price),
 		Name:     input.Name,
 		Currency: input.Currency,
@@ -2124,7 +2154,7 @@ func (r *mutationResolver) CreateSchedule(ctx context.Context, input NewSchedule
 	}
 
 	arg := db.CreateScheduleParams{
-		EventID:   int32(input.EventID),
+		EventID:   int32(*input.EventID),
 		Date:      *d1,
 		StartTime: input.StartTime,
 		EndTime:   input.EndTime,

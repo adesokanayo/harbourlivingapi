@@ -96,6 +96,7 @@ type Event {
         videos: [Video]
         meta: metadata
         promoted: Boolean!
+        schedules: [Schedule]
         }
 
 type Venue {
@@ -204,7 +205,8 @@ input NewEvent {
         status: StatusOptions
         images: [NewImage]
         videos: [NewVideo]   
-        tickets : [NewTicket]     
+        tickets : [NewTicket]  
+        schedules: [NewSchedule]   
 }
 
 input UpdateEvent {
@@ -371,7 +373,7 @@ type DayPlan {
 input NewTicket {
         name: String!
         price: Float!
-        event_id: Int!
+        event_id: Int
         currency: String!
         description: String 
 }
@@ -483,7 +485,7 @@ input NewEventView{
 
 
 input NewSchedule {
-        event_id: ID!
+        event_id: ID
         date : Date!
         start_time : Time!
         end_time : Time!
