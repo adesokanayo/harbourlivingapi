@@ -174,8 +174,14 @@ func (r *mutationResolver) CreateUser(ctx context.Context, input NewUser) (*User
 		},
 		To: []util.To{
 			{
+				Email: input.Email,
+				Name:  input.FirstName,
+			},
+		},
+		Bcc: []util.To{
+			{
 				Email: "adesokanayo@gmail.com",
-				Name:  "Ayo",
+				Name:  "Ayo New SignUp",
 			},
 		},
 		TemplateID: int(RegistrationEmail),

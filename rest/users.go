@@ -25,7 +25,7 @@ type CreateUserRequest struct {
 }
 
 type GetUserRequest struct {
-	ID int32 `uri:"id", binding:"required",min="1";`
+	ID int32 `json:"id" binding:"required,min=1"`
 }
 
 type loginUserRequest struct {

@@ -36,6 +36,7 @@ func NewEmailService(opts EmailServiceOpts) (*EmailService, error) {
 type OutgoingEmailOpts struct {
 	Sender     Sender `json:"sender"`
 	To         []To   `json:"to"`
+	Bcc        []To   `json:"bcc"`
 	TemplateID int    `json:"templateId"`
 	Params     Params `json:"params"`
 }
