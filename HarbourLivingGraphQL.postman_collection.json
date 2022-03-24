@@ -1,0 +1,816 @@
+{
+	"info": {
+		"_postman_id": "4a39039f-65ed-41e9-ad00-b3c2f0c903d2",
+		"name": "HarbourLivingGraphQL",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Create Event",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "mutation {\n  createEvent(\n    input: {\n      title: \"Main Event\"\n      description: \"Custom Event with location \"\n      category: 1\n      banner_image: \"link\"\n      startDate: \"2022-01-01T14:00:12-00:00\"\n      endDate: \"2022-02-01T14:00:12-00:00\"\n      venue: 6\n      type: 1\n      user_id: 1,\n      status: APPROVED\n    }\n  ) {\n    title\n    id\n    description\n    banner_image\n     category,\n    startDate\n    endDate\n    \n  }\n}",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "{{graphql-url}}",
+					"host": [
+						"{{graphql-url}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create Venue",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "mutation {\n  createVenue(input:\n    { \n    name: \"Main  Event\", \n    address:\"35 templeby way ne \",\n    postal_code:\"T1Y5N7\",\n    province:\"AB\",\n    country_code:\"CAN\",\n    city:\"CALGARY\",\n    longitude:-113.93911328351625,\n    latitude:  51.09378353748896,\n    venue_owner: 1,\n    status:APPROVED\n      \n    }) {\n   id\n    name\n    address\n    postal_code\n    province\n    country_code\n    city,\n    Longitude,\n    Latitude\n  }\n}\n\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "{{graphql-url}}",
+					"host": [
+						"{{graphql-url}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create Venue Automation",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "mutation {\n  createVenue(input:\n    { \n    name: \"Main  Event\", \n    address:\"35 templeby way ne \",\n    postal_code:\"T1Y5N7\",\n    province:\"AB\",\n    country_code:\"CAN\",\n    city:\"CALGARY\",\n    longitude:-113.93911328351625,\n    latitude:  51.09378353748896,\n    venue_owner: 1,\n    status:APPROVED\n      \n    }) {\n   id\n    name\n    address\n    postal_code\n    province\n    country_code\n    city,\n    Longitude,\n    Latitude\n  }\n}\n\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "{{graphql-url}}",
+					"host": [
+						"{{graphql-url}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create Sponsor for Event",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "mutation {\n  createSponsorForEvent(\n      input:{\n          event_id:2,\n          user_id:1\n      }\n  )\n  \n  {\nid,\nuser_id\n  }\n}\n\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "{{graphql-url}}",
+					"host": [
+						"{{graphql-url}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create Ticket",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "mutation {\n  createTicket(input:\n    { event_id:1,\n    quantity:10,\n    price:500,\n    currency: \"USD\",\n    status:1,\n    name:\"Standard Ticket\"\n      \n    }) {\n   \n    event_id\n    quantity\n    price\n    status\n  }\n}\n\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "{{graphql-url}}",
+					"host": [
+						"{{graphql-url}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "List Venue",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query{\n    getAllVenues{\n        id\n        name\n        address\n        city\n        postal_code\n        province\n        country_code\n        rating\n        status\n        Longitude\n        Latitude\n    \n    }\n}",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "{{graphql-url}}",
+					"host": [
+						"{{graphql-url}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Venue",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query{\n    getVenue(input:1){\n        id,\n        name, \n        city,\n        postal_code,\n        country_code, \n        province\n    }\n}",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "{{graphql-url}}",
+					"host": [
+						"{{graphql-url}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create User",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "mutation {\n  createUser(\n    input: {\n      avatar:\"\"\n      phone: \"08067648635\"\n      first_name: \"ayo\"\n      last_name: \"adesokan\"\n      email: \"adesokanayo@gmail.com29\"\n      username: \"adesokanayo29\"\n      password: \"12345678\"\n      usertype: HOST\n    }\n  ) {\n      avatar\n    username\n    phone\n    id\n    password\n  }\n}",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "{{graphql-url}}",
+					"host": [
+						"{{graphql-url}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Login",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"  pm.test(\"Status code is 200\", function () {",
+							"        pm.response.to.have.status(200);",
+							"    });",
+							"",
+							"pm.test(\"Token is Present\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.environment.set(\"token\",jsonData.data.login.token)",
+							"",
+							"});",
+							"",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "mutation {\n  login(input: { email: \"demouser@gmail.com\", password: \"12345678\" }) {\n    token\n    user {\n      username\n      email\n      first_name, \n      last_name\n    }\n  }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "{{graphql-url}}",
+					"host": [
+						"{{graphql-url}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Refresh Token",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "mutation {\n refreshToken(input:{token:\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjIyOTUxZWUxLTQ2MzUtNGM4OS1iYmE5LTJhMzA2MDFkMWMxMSIsInVzZXJuYW1lIjoiYWRlc29rYW5heW8iLCJpc3N1ZWRfYXQiOiIyMDIxLTA4LTI3VDIwOjQzOjIwLjM3MzIzLTA2OjAwIiwiZXhwaXJlZF9hdCI6IjIwMjEtMDgtMjhUMjA6NDM6MjAuMzczMjMtMDY6MDAifQ.8WW0_onsJUJrUl8vbPVzY3cVFJQ4mhDXs3k-WD81TJI\"})\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "{{graphql-url}}",
+					"host": [
+						"{{graphql-url}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "List Users",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query {\n  getUsers{\n    username,\n    id,\n    email,\n    first_name,\n    last_name,\n    \n  }\n}",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "{{graphql-url}}",
+					"host": [
+						"{{graphql-url}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Update User",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "mutation {\n  updateUser(\n    input: {\n        id: 2\n      first_name :\"demo2firstname\"\n      last_name: \"demo2lastname\"\n\n    }\n  ) \n  {\n    id\n first_name\nlast_name\n\n\n  }\n}",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "{{graphql-url}}",
+					"host": [
+						"{{graphql-url}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Single User",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query {\n  getUser( input: 1){\n    username,\n    phone,\n    email,\n    id,\n    favorites_events{\n        id,\n        title,\n        description\n\n    }\n    \n    \n  }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "{{graphql-url}}",
+					"host": [
+						"{{graphql-url}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "List Events",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query {\n  getAllEvents(\n    input: {\n      pageNumber: 1\n      limit:10\n      latitude:-113.93911328351625\n        longitude:51.09378353748896\n        miles: 1\n\n      \n    }\n  ) {\n    id\n    startDate\n    endDate\n    status\n    venue{\n        id\n    }\n    title\n    category\n    promoted\n  }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "{{graphql-url}}",
+					"host": [
+						"{{graphql-url}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "List Events Copy",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query {\n  getAllEvents(\n    input: {\n      pageNumber: 1\n      limit:100\n      \n    }\n  ) {\n    id\n    startDate\n    endDate\n    status\n    venue{\n        id\n    }\n    title\n    category\n    promoted\n  }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "{{graphql-url}}",
+					"host": [
+						"{{graphql-url}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Event",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query{\n    getEvent(input:1){\n        id\n        banner_image,\n        startDate,\n        endDate,\n        category,\n        description,\n        status,\n        meta{\n            total_favorite\n            total_view\n        },\n        promoted,\n        venue{\n            id\n            status\n            \n        }\n\n    }\n}",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "{{graphql-url}}",
+					"host": [
+						"{{graphql-url}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get EventByLocation",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query{\n    getEventsByLocation(input:{\n        latitude:-113.93911328351625\n        longitude:51.09378353748896\n        miles:1\n    })\n    \n    {\n    id\n    startDate\n    endDate\n    status\n    venue{\n        id\n        name\n\n    }\n    title\n    category\n    promoted\n\n    }\n}",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "{{graphql-url}}",
+					"host": [
+						"{{graphql-url}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "UpdateEvent",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Access-Control-Request-Method",
+						"value": "GET",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "mutation{\n    updateEvent(input: {\n    id:1\n    title: \"updated Title 2 \"\n    description: \"new description\"\n    banner_image:\"updated link \"\n    venue: 2,\n    category:3\n     startDate: \"2016-09-15T14:00:12-00:00\"\n      endDate: \"2016-09-15T14:00:12-00:00\"\n     })\n \n{\n    title\n    id\n    description\n    banner_image\n    category,\n    venue\n    startDate\n    endDate\n}\n    \n}",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "{{graphql-url}}",
+					"host": [
+						"{{graphql-url}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GetCategory",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query{\n    getCategory(input:1)\n {\n     id, \n     status,\n     description\n }\n\n    \n}",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "{{graphql-url}}",
+					"host": [
+						"{{graphql-url}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "CreateCategory",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query{\n    getCategory(input:1)\n {\n     id, \n     status,\n     description\n }\n\n    \n}",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "{{graphql-url}}",
+					"host": [
+						"{{graphql-url}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "DeleteEvent",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "mutation{\n    deleteEvent (input:6)\n}\n\n    \n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "{{graphql-url}}",
+					"host": [
+						"{{graphql-url}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GetAllCategories",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query{\n    getCategories\n\n  {\n     id, \n     status,\n     desc\n }\n}",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "{{graphql-url}}",
+					"host": [
+						"{{graphql-url}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Update Sponsor",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "mutation {\n  updateSponsor(\n    input: {\n        id: 1\n      avatar :\"new url\"\n      display_name: \"display name here here \"\n      short_bio: \"short bio here here\"\n\n    }\n  ) {\n      id\n    short_bio\n    display_name\n    avatar\n\n  }\n}",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "{{graphql-url}}",
+					"host": [
+						"{{graphql-url}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Favorite Event",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "mutation {\n  createEventFavorite(\n    input: {\n       event_id:1\nuser_id:2\n\n    }\n  ) {\n      id\n      event_id\n      user_id\n\n\n  }\n}",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "{{graphql-url}}",
+					"host": [
+						"{{graphql-url}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Favorite Event Delete",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "mutation {\n  createEventFavorite(\n    input: {\n       event_id:1\nuser_id:2\n\n    }\n  ) {\n      id\n      event_id\n      user_id\n\n\n  }\n}",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "{{graphql-url}}",
+					"host": [
+						"{{graphql-url}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Favorite Venue",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "mutation {\n  createVenueFavorite(\n    input: {\n       venue_id:1\nuser_id:1\n\n    }\n  ) {\n      id\n      venue_id\n      user_id\n\n  }\n}",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "{{graphql-url}}",
+					"host": [
+						"{{graphql-url}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "View Event",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "mutation {\n  createEventView(\n    input: {\n       event_id:1\nuser_id:1\n\n    }\n  ) {\n      id\n      event_id\n      user_id\n\n\n  }\n}",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "{{graphql-url}}",
+					"host": [
+						"{{graphql-url}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create Plan",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "mutation {\n  createPlan(\n    input: {\n name :\"standard plan\"\n description:\"standard plan is the best \"\n price:21.00\n no_of_days: 10\n\n    }\n  ) {\n      id\n    name\n    description\n    price\n\n  }\n}",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "{{graphql-url}}",
+					"host": [
+						"{{graphql-url}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Update Plan",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "mutation {\n  updatePlan(\n    input: {\n        id:1\n name :\"standard plan\"\n description:\"standard plan is the best \"\n price:21.00\n\n    }\n  ) {\n      id\n    name\n    description\n    price\n\n  }\n}",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "{{graphql-url}}",
+					"host": [
+						"{{graphql-url}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "create promotion",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "mutation {\n  createPromotion(\n    input: {\nuser_id:1\nevent_id:1\nplan_id:1\nstart_date: \"2022-01-01T14:00:12-00:00\"\nend_date: \"2022-02-02T14:00:12-00:00\"\n\n\n    }\n  ) {\n      id\n    event_id\n    user_id\n    start_date\n    end_date\n\n  }\n}",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "{{graphql-url}}",
+					"host": [
+						"{{graphql-url}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "create schedule",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "mutation {\n  createSchedule(\n    input: {\ndate :\"2022-01-01\"\nevent_id:1\nstart_time: \"2022-01-01T14:00:12-00:00\"\nend_time: \"2022-02-02T14:00:12-00:00\"\n\n\n    }\n  ) {\n      id\n    event_id\n    start_time\n    end_time\n\n  }\n}",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "{{graphql-url}}",
+					"host": [
+						"{{graphql-url}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create dayplan",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "mutation {\n  createSchedule(\n    input: {\ndate :\"2022-01-01\"\nevent_id:1\nstart_time: \"2022-01-01T14:00:12-00:00\"\nend_time: \"2022-02-02T14:00:12-00:00\"\n\n\n    }\n  ) {\n      id\n    event_id\n    start_time\n    end_time\n\n  }\n}",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "{{graphql-url}}",
+					"host": [
+						"{{graphql-url}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "DeleteDayPlan",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "mutation {\n  createSchedule(\n    input: {\ndate :\"2022-01-01\"\nevent_id:1\nstart_time: \"2022-01-01T14:00:12-00:00\"\nend_time: \"2022-02-02T14:00:12-00:00\"\n\n\n    }\n  ) {\n      id\n    event_id\n    start_time\n    end_time\n\n  }\n}",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "{{graphql-url}}",
+					"host": [
+						"{{graphql-url}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Update Promotion",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "mutation {\n  updatePromotion(\n    input: {\n        id:1\nuser_id:1\nevent_id:1\nstart_date: \"2022-01-01T14:00:12-00:00\"\nend_date: \"2022-02-01T14:00:12-00:00\"\n\n\n    }\n  ) {\n      id\n    event_id\n    user_id\n    start_date\n    end_date\n\n  }\n}",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "{{graphql-url}}",
+					"host": [
+						"{{graphql-url}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete Promotion",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "mutation {\n  deletePromotion(input:2)\n}",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "{{graphql-url}}",
+					"host": [
+						"{{graphql-url}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Send Email",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "api-key",
+						"value": "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",
+						"type": "default"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "default"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"sender\": {\n        \"name\": \"Mary from MyShop\",\n        \"email\": \"events@harbourliving.ca\"\n    },\n    \"to\": [\n        {\n            \"email\": \"adesokanayo@gmail.com\",\n            \"name\": \"Jimmy\"\n        }\n    ],\n    \"templateId\": 358,\n    \"params\": {\n        \"first_name\": \"Joe\",\n        \"LNAME\": \"Doe\"\n    }\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://api.sendinblue.com/v3/smtp/email",
+					"protocol": "https",
+					"host": [
+						"api",
+						"sendinblue",
+						"com"
+					],
+					"path": [
+						"v3",
+						"smtp",
+						"email"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

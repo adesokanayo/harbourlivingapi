@@ -6,6 +6,12 @@ on:
   pull_request:
     branches: [ main ]
 
+
+env:
+  # Slack Webhook "Deployments"
+  # settings are in https://quotersoftware.slack.com/services/3061599386935
+  DEPLOYMENTS_SLACK_WEBHOOK: 'https://hooks.slack.com/services/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'
+
 jobs:
 
   test:
@@ -49,3 +55,44 @@ jobs:
 
       - name: Test
         run: make test
+
+
+  integration-test:
+    name: Accountant Tests
+    runs-on: ubuntu-latest
+    steps: 
+      - name: Install Node on runner
+        uses: actions/setup-node@v1
+        with:
+          node-version: "14"
+
+      # Install newman globally
+      - name : Install newman
+        run: |
+          npm install -g newman
+          npm install -g newman-reporter-slackreporter
+          npm install -g newman-reporter-htmlextra
+      
+      # Create directory for result
+      - name: Make directory for test result
+        run: mkdir -p TestResults
+
+      # List directory 
+      - name: List directory
+        run: ls -lah 
+  
+      # Run Test 
+      - name: Run Postman Collection
+        run: |
+          newman run HarbourLivingGraphQL.postman_collection.json \
+          -e HarbourLiving-Heroku.postman_environment.json \
+          -d postman_data.csv -r slackreporter, htmlextra \
+          --reporter-htmlextra-export TestResults/report.html \
+          --reporter-slackreporter-webhookurl ${{env.DEPLOYMENTS_SLACK_WEBHOOK}} > TestResults/report.html
+          
+      # Upload Report
+      - name: Output Result 
+        uses: actions/upload-artifact@v2
+        with:
+          name: Reports
+          path: TestResults
