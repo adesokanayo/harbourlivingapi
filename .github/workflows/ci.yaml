@@ -60,10 +60,12 @@ jobs:
   integration-test:
     name: Postman Tests
     runs-on: ubuntu-latest
-    steps: 
+    steps:
+      - name: Check code
+        uses: actions/checkout@v2 
+
       - name: Install Node on runner
-      - uses: actions/setup-node@v1
-      - uses: actions/checkout@v2
+        uses: actions/setup-node@v1
         with:
           node-version: "14"
 
@@ -82,9 +84,9 @@ jobs:
          run: cd ..
 
       # List directory 
-      - name:  List file in the repo
+      - name:  List file in the directory
         run: | 
-            ls ${{ github.workspace }} 
+            ls -lah
         
   
       # Run Test 
