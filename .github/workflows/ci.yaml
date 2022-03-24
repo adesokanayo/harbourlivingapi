@@ -89,9 +89,9 @@ jobs:
       # Run Test 
       - name: Run Postman Collection
         run: |
-          newman run HarbourLivingGraphQL.postman_collection.json \
-          -e HarbourLiving-Heroku.postman_environment.json \
-          -d postman_data.csv -r slackreporter, htmlextra \
+          newman run "HarbourLivingGraphQL.postman_collection.json" \
+          -e "HarbourLiving-Heroku.postman_environment.json" \
+          -d "postman_data.csv" -r slackreporter, htmlextra \
           --reporter-htmlextra-export TestResults/report.html \
           --reporter-slackreporter-webhookurl ${{env.DEPLOYMENTS_SLACK_WEBHOOK}} > TestResults/report.html
           
