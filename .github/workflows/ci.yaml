@@ -58,7 +58,7 @@ jobs:
 
 
   integration-test:
-    name: Accountant Tests
+    name: Postman Tests
     runs-on: ubuntu-latest
     steps: 
       - name: Install Node on runner
@@ -77,9 +77,14 @@ jobs:
       - name: Make directory for test result
         run: mkdir -p TestResults
 
+      -  name: change dir before List directory
+         run: cd ..
+
       # List directory 
-      - name: List directory
-        run: ls -lah 
+      - name:  List directory
+        run: | 
+            ls -lah 
+        
   
       # Run Test 
       - name: Run Postman Collection
