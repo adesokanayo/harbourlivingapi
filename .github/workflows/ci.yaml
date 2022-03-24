@@ -81,9 +81,9 @@ jobs:
          run: cd ..
 
       # List directory 
-      - name:  List directory
+      - name:  List file in the repo
         run: | 
-            ls -lah 
+            ls ${{ github.workspace }} 
         
   
       # Run Test 
