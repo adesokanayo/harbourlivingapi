@@ -8,9 +8,10 @@ INSERT INTO users (
     username,
     usertype,
     date_of_birth,
-    avatar_url
+    avatar_url,
+    activation_code
 ) VALUES
-    ($1, $2, $3, $4, $5, $6, $7,$8,$9) RETURNING *;
+    ($1, $2, $3, $4, $5, $6, $7,$8,$9, $10) RETURNING *;
 
 -- name: GetUser :one
 SELECT * FROM users

@@ -5,7 +5,7 @@ WHERE id = $1 LIMIT 1;
 -- name: GetAllVideos :many
 SELECT * FROM Videos;
 
---name: DeleteVideo :exec
+-- name: DeleteVideo :exec
 DELETE  from Videos
 where id =$1 ;
 

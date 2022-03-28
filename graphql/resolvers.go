@@ -147,6 +147,10 @@ func (r *mutationResolver) CreateUser(ctx context.Context, input NewUser) (*User
 		avatar.Valid = true
 	}
 
+	b := util.Encrypt([]byte(input.Username+input.Email), "passphraseSecured")
+	activation_code := string(fmt.Sprintf("%x\n", b))
+	fmt.Println(fmt.Sprintf("Activation token is %s", activation_code))
+
 	arg := db.CreateUserParams{
 		Phone:     phone,
 		FirstName: input.FirstName,
@@ -156,6 +160,10 @@ func (r *mutationResolver) CreateUser(ctx context.Context, input NewUser) (*User
 		Username:  input.Username,
 		Usertype:  int32(ConvertUserTypeOptionsToDb(input.Usertype)),
 		AvatarUrl: avatar,
+		ActivationCode: sql.NullString{
+			String: activation_code,
+			Valid:  true,
+		},
 	}
 
 	user, err := r.Repo.CreateUser(context.Background(), arg)
@@ -163,8 +171,8 @@ func (r *mutationResolver) CreateUser(ctx context.Context, input NewUser) (*User
 		return nil, err
 	}
 
-	activation_code := util.RandomInt(10000000, 99999999)
-	fmt.Println(activation_code)
+	//activation_code := util.RandomInt(10000000, 99999999)
+	//fmt.Println(activation_code)
 
 	//Send Email
 	emailOpts := util.OutgoingEmailOpts{

@@ -5,7 +5,7 @@ WHERE id = $1 LIMIT 1;
 -- name: GetAllImages :many
 SELECT * FROM images;
 
---name: DeleteImage :exec
+-- name: DeleteImage :exec
 DELETE  from images
 where id =$1 ;
 

@@ -80,3 +80,4 @@ func (maker *JWTService) ParseToken(tokenStr string) (string, error) {
 		return "", nil
 	}
 }
+

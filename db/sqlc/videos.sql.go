@@ -26,6 +26,16 @@ func (q *Queries) CreateVideo(ctx context.Context, arg CreateVideoParams) (Video
 	return i, err
 }
 
+const deleteVideo = `-- name: DeleteVideo :exec
+DELETE  from Videos
+where id =$1
+`
+
+func (q *Queries) DeleteVideo(ctx context.Context, id int32) error {
+	_, err := q.db.ExecContext(ctx, deleteVideo, id)
+	return err
+}
+
 const getAllVideos = `-- name: GetAllVideos :many
 SELECT id, name, url FROM Videos
 `

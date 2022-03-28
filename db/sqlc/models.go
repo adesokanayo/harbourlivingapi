@@ -206,6 +206,9 @@ type User struct {
 	AvatarUrl         sql.NullString `json:"avatar_url"`
 	DateOfBirth       time.Time      `json:"date_of_birth"`
 	CreatedAt         time.Time      `json:"created_at"`
+	ModifiedAt        time.Time      `json:"modified_at"`
+	Activated         sql.NullBool   `json:"activated"`
+	ActivationCode    sql.NullString `json:"activation_code"`
 }
 
 type UsersTicket struct {

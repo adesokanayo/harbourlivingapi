@@ -38,7 +38,6 @@ func NewHTTPServer(opts HttpServerOpts) (*HTTPServer, error) {
 	}
 	router := gin.Default()
 	router.POST("/api/v1/users", server.CreateUser)
-	router.GET("/api/v1/users", server.ListUsers)
 	router.GET("/api/v1/users/:id", server.GetUser)
 
 	router.POST("/api/v1/login", server.Login)

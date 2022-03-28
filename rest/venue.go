@@ -1,6 +1,7 @@
 package rest
 
 import (
+	"crypto/sha256"
 	"database/sql"
 	"fmt"
 	"net/http"
@@ -71,12 +72,16 @@ func (s *HTTPServer) GetVenue(ctx *gin.Context) {
 func (s *HTTPServer) VerifyEmail(w http.ResponseWriter, r *http.Request) {
 	q := r.URL.Query().Get("query")
 
+	h := sha256.Sum256([]byte("12345678"))
+
+	activation_code := string(fmt.Sprintf("%x\n", h))
+	fmt.Println(fmt.Sprintf("Activation token is %s", activation_code))
+	
 	email, err := jwt.DecodeSegment(q)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 	}
 	fmt.Println(email)
-	w.WriteHeader(http.StatusOK)
 	fmt.Fprintf(w, "Hello!")
 
 	/*

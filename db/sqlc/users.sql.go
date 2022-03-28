@@ -19,21 +19,23 @@ INSERT INTO users (
     username,
     usertype,
     date_of_birth,
-    avatar_url
+    avatar_url,
+    activation_code
 ) VALUES
-    ($1, $2, $3, $4, $5, $6, $7,$8,$9) RETURNING id, phone, first_name, last_name, email, username, password, password_changed_at, usertype, avatar_url, date_of_birth, created_at
+    ($1, $2, $3, $4, $5, $6, $7,$8,$9, $10) RETURNING id, phone, first_name, last_name, email, username, password, password_changed_at, usertype, avatar_url, date_of_birth, created_at, modified_at, activated, activation_code
 `
 
 type CreateUserParams struct {
-	Phone       sql.NullString `json:"phone"`
-	FirstName   string         `json:"first_name"`
-	LastName    string         `json:"last_name"`
-	Email       string         `json:"email"`
-	Password    string         `json:"password"`
-	Username    string         `json:"username"`
-	Usertype    int32          `json:"usertype"`
-	DateOfBirth time.Time      `json:"date_of_birth"`
-	AvatarUrl   sql.NullString `json:"avatar_url"`
+	Phone          sql.NullString `json:"phone"`
+	FirstName      string         `json:"first_name"`
+	LastName       string         `json:"last_name"`
+	Email          string         `json:"email"`
+	Password       string         `json:"password"`
+	Username       string         `json:"username"`
+	Usertype       int32          `json:"usertype"`
+	DateOfBirth    time.Time      `json:"date_of_birth"`
+	AvatarUrl      sql.NullString `json:"avatar_url"`
+	ActivationCode sql.NullString `json:"activation_code"`
 }
 
 func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, error) {
@@ -47,6 +49,7 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, e
 		arg.Usertype,
 		arg.DateOfBirth,
 		arg.AvatarUrl,
+		arg.ActivationCode,
 	)
 	var i User
 	err := row.Scan(
@@ -62,6 +65,9 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, e
 		&i.AvatarUrl,
 		&i.DateOfBirth,
 		&i.CreatedAt,
+		&i.ModifiedAt,
+		&i.Activated,
+		&i.ActivationCode,
 	)
 	return i, err
 }
@@ -77,7 +83,7 @@ func (q *Queries) DeleteUser(ctx context.Context, id int32) error {
 }
 
 const getAllUsers = `-- name: GetAllUsers :many
-SELECT id, phone, first_name, last_name, email, username, password, password_changed_at, usertype, avatar_url, date_of_birth, created_at FROM users
+SELECT id, phone, first_name, last_name, email, username, password, password_changed_at, usertype, avatar_url, date_of_birth, created_at, modified_at, activated, activation_code FROM users
 ORDER  by id
 `
 
@@ -103,6 +109,9 @@ func (q *Queries) GetAllUsers(ctx context.Context) ([]User, error) {
 			&i.AvatarUrl,
 			&i.DateOfBirth,
 			&i.CreatedAt,
+			&i.ModifiedAt,
+			&i.Activated,
+			&i.ActivationCode,
 		); err != nil {
 			return nil, err
 		}
@@ -118,7 +127,7 @@ func (q *Queries) GetAllUsers(ctx context.Context) ([]User, error) {
 }
 
 const getEmail = `-- name: GetEmail :one
-SELECT id, phone, first_name, last_name, email, username, password, password_changed_at, usertype, avatar_url, date_of_birth, created_at FROM users
+SELECT id, phone, first_name, last_name, email, username, password, password_changed_at, usertype, avatar_url, date_of_birth, created_at, modified_at, activated, activation_code FROM users
 WHERE email = $1 LIMIT 1
 `
 
@@ -138,12 +147,15 @@ func (q *Queries) GetEmail(ctx context.Context, email string) (User, error) {
 		&i.AvatarUrl,
 		&i.DateOfBirth,
 		&i.CreatedAt,
+		&i.ModifiedAt,
+		&i.Activated,
+		&i.ActivationCode,
 	)
 	return i, err
 }
 
 const getUser = `-- name: GetUser :one
-SELECT id, phone, first_name, last_name, email, username, password, password_changed_at, usertype, avatar_url, date_of_birth, created_at FROM users
+SELECT id, phone, first_name, last_name, email, username, password, password_changed_at, usertype, avatar_url, date_of_birth, created_at, modified_at, activated, activation_code FROM users
 WHERE id = $1 LIMIT 1
 `
 
@@ -163,12 +175,15 @@ func (q *Queries) GetUser(ctx context.Context, id int32) (User, error) {
 		&i.AvatarUrl,
 		&i.DateOfBirth,
 		&i.CreatedAt,
+		&i.ModifiedAt,
+		&i.Activated,
+		&i.ActivationCode,
 	)
 	return i, err
 }
 
 const getUsername = `-- name: GetUsername :one
-SELECT id, phone, first_name, last_name, email, username, password, password_changed_at, usertype, avatar_url, date_of_birth, created_at FROM users
+SELECT id, phone, first_name, last_name, email, username, password, password_changed_at, usertype, avatar_url, date_of_birth, created_at, modified_at, activated, activation_code FROM users
 WHERE username = $1 LIMIT 1
 `
 
@@ -188,6 +203,9 @@ func (q *Queries) GetUsername(ctx context.Context, username string) (User, error
 		&i.AvatarUrl,
 		&i.DateOfBirth,
 		&i.CreatedAt,
+		&i.ModifiedAt,
+		&i.Activated,
+		&i.ActivationCode,
 	)
 	return i, err
 }
@@ -210,7 +228,7 @@ UPDATE users SET
         THEN $14::timestamp ELSE date_of_birth END,
     avatar_url = CASE WHEN $15::boolean
         THEN $16::text ELSE avatar_url END
-    WHERE id= $17 RETURNING id, phone, first_name, last_name, email, username, password, password_changed_at, usertype, avatar_url, date_of_birth, created_at
+    WHERE id= $17 RETURNING id, phone, first_name, last_name, email, username, password, password_changed_at, usertype, avatar_url, date_of_birth, created_at, modified_at, activated, activation_code
 `
 
 type UpdateUserParams struct {
@@ -267,6 +285,9 @@ func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) (User, e
 		&i.AvatarUrl,
 		&i.DateOfBirth,
 		&i.CreatedAt,
+		&i.ModifiedAt,
+		&i.Activated,
+		&i.ActivationCode,
 	)
 	return i, err
 }

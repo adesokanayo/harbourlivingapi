@@ -1,7 +1,9 @@
 package rest
 
 import (
+	"context"
 	"database/sql"
+	"encoding/json"
 	"errors"
 	"net/http"
 	"strings"
@@ -121,12 +123,21 @@ func (s *HTTPServer) CreateUser(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, newUserResponse(user))
 }
 
-func (s *HTTPServer) ListUsers(ctx *gin.Context) {
+func (s *HTTPServer) ListUsers(w http.ResponseWriter, r *http.Request) {
+	ctx := context.Background()
 	users, err := s.store.GetAllUsers(ctx)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		w.WriteHeader(http.StatusInternalServerError)
 	}
-	ctx.JSON(http.StatusOK, users)
+
+	jsonData, err := json.Marshal(users)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write(jsonData)
 }
 
 // Login godoc
@@ -176,6 +187,25 @@ func (s *HTTPServer) Login(ctx *gin.Context) {
 }
 
 func (s *HTTPServer) GetUser(ctx *gin.Context) {
+	var req GetUserRequest
+	err := ctx.ShouldBindUri(&req)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+		return
+	}
+	user, err := s.store.GetUser(ctx, req.ID)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			ctx.JSON(http.StatusNotFound, errorResponse(err))
+			return
+		}
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		return
+	}
+	ctx.JSON(http.StatusOK, user)
+}
+
+func (s *HTTPServer) ActivateAccount(ctx *gin.Context) {
 	var req GetUserRequest
 	err := ctx.ShouldBindUri(&req)
 	if err != nil {

@@ -26,7 +26,7 @@ type dependencies struct {
 	Config       util.Config
 	Repo         *db.Store
 	EmailService *util.EmailService
-	TokenService   token.TokenService
+	TokenService token.TokenService
 }
 
 func start() {
@@ -38,8 +38,8 @@ func start() {
 	deps := getDependencies()
 
 	httpSvr, err := rest.NewHTTPServer(rest.HttpServerOpts{
-		Store:      deps.Repo,
-		Config:     deps.Config,
+		Store:        deps.Repo,
+		Config:       deps.Config,
 		TokenService: deps.TokenService,
 	})
 	if err != nil {
@@ -56,13 +56,15 @@ func start() {
 	http.Handle("/", playground.Handler("GraphQL playground", "/query"))
 	http.Handle("/query", middleware.AuthMiddleware(CorsMiddleware(graphQLsrv)))
 
-	http.HandleFunc("/verifyemail", httpSvr.VerifyEmail)
+	http.HandleFunc("/api/v1/verifyemail", httpSvr.VerifyEmail)
+	http.HandleFunc("/api/v1/users", httpSvr.ListUsers)
+
 	log.Printf("connect to http://localhost:%s/ for GraphQL playground", port)
 	log.Fatal(http.ListenAndServe(":"+port, nil))
 }
 
 func getDependencies() dependencies {
-// Load Config
+	// Load Config
 	config, err := util.LoadConfig(".")
 	if err != nil {
 		log.Fatal("cannot find config ", err)
@@ -81,7 +83,6 @@ func getDependencies() dependencies {
 	if err != nil {
 		log.Fatalln("cannot create a token maker ", err)
 	}
-
 
 	// Create Email Svr
 	sendActualMail := true
@@ -106,7 +107,7 @@ func getDependencies() dependencies {
 		Config:       *config,
 		Repo:         store,
 		EmailService: emailSvc,
-		TokenService:   tokenService,
+		TokenService: tokenService,
 	}
 }
 
