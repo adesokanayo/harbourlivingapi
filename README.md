@@ -33,6 +33,7 @@
 [ER Diagram](https://dbdiagram.io/d/612d650b825b5b0146eb97b0)
 
 ### Build and Push Docker Image
+``docker build``
 
 ### Create new migration 
  migrate create -ext sql -dir db/migration -seq rating
