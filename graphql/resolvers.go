@@ -4,10 +4,12 @@ package graphql
 //go:generate go run github.com/99designs/gqlgen
 
 import (
+	"bytes"
 	"context"
 	"database/sql"
 	"fmt"
 	"log"
+	"strings"
 	"time"
 
 	db "github.com/BigListRyRy/harbourlivingapi/db/sqlc"
@@ -16,6 +18,11 @@ import (
 	"github.com/BigListRyRy/harbourlivingapi/util"
 	_ "github.com/lib/pq"
 	"github.com/pkg/errors"
+)
+
+const (
+	BASE_DEV  = "http://localhost:3007/"
+	BASE_TEST = "https://harbourlivingapi.herokuapp.com/"
 )
 
 type Resolver struct {
@@ -147,10 +154,19 @@ func (r *mutationResolver) CreateUser(ctx context.Context, input NewUser) (*User
 		avatar.Valid = true
 	}
 
-	b := util.Encrypt([]byte(input.Username+input.Email), "passphraseSecured")
-	activation_code := string(fmt.Sprintf("%x\n", b))
-	fmt.Println(fmt.Sprintf("Activation token is %s", activation_code))
+	activation_code := strings.ToUpper(util.RandomString(8))
+	fmt.Println(activation_code)
 
+	b := util.Encrypt([]byte(activation_code), "passphraseSecured")
+	fmt.Printf("Activation token is %s", string(b))
+	url := ""
+	u := bytes.NewBuffer(b).String()
+	fmt.Printf("Activation token is %s", u)
+	if r.Config.ENVIRONMENT == "Prod" {
+		url = fmt.Sprintf("%s/api/verifyemail?code=%s", BASE_TEST, u)
+	} else if r.Config.ENVIRONMENT == "DEV" {
+		url = fmt.Sprintf("%s/api/verifyemail/%s", BASE_DEV, u)
+	}
 	arg := db.CreateUserParams{
 		Phone:     phone,
 		FirstName: input.FirstName,
@@ -170,9 +186,6 @@ func (r *mutationResolver) CreateUser(ctx context.Context, input NewUser) (*User
 	if err != nil {
 		return nil, err
 	}
-
-	//activation_code := util.RandomInt(10000000, 99999999)
-	//fmt.Println(activation_code)
 
 	//Send Email
 	emailOpts := util.OutgoingEmailOpts{
@@ -196,7 +209,7 @@ func (r *mutationResolver) CreateUser(ctx context.Context, input NewUser) (*User
 		Params: util.Params{
 			FirstName:      user.FirstName,
 			Lname:          user.LastName,
-			ActivationCode: fmt.Sprintf("%v", activation_code),
+			ActivationCode: fmt.Sprintf("%v", url),
 		},
 	}
 

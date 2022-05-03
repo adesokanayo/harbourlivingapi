@@ -1,13 +1,10 @@
 package rest
 
 import (
-	"crypto/sha256"
 	"database/sql"
-	"fmt"
 	"net/http"
 
 	db "github.com/BigListRyRy/harbourlivingapi/db/sqlc"
-	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
 )
 
@@ -67,39 +64,4 @@ func (s *HTTPServer) GetVenue(ctx *gin.Context) {
 		return
 	}
 	ctx.JSON(http.StatusOK, venue)
-}
-
-func (s *HTTPServer) VerifyEmail(w http.ResponseWriter, r *http.Request) {
-	q := r.URL.Query().Get("query")
-
-	h := sha256.Sum256([]byte("12345678"))
-
-	activation_code := string(fmt.Sprintf("%x\n", h))
-	fmt.Println(fmt.Sprintf("Activation token is %s", activation_code))
-	
-	email, err := jwt.DecodeSegment(q)
-	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-	}
-	fmt.Println(email)
-	fmt.Fprintf(w, "Hello!")
-
-	/*
-		var req GetVenueRequest
-		err := ctx.ShouldBindUri(&req)
-		if err != nil {
-			ctx.JSON(http.StatusBadRequest, errorResponse(err))
-			return
-		}
-		venue, err := s.store.GetVenue(ctx, req.ID)
-		if err != nil {
-			if err == sql.ErrNoRows {
-				ctx.JSON(http.StatusNotFound, errorResponse(err))
-				return
-			}
-			ctx.JSON(http.StatusInternalServerError, errorResponse(err))
-			return
-		}
-		ctx.JSON(http.StatusOK, venue)
-	*/
 }

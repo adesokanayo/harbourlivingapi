@@ -84,10 +84,12 @@ jobs:
          run: cd ..
 
       # List directory 
-      - name:  List file in the directory
+      - name:  Write to a config file 
         run: | 
-            ls -lah
-        
+          touch harbourEnv.env
+          echo ${{ secrets.harbourEnv }} >> .harbourEnv
+          ls
+      
   
       # Run Test 
       - name: Run Postman Collection

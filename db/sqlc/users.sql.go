@@ -9,6 +9,17 @@ import (
 	"time"
 )
 
+const activateUser = `-- name: ActivateUser :exec
+UPDATE users
+SET activated = true
+WHERE id = $1
+`
+
+func (q *Queries) ActivateUser(ctx context.Context, id int32) error {
+	_, err := q.db.ExecContext(ctx, activateUser, id)
+	return err
+}
+
 const createUser = `-- name: CreateUser :one
 INSERT INTO users (
     phone,
@@ -80,6 +91,34 @@ WHERE id = $1
 func (q *Queries) DeleteUser(ctx context.Context, id int32) error {
 	_, err := q.db.ExecContext(ctx, deleteUser, id)
 	return err
+}
+
+const getActivationCode = `-- name: GetActivationCode :one
+SELECT id, phone, first_name, last_name, email, username, password, password_changed_at, usertype, avatar_url, date_of_birth, created_at, modified_at, activated, activation_code FROM users
+WHERE activation_code = $1 LIMIT 1
+`
+
+func (q *Queries) GetActivationCode(ctx context.Context, activationCode sql.NullString) (User, error) {
+	row := q.db.QueryRowContext(ctx, getActivationCode, activationCode)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.Phone,
+		&i.FirstName,
+		&i.LastName,
+		&i.Email,
+		&i.Username,
+		&i.Password,
+		&i.PasswordChangedAt,
+		&i.Usertype,
+		&i.AvatarUrl,
+		&i.DateOfBirth,
+		&i.CreatedAt,
+		&i.ModifiedAt,
+		&i.Activated,
+		&i.ActivationCode,
+	)
+	return i, err
 }
 
 const getAllUsers = `-- name: GetAllUsers :many

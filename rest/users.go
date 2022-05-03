@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"net/http"
 	"strings"
 	"time"
@@ -222,4 +223,27 @@ func (s *HTTPServer) ActivateAccount(ctx *gin.Context) {
 		return
 	}
 	ctx.JSON(http.StatusOK, user)
+}
+
+func (s *HTTPServer) VerifyEmail(w http.ResponseWriter, r *http.Request) {
+	var err error
+
+	ctx := r.Context()
+	encryptedValue := r.URL.Query().Get("code")
+
+	decrypted := util.Decrypt([]byte(encryptedValue), "passphraseSecured")
+
+	user, err := s.store.GetActivationCode(ctx, sql.NullString{Valid: true, String: string(decrypted)})
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+	}
+	fmt.Printf("About to activate %s", user.Email)
+
+	err = s.store.ActivateUser(ctx, user.ID)
+	if err != nil {
+		fmt.Printf("Unable to activate %s", user.Email)
+	}
+	w.WriteHeader(http.StatusAccepted)
+	fmt.Fprintf(w, "User Activated ")
+
 }

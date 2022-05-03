@@ -52,3 +52,13 @@ UPDATE users SET
     avatar_url = CASE WHEN @avatar_url_to_update::boolean
         THEN @avatar_url::text ELSE avatar_url END
     WHERE id= @id RETURNING *;
+
+-- name: ActivateUser :exec
+UPDATE users
+SET activated = true
+WHERE id = $1;
+
+
+-- name: GetActivationCode :one
+SELECT * FROM users
+WHERE activation_code = $1 LIMIT 1;

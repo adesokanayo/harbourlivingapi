@@ -1,4 +1,4 @@
 ALTER TABLE users
-DROP COLUMN "modified_at" ,
+DROP COLUMN "modified_at",
 DROP COLUMN "activated" , 
-DROP COLUMN "activation_code" varchar(50);
+DROP COLUMN "activation_code";
